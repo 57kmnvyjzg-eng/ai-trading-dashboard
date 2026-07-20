@@ -24,7 +24,7 @@
 </head>
 <body class="bg-gray-900 text-gray-100 h-screen flex overflow-hidden">
 
-    <!-- 좌측 사이드바 (Sidebar) -->
+    <!-- 좌측 사이드바 -->
     <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col hidden md:flex">
         <div class="p-6 border-b border-gray-700">
             <h1 class="text-xl font-bold text-white tracking-wider">
@@ -33,7 +33,6 @@
             <p class="text-xs text-gray-400 mt-1">Smart Money Tracker</p>
         </div>
         <nav class="flex-1 p-4 space-y-2">
-            <!-- 탭 버튼들 -->
             <button onclick="switchTab('page1')" class="w-full flex items-center p-3 text-left bg-gray-700 text-white rounded-lg font-medium transition-colors hover:bg-gray-600">
                 📊 1. 매크로 차트 보드
             </button>
@@ -61,197 +60,109 @@
                 <h2 class="text-2xl font-bold">실시간 매크로 보드</h2>
                 <span class="bg-blue-900 text-blue-300 text-xs px-3 py-1 rounded-full border border-blue-700">Live 🟢</span>
             </div>
-            
-            <!-- 2x3 차트 격자 레이아웃 -->
             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 h-[80%]">
-                
-                <!-- 차트 위젯 1: S&P 500 (SPY ETF) -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
                     <h3 class="text-sm font-semibold text-gray-400 mb-2">S&P 500 (SPY)</h3>
                     <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
                         <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                        "symbol": "AMEX:SPY",
-                        "width": "100%",
-                        "height": "100%",
-                        "locale": "kr",
-                        "dateRange": "1D",
-                        "colorTheme": "dark",
-                        "isTransparent": true,
-                        "autosize": true
-                        }
+                        { "symbol": "AMEX:SPY", "width": "100%", "height": "100%", "locale": "kr", "dateRange": "1D", "colorTheme": "dark", "isTransparent": true, "autosize": true }
                         </script>
                     </div>
                 </div>
-
-                <!-- 차트 위젯 2: 나스닥 100 (QQQ ETF) -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
                     <h3 class="text-sm font-semibold text-gray-400 mb-2">NASDAQ 100 (QQQ)</h3>
                     <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
                         <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                        "symbol": "NASDAQ:QQQ",
-                        "width": "100%",
-                        "height": "100%",
-                        "locale": "kr",
-                        "dateRange": "1D",
-                        "colorTheme": "dark",
-                        "isTransparent": true,
-                        "autosize": true
-                        }
+                        { "symbol": "NASDAQ:QQQ", "width": "100%", "height": "100%", "locale": "kr", "dateRange": "1D", "colorTheme": "dark", "isTransparent": true, "autosize": true }
                         </script>
                     </div>
                 </div>
-
-                <!-- 차트 위젯 3: 다우존스 (DIA ETF) -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
                     <h3 class="text-sm font-semibold text-gray-400 mb-2">DOW JONES (DIA)</h3>
                     <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
                         <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                        "symbol": "AMEX:DIA",
-                        "width": "100%",
-                        "height": "100%",
-                        "locale": "kr",
-                        "dateRange": "1D",
-                        "colorTheme": "dark",
-                        "isTransparent": true,
-                        "autosize": true
-                        }
+                        { "symbol": "AMEX:DIA", "width": "100%", "height": "100%", "locale": "kr", "dateRange": "1D", "colorTheme": "dark", "isTransparent": true, "autosize": true }
                         </script>
                     </div>
                 </div>
-
-                <!-- 차트 위젯 4: 러셀 2000 (IWM ETF) -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
                     <h3 class="text-sm font-semibold text-gray-400 mb-2">RUSSELL 2000 (IWM)</h3>
                     <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
                         <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                        "symbol": "AMEX:IWM",
-                        "width": "100%",
-                        "height": "100%",
-                        "locale": "kr",
-                        "dateRange": "1D",
-                        "colorTheme": "dark",
-                        "isTransparent": true,
-                        "autosize": true
-                        }
+                        { "symbol": "AMEX:IWM", "width": "100%", "height": "100%", "locale": "kr", "dateRange": "1D", "colorTheme": "dark", "isTransparent": true, "autosize": true }
                         </script>
                     </div>
                 </div>
-
-                <!-- 차트 위젯 5: 환율 (USD/KRW) -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
                     <h3 class="text-sm font-semibold text-gray-400 mb-2">USD / KRW</h3>
                     <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
                         <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                        "symbol": "FX_IDC:USDKRW",
-                        "width": "100%",
-                        "height": "100%",
-                        "locale": "kr",
-                        "dateRange": "1D",
-                        "colorTheme": "dark",
-                        "isTransparent": true,
-                        "autosize": true
-                        }
+                        { "symbol": "FX_IDC:USDKRW", "width": "100%", "height": "100%", "locale": "kr", "dateRange": "1D", "colorTheme": "dark", "isTransparent": true, "autosize": true }
                         </script>
                     </div>
                 </div>
-                
-                <!-- 차트 위젯 6: VIX 공포지수 (가장 안정적인 BATS:VXX 로 교체 완료) -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
                     <h3 class="text-sm font-semibold text-gray-400 mb-2">VIX 공포지수 (VXX)</h3>
                     <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
                         <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
                         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                        "symbol": "BATS:VXX",
-                        "width": "100%",
-                        "height": "100%",
-                        "locale": "kr",
-                        "dateRange": "1D",
-                        "colorTheme": "dark",
-                        "isTransparent": true,
-                        "autosize": true
-                        }
+                        { "symbol": "BATS:VXX", "width": "100%", "height": "100%", "locale": "kr", "dateRange": "1D", "colorTheme": "dark", "isTransparent": true, "autosize": true }
                         </script>
                     </div>
                 </div>
-
             </div>
         </section>
 
         <!-- 페이지 2: 스마트 브리핑 & 뉴스 허브 -->
         <section id="page2" class="page-content h-full">
             <div class="flex flex-col lg:flex-row gap-6 h-full">
-                
-                <!-- 좌측: 스마트 AI 브리핑 (50%) -->
+                <!-- 좌측: 스마트 브리핑 -->
                 <div class="w-full lg:w-1/2 flex flex-col h-full bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
                     <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
-                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                            <span>🧠</span> AI 스마트 브리핑
-                        </h2>
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>🧠</span> AI 스마트 브리핑</h2>
                         <div class="flex space-x-1 bg-gray-800 p-1 rounded-lg border border-gray-700">
                             <button onclick="switchBriefing('pre')" id="btn-pre" class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white font-medium transition-colors">장전</button>
                             <button onclick="switchBriefing('intra')" id="btn-intra" class="px-3 py-1 text-sm rounded-md text-gray-400 hover:text-white transition-colors">장중</button>
                             <button onclick="switchBriefing('post')" id="btn-post" class="px-3 py-1 text-sm rounded-md text-gray-400 hover:text-white transition-colors">장후</button>
                         </div>
                     </div>
-                    
                     <div class="p-6 overflow-y-auto flex-1 space-y-4">
                         <div id="brief-pre" class="briefing-section block">
                             <h3 class="text-blue-400 font-semibold border-b border-gray-700 pb-2 mb-4">🌅 프리마켓 체크포인트</h3>
                             <ul class="space-y-3 text-sm text-gray-300">
-                                <li class="flex items-start gap-2">
-                                    <span class="text-yellow-400 mt-0.5">⚠️</span>
-                                    <p><strong class="text-white">매크로:</strong> CPI 지수 발표 변동성 대비 요망.</p>
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="text-green-400 mt-0.5">📈</span>
-                                    <p><strong class="text-white">NVDA 전략:</strong> 돌파 추격 매수 자제, $126 부근 지지 확인 후 눌림목 타점 진입.</p>
-                                </li>
+                                <li class="flex items-start gap-2"><span class="text-yellow-400 mt-0.5">⚠️</span><p><strong class="text-white">매크로:</strong> CPI 지수 발표 변동성 대비 요망.</p></li>
+                                <li class="flex items-start gap-2"><span class="text-green-400 mt-0.5">📈</span><p><strong class="text-white">NVDA 전략:</strong> 돌파 추격 매수 자제, $126 부근 지지 확인 후 눌림목 타점 진입.</p></li>
                             </ul>
                         </div>
                         <div id="brief-intra" class="briefing-section hidden">
                             <h3 class="text-green-400 font-semibold border-b border-gray-700 pb-2 mb-4">🔥 장중 실시간 흐름</h3>
                             <ul class="space-y-3 text-sm text-gray-300">
-                                <li class="flex items-start gap-2">
-                                    <span class="text-purple-400 mt-0.5">💸</span>
-                                    <p><strong class="text-white">자금 유입:</strong> TSLA $185 구간 대량 다크풀 매수세 확인.</p>
-                                </li>
+                                <li class="flex items-start gap-2"><span class="text-purple-400 mt-0.5">💸</span><p><strong class="text-white">자금 유입:</strong> TSLA $185 구간 대량 다크풀 매수세 확인.</p></li>
                             </ul>
                         </div>
                         <div id="brief-post" class="briefing-section hidden">
                             <h3 class="text-purple-400 font-semibold border-b border-gray-700 pb-2 mb-4">🌙 애프터마켓 결산</h3>
                             <ul class="space-y-3 text-sm text-gray-300">
-                                <li class="flex items-start gap-2">
-                                    <span class="text-gray-400 mt-0.5">📊</span>
-                                    <p><strong class="text-white">실적:</strong> AAPL 예상을 상회하는 EPS 발표로 시간외 강세.</p>
-                                </li>
+                                <li class="flex items-start gap-2"><span class="text-gray-400 mt-0.5">📊</span><p><strong class="text-white">실적:</strong> AAPL 예상을 상회하는 EPS 발표로 시간외 강세.</p></li>
                             </ul>
                         </div>
                     </div>
                 </div>
 
-                <!-- 우측: 실시간 뉴스 피드 (50%) -->
+                <!-- 우측: 뉴스 피드 -->
                 <div class="w-full lg:w-1/2 flex flex-col h-full bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
                     <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
-                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                            <span>⚡</span> 실시간 뉴스 피드
-                        </h2>
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>⚡</span> 실시간 뉴스 피드</h2>
                         <span class="relative flex h-3 w-3 mr-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                         </span>
                     </div>
-                    
                     <div class="p-4 overflow-y-auto flex-1 space-y-3">
                         <div class="border border-gray-700 rounded-lg bg-gray-800 hover:border-gray-500 transition-colors">
                             <div class="p-4 cursor-pointer flex justify-between items-center" onclick="toggleNews('news1', 'icon1')">
@@ -274,14 +185,137 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
+        <!-- ============================================== -->
+        <!-- 페이지 3: 타점 분석 및 시각화 (모드 8) -->
+        <!-- ============================================== -->
+        <section id="page3" class="page-content h-full">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <h2 class="text-2xl font-bold flex items-center gap-2">
+                    🎯 타점 분석 <span class="text-sm font-normal text-gray-400">| 시나리오 시각화</span>
+                </h2>
+                <!-- 우측 컨트롤 패널 -->
+                <div class="flex items-center gap-3">
+                    <div class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 flex items-center">
+                        <span class="text-gray-400 text-sm mr-2">티커:</span>
+                        <input type="text" value="NVDA" class="bg-transparent text-white font-bold w-16 outline-none uppercase" readonly />
+                    </div>
+                    <span class="bg-purple-900 text-purple-300 text-xs px-4 py-2 rounded-full border border-purple-700 font-bold animate-pulse">
+                        MODE 8 ON ⚡
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-6 h-[75vh]">
+                
+                <!-- 좌측: 메인 분석 차트 (고급 위젯 적용) -->
+                <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-4 flex flex-col h-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-md font-bold text-gray-200">고급 타점 차트 (NVDA)</h3>
+                        <span class="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded">15m / 1H 멀티프레임</span>
+                    </div>
+                    <!-- 트레이딩뷰 고급 차트 -->
+                    <div class="flex-1 rounded-lg overflow-hidden border border-gray-700 w-full h-full">
+                        <div class="tradingview-widget-container" style="height:100%;width:100%">
+                          <div id="tv_chart_container" style="height:100%;width:100%"></div>
+                          <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                          <script type="text/javascript">
+                          new TradingView.widget(
+                          {
+                          "autosize": true,
+                          "symbol": "NASDAQ:NVDA",
+                          "interval": "15",
+                          "timezone": "Asia/Seoul",
+                          "theme": "dark",
+                          "style": "1",
+                          "locale": "kr",
+                          "enable_publishing": false,
+                          "backgroundColor": "#1f2937",
+                          "gridColor": "#374151",
+                          "hide_top_toolbar": false,
+                          "hide_legend": false,
+                          "save_image": false,
+                          "container_id": "tv_chart_container"
+                        }
+                          );
+                          </script>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 우측: AI 시나리오 보드 (Plan A/B/C) -->
+                <div class="w-full lg:w-2/5 flex flex-col gap-4 h-full overflow-y-auto pr-1">
+                    
+                    <!-- Plan A: 정석 돌파 -->
+                    <div class="bg-gray-800 rounded-xl border border-green-700/50 shadow-lg p-5 relative overflow-hidden shrink-0">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-lg font-bold text-green-400">Plan A: 정석 돌파</h3>
+                            <span class="bg-green-900/50 text-green-300 text-xs px-2 py-1 rounded font-semibold border border-green-800">확률 35%</span>
+                        </div>
+                        <p class="text-sm text-gray-300 mb-4">단기 저항선 상향 돌파 시 추격 시나리오.</p>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-gray-700 pb-2">
+                                <span class="text-gray-400">진입 타점</span>
+                                <span class="text-white font-bold">$130.50 <span class="text-gray-500 text-xs">(거래량 동반 필수)</span></span>
+                            </div>
+                            <div class="flex justify-between pb-1">
+                                <span class="text-gray-400">1차 목표가</span>
+                                <span class="text-green-400 font-bold">$135.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plan B: 눌림목 스윙 (메인) -->
+                    <div class="bg-gray-800 rounded-xl border border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.15)] p-5 relative overflow-hidden shrink-0">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-lg font-bold text-blue-400 flex items-center gap-2">
+                                Plan B: 눌림목 스윙 
+                                <span class="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wider">Main</span>
+                            </h3>
+                            <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-1 rounded font-semibold border border-blue-800">확률 50%</span>
+                        </div>
+                        <p class="text-sm text-gray-300 mb-4">지지선 부근 갭 채우기 후 반등을 노리는 정석 스윙.</p>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-gray-700 pb-2">
+                                <span class="text-gray-400">매수 밴드</span>
+                                <span class="text-white font-bold">$125.00 ~ $126.50 <span class="text-gray-500 text-xs">(분할 진입)</span></span>
+                            </div>
+                            <div class="flex justify-between pb-1">
+                                <span class="text-gray-400">기대 수익률</span>
+                                <span class="text-blue-400 font-bold">+6.5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plan C: 리스크 관리 -->
+                    <div class="bg-gray-800 rounded-xl border border-red-700/50 shadow-lg p-5 relative overflow-hidden shrink-0">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-lg font-bold text-red-400">Plan C: 리스크 관리 (손절)</h3>
+                            <span class="bg-red-900/50 text-red-300 text-xs px-2 py-1 rounded font-semibold border border-red-800">확률 15%</span>
+                        </div>
+                        <p class="text-sm text-gray-300 mb-4">하락 추세 전환 대비 최후의 방어선.</p>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-gray-700 pb-2">
+                                <span class="text-gray-400">손절 라인</span>
+                                <span class="text-red-400 font-bold">$123.80 <span class="text-gray-500 text-xs">(종가 이탈 시)</span></span>
+                            </div>
+                            <div class="flex justify-between pb-1">
+                                <span class="text-gray-400">대응 전략</span>
+                                <span class="text-white font-bold">전량 매도 후 현금 관망</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </section>
 
         <!-- 빈 페이지들 -->
-        <section id="page3" class="page-content h-full flex items-center justify-center text-gray-500">
-            <h2 class="text-2xl">타점 분석 (다음 단계에서 구현됩니다)</h2>
-        </section>
         <section id="page4" class="page-content h-full flex items-center justify-center text-gray-500">
             <h2 class="text-2xl">액티브 포트폴리오 (다음 단계에서 구현됩니다)</h2>
         </section>
@@ -338,9 +372,9 @@
             }
         }
 
-        // 초기 화면을 1페이지(차트 보드)로 설정
+        // 개발 및 테스트 편의를 위해 초기 화면을 3페이지로 설정했습니다.
         document.addEventListener('DOMContentLoaded', () => {
-            switchTab('page1');
+            switchTab('page3');
         });
     </script>
 </body>
