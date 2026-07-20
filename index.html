@@ -7,7 +7,7 @@
     <!-- Tailwind CSS 불러오기 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 커스텀 스크롤바 (다크모드용) */
+        /* 커스텀 스크롤바 */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1f2937; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
@@ -18,14 +18,18 @@
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* 뉴스 아코디언 아이콘 트랜지션 */
-        .icon-transition { transition: transform 0.3s ease; }
+        /* 모달 애니메이션 */
+        .modal-active { display: flex !important; animation: fadeModalIn 0.2s ease-out forwards; }
+        .modal-card-active { animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        @keyframes fadeModalIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 h-screen flex overflow-hidden">
+<body class="bg-gray-900 text-gray-100 h-screen flex overflow-hidden relative">
 
     <!-- 좌측 사이드바 -->
-    <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col hidden md:flex">
+    <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col hidden md:flex z-10">
         <div class="p-6 border-b border-gray-700">
             <h1 class="text-xl font-bold text-white tracking-wider">
                 <span class="text-blue-500">AI</span> TRADER
@@ -51,11 +55,11 @@
         </nav>
     </aside>
 
-    <!-- 우측 메인 콘텐츠 영역 -->
-    <main class="flex-1 p-8 overflow-y-auto">
+    <!-- 우측 메인 콘텐츠 -->
+    <main class="flex-1 p-8 overflow-y-auto z-0 relative">
         
         <!-- 페이지 1: 실시간 매크로 차트 보드 -->
-        <section id="page1" class="page-content active h-full">
+        <section id="page1" class="page-content h-full">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold">실시간 매크로 보드</h2>
                 <span class="bg-blue-900 text-blue-300 text-xs px-3 py-1 rounded-full border border-blue-700">Live 🟢</span>
@@ -189,14 +193,13 @@
         </section>
 
         <!-- ============================================== -->
-        <!-- 페이지 3: 타점 분석 및 시각화 (모드 8) -->
+        <!-- 페이지 3: 타점 분석 및 시각화 (모달 기능 추가) -->
         <!-- ============================================== -->
-        <section id="page3" class="page-content h-full">
+        <section id="page3" class="page-content active h-full">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <h2 class="text-2xl font-bold flex items-center gap-2">
                     🎯 타점 분석 <span class="text-sm font-normal text-gray-400">| 시나리오 시각화</span>
                 </h2>
-                <!-- 우측 컨트롤 패널 -->
                 <div class="flex items-center gap-3">
                     <div class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 flex items-center">
                         <span class="text-gray-400 text-sm mr-2">티커:</span>
@@ -210,13 +213,12 @@
 
             <div class="flex flex-col lg:flex-row gap-6 h-[75vh]">
                 
-                <!-- 좌측: 메인 분석 차트 (고급 위젯 적용) -->
-                <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-4 flex flex-col h-full">
+                <!-- 좌측: 메인 분석 차트 -->
+                <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-4 flex flex-col h-full z-0">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-md font-bold text-gray-200">고급 타점 차트 (NVDA)</h3>
                         <span class="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded">15m / 1H 멀티프레임</span>
                     </div>
-                    <!-- 트레이딩뷰 고급 차트 -->
                     <div class="flex-1 rounded-lg overflow-hidden border border-gray-700 w-full h-full">
                         <div class="tradingview-widget-container" style="height:100%;width:100%">
                           <div id="tv_chart_container" style="height:100%;width:100%"></div>
@@ -245,32 +247,31 @@
                     </div>
                 </div>
 
-                <!-- 우측: AI 시나리오 보드 (Plan A/B/C) -->
+                <!-- 우측: AI 시나리오 보드 (클릭 이벤트 및 Hover 효과 추가) -->
                 <div class="w-full lg:w-2/5 flex flex-col gap-4 h-full overflow-y-auto pr-1">
                     
-                    <!-- Plan A: 정석 돌파 -->
-                    <div class="bg-gray-800 rounded-xl border border-green-700/50 shadow-lg p-5 relative overflow-hidden shrink-0">
-                        <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
+                    <!-- Plan A: 클릭 가능하도록 수정 -->
+                    <div onclick="openModal('planA')" class="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:border-green-500 bg-gray-800 rounded-xl border border-green-700/50 shadow-lg p-5 relative overflow-hidden shrink-0 group">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500 group-hover:w-2 transition-all"></div>
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-lg font-bold text-green-400">Plan A: 정석 돌파</h3>
                             <span class="bg-green-900/50 text-green-300 text-xs px-2 py-1 rounded font-semibold border border-green-800">확률 35%</span>
                         </div>
-                        <p class="text-sm text-gray-300 mb-4">단기 저항선 상향 돌파 시 추격 시나리오.</p>
+                        <p class="text-sm text-gray-300 mb-4 line-clamp-1">단기 저항선 상향 돌파 시 추격 시나리오.</p>
                         <div class="space-y-3 text-sm">
                             <div class="flex justify-between border-b border-gray-700 pb-2">
                                 <span class="text-gray-400">진입 타점</span>
-                                <span class="text-white font-bold">$130.50 <span class="text-gray-500 text-xs">(거래량 동반 필수)</span></span>
+                                <span class="text-white font-bold">$130.50</span>
                             </div>
-                            <div class="flex justify-between pb-1">
-                                <span class="text-gray-400">1차 목표가</span>
-                                <span class="text-green-400 font-bold">$135.00</span>
-                            </div>
+                        </div>
+                        <div class="mt-4 text-right text-xs text-green-500/70 font-semibold flex justify-end items-center gap-1 group-hover:text-green-400 transition-colors">
+                            상세 브리핑 보기 <span>➜</span>
                         </div>
                     </div>
 
-                    <!-- Plan B: 눌림목 스윙 (메인) -->
-                    <div class="bg-gray-800 rounded-xl border border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.15)] p-5 relative overflow-hidden shrink-0">
-                        <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
+                    <!-- Plan B: 클릭 가능하도록 수정 -->
+                    <div onclick="openModal('planB')" class="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl hover:border-blue-400 bg-gray-800 rounded-xl border border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.15)] p-5 relative overflow-hidden shrink-0 group">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500 group-hover:w-2 transition-all"></div>
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-lg font-bold text-blue-400 flex items-center gap-2">
                                 Plan B: 눌림목 스윙 
@@ -278,36 +279,34 @@
                             </h3>
                             <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-1 rounded font-semibold border border-blue-800">확률 50%</span>
                         </div>
-                        <p class="text-sm text-gray-300 mb-4">지지선 부근 갭 채우기 후 반등을 노리는 정석 스윙.</p>
+                        <p class="text-sm text-gray-300 mb-4 line-clamp-1">지지선 부근 갭 채우기 후 반등을 노리는 정석 스윙.</p>
                         <div class="space-y-3 text-sm">
                             <div class="flex justify-between border-b border-gray-700 pb-2">
                                 <span class="text-gray-400">매수 밴드</span>
-                                <span class="text-white font-bold">$125.00 ~ $126.50 <span class="text-gray-500 text-xs">(분할 진입)</span></span>
+                                <span class="text-white font-bold">$125.00 ~ $126.50</span>
                             </div>
-                            <div class="flex justify-between pb-1">
-                                <span class="text-gray-400">기대 수익률</span>
-                                <span class="text-blue-400 font-bold">+6.5%</span>
-                            </div>
+                        </div>
+                        <div class="mt-4 text-right text-xs text-blue-500/70 font-semibold flex justify-end items-center gap-1 group-hover:text-blue-400 transition-colors">
+                            상세 브리핑 보기 <span>➜</span>
                         </div>
                     </div>
 
-                    <!-- Plan C: 리스크 관리 -->
-                    <div class="bg-gray-800 rounded-xl border border-red-700/50 shadow-lg p-5 relative overflow-hidden shrink-0">
-                        <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+                    <!-- Plan C: 클릭 가능하도록 수정 -->
+                    <div onclick="openModal('planC')" class="cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:border-red-500 bg-gray-800 rounded-xl border border-red-700/50 shadow-lg p-5 relative overflow-hidden shrink-0 group">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500 group-hover:w-2 transition-all"></div>
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="text-lg font-bold text-red-400">Plan C: 리스크 관리 (손절)</h3>
                             <span class="bg-red-900/50 text-red-300 text-xs px-2 py-1 rounded font-semibold border border-red-800">확률 15%</span>
                         </div>
-                        <p class="text-sm text-gray-300 mb-4">하락 추세 전환 대비 최후의 방어선.</p>
+                        <p class="text-sm text-gray-300 mb-4 line-clamp-1">하락 추세 전환 대비 최후의 방어선.</p>
                         <div class="space-y-3 text-sm">
                             <div class="flex justify-between border-b border-gray-700 pb-2">
                                 <span class="text-gray-400">손절 라인</span>
-                                <span class="text-red-400 font-bold">$123.80 <span class="text-gray-500 text-xs">(종가 이탈 시)</span></span>
+                                <span class="text-red-400 font-bold">$123.80</span>
                             </div>
-                            <div class="flex justify-between pb-1">
-                                <span class="text-gray-400">대응 전략</span>
-                                <span class="text-white font-bold">전량 매도 후 현금 관망</span>
-                            </div>
+                        </div>
+                        <div class="mt-4 text-right text-xs text-red-500/70 font-semibold flex justify-end items-center gap-1 group-hover:text-red-400 transition-colors">
+                            상세 브리핑 보기 <span>➜</span>
                         </div>
                     </div>
 
@@ -325,12 +324,60 @@
 
     </main>
 
+    <!-- ============================================== -->
+    <!-- 시나리오 상세 분석 모달 (Popup) -->
+    <!-- ============================================== -->
+    <div id="scenarioModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div id="modalContent" class="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden relative">
+            <!-- 동적 헤더 색상 테두리 적용을 위한 상단 바 -->
+            <div id="modalTopBorder" class="h-2 w-full bg-gray-500"></div>
+            
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 id="modalTitle" class="text-2xl font-bold text-white mb-1">Plan Title</h2>
+                        <span id="modalProbability" class="text-xs px-2 py-1 rounded font-semibold border">확률</span>
+                    </div>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-white transition-colors bg-gray-700 hover:bg-gray-600 rounded-full w-8 h-8 flex items-center justify-center">
+                        ✕
+                    </button>
+                </div>
+                
+                <p id="modalDesc" class="text-gray-300 text-sm mb-6 leading-relaxed">
+                    상세 설명이 여기에 들어갑니다.
+                </p>
+
+                <div class="space-y-4">
+                    <!-- 상세 타점 정보 -->
+                    <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700">
+                        <h4 class="text-xs text-gray-400 font-bold mb-3 uppercase tracking-wider">🎯 진입 및 대응 전략</h4>
+                        <div id="modalStrategyDetails" class="space-y-2 text-sm">
+                            <!-- JS로 동적 생성됨 -->
+                        </div>
+                    </div>
+
+                    <!-- AI 인사이트 박스 -->
+                    <div class="bg-indigo-900/20 p-4 rounded-xl border border-indigo-700/50">
+                        <p class="text-xs text-indigo-400 font-bold mb-1 flex items-center gap-1"><span>🤖</span> AI 딥러닝 기술적 분석</p>
+                        <p id="modalAiInsight" class="text-sm text-indigo-100 leading-relaxed"></p>
+                    </div>
+                </div>
+                
+                <!-- 하단 액션 버튼 -->
+                <div class="mt-6 flex justify-end">
+                    <button onclick="closeModal()" class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition-colors">
+                        확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- UI 동작용 스크립트 -->
     <script>
+        // 탭 전환 로직
         function switchTab(pageId) {
-            document.querySelectorAll('.page-content').forEach(page => {
-                page.classList.remove('active');
-            });
+            document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             
             const buttons = document.querySelectorAll('aside nav button');
@@ -346,6 +393,7 @@
             }
         }
 
+        // 뉴스 브리핑 로직
         function switchBriefing(timeFrame) {
             const frames = ['pre', 'intra', 'post'];
             frames.forEach(frame => {
@@ -360,6 +408,7 @@
             document.getElementById(`btn-${timeFrame}`).classList.add('bg-blue-600', 'text-white');
         }
 
+        // 뉴스 아코디언 로직
         function toggleNews(newsId, iconId) {
             const newsContent = document.getElementById(newsId);
             const icon = document.getElementById(iconId);
@@ -372,7 +421,104 @@
             }
         }
 
-        // 개발 및 테스트 편의를 위해 초기 화면을 3페이지로 설정했습니다.
+        // --- 모달 데이터 및 제어 로직 ---
+        const planData = {
+            planA: {
+                title: "Plan A: 정석 돌파",
+                probability: "확률 35%",
+                colorTheme: "green",
+                desc: "단기 저항선 $130 상향 돌파 시, 강한 수급을 동반하는 경우 추격 진입하는 돌파 매매 시나리오입니다.",
+                strategy: [
+                    { label: "돌파 확인가", value: "$130.50 이상 (15분봉 마감 기준)" },
+                    { label: "필요 거래량", value: "최근 5일 평균 거래량 1.5배 이상" },
+                    { label: "1차 익절가", value: "$135.00 (절반 매도)" },
+                    { label: "트레일링 스탑", value: "$129.50 본절 로스컷 설정" }
+                ],
+                insight: "현재 일봉상 볼린저 밴드 상단이 열려 있으며, MACD 골든크로스가 임박했습니다. 단, 장 초반 '휩쏘(속임수 하락)'가 나올 수 있으므로 개장 후 30분 뒤 거래량을 확인하고 진입하는 것이 안전합니다."
+            },
+            planB: {
+                title: "Plan B: 눌림목 스윙 (Main)",
+                probability: "확률 50%",
+                colorTheme: "blue",
+                desc: "단기 과열로 인해 지지선인 $125 부근까지 갭을 채우며 하락할 때, 분할로 담아 기술적 반등을 노리는 우리의 메인 스윙 전략입니다.",
+                strategy: [
+                    { label: "1차 매수 (30%)", value: "$126.50 (이평선 지지 확인)" },
+                    { label: "2차 매수 (70%)", value: "$125.00 (피보나치 0.382 되돌림)" },
+                    { label: "평균 단가", value: "약 $125.45" },
+                    { label: "기대 목표가", value: "$132.00 (기대 수익 +5~6%)" }
+                ],
+                insight: "과거 통계상 NVDA는 급등 후 3일 차에 10일선 부근까지 터치하는 강한 눌림목 패턴을 자주 보였습니다. 스마트머니(기관) 평단가로 추정되는 $124.50을 깨지 않는 한 스윙 홀딩이 유리합니다."
+            },
+            planC: {
+                title: "Plan C: 리스크 관리 (손절)",
+                probability: "확률 15%",
+                colorTheme: "red",
+                desc: "거시 경제 악재나 강력한 섹터 자금 유출로 인해 추세가 하락으로 꺾일 때를 대비한 최후의 자금 보호 시나리오입니다.",
+                strategy: [
+                    { label: "경고 시그널", value: "$124 하회 시 비중 50% 축소" },
+                    { label: "최종 손절선", value: "$123.80 (전량 매도)" },
+                    { label: "확인 기준", value: "오후 3시(장 마감 전) 종가 기준" }
+                ],
+                insight: "주가가 $123.80을 이탈하면 다음 주요 지지선인 $118까지 매물대가 비어있어 급락 위험이 큽니다. 미련 없이 손절 후 현금을 확보하고, 바닥을 다지는 패턴(쌍바닥 등)을 새로 탐색해야 합니다."
+            }
+        };
+
+        const modal = document.getElementById('scenarioModal');
+        const modalContent = document.getElementById('modalContent');
+
+        function openModal(planKey) {
+            const data = planData[planKey];
+            if(!data) return;
+
+            // 테마 색상 설정
+            const topBorder = document.getElementById('modalTopBorder');
+            const probBadge = document.getElementById('modalProbability');
+            
+            topBorder.className = `h-2 w-full bg-${data.colorTheme}-500`;
+            probBadge.className = `text-xs px-2 py-1 rounded font-semibold border bg-${data.colorTheme}-900/50 text-${data.colorTheme}-300 border-${data.colorTheme}-800`;
+            probBadge.textContent = data.probability;
+
+            // 텍스트 매핑
+            document.getElementById('modalTitle').textContent = data.title;
+            document.getElementById('modalTitle').className = `text-2xl font-bold mb-1 text-${data.colorTheme}-400`;
+            document.getElementById('modalDesc').textContent = data.desc;
+            document.getElementById('modalAiInsight').textContent = data.insight;
+
+            // 전략 리스트 동적 생성
+            const strategyContainer = document.getElementById('modalStrategyDetails');
+            strategyContainer.innerHTML = ''; // 초기화
+            
+            data.strategy.forEach((item, index) => {
+                const borderClass = index !== data.strategy.length - 1 ? 'border-b border-gray-700 pb-2 mb-2' : '';
+                strategyContainer.innerHTML += `
+                    <div class="flex justify-between items-center ${borderClass}">
+                        <span class="text-gray-400">${item.label}</span>
+                        <span class="text-white font-bold">${item.value}</span>
+                    </div>
+                `;
+            });
+
+            // 모달 열기 (애니메이션 클래스 추가)
+            modal.classList.remove('hidden');
+            modal.classList.add('modal-active');
+            modalContent.classList.add('modal-card-active');
+        }
+
+        function closeModal() {
+            // 애니메이션 클래스 제거 및 숨김 처리
+            modal.classList.add('hidden');
+            modal.classList.remove('modal-active');
+            modalContent.classList.remove('modal-card-active');
+        }
+
+        // 배경 클릭 시 모달 닫기
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // 초기 화면 설정
         document.addEventListener('DOMContentLoaded', () => {
             switchTab('page3');
         });
