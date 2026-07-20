@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Trading Dashboard - Page 1</title>
+    <!-- Tailwind CSS 불러오기 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 커스텀 스크롤바 (다크모드용) */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        .page-content { display: none; }
+        /* active 클래스가 붙으면 부드럽게 나타나는 애니메이션 */
+        .page-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 h-screen flex overflow-hidden">
+
+    <!-- 좌측 사이드바 (Sidebar) -->
+    <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col hidden md:flex">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold text-white tracking-wider">
+                <span class="text-blue-500">AI</span> TRADER
+            </h1>
+            <p class="text-xs text-gray-400 mt-1">Smart Money Tracker</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <!-- 페이지 1 버튼 (현재 활성화된 상태 디자인) -->
+            <button onclick="switchTab('page1')" class="w-full flex items-center p-3 text-left bg-gray-700 text-white rounded-lg font-medium transition-colors hover:bg-gray-600">
+                📊 1. 매크로 차트 보드
+            </button>
+            <button onclick="switchTab('page2')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
+                🗞️ 2. 뉴스 & 브리핑
+            </button>
+            <button onclick="switchTab('page3')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
+                🎯 3. 타점 분석 (모드 8)
+            </button>
+            <button onclick="switchTab('page4')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
+                🗂️ 4. 액티브 포트폴리오
+            </button>
+            <button onclick="switchTab('page5')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
+                🔍 5. 커스텀 스크리너
+            </button>
+        </nav>
+    </aside>
+
+    <!-- 우측 메인 콘텐츠 영역 -->
+    <main class="flex-1 p-8 overflow-y-auto">
+        
+        <!-- ============================================== -->
+        <!-- 페이지 1: 실시간 매크로 차트 보드 (여기가 핵심입니다) -->
+        <!-- ============================================== -->
+        <section id="page1" class="page-content active h-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">실시간 매크로 보드</h2>
+                <span class="bg-blue-900 text-blue-300 text-xs px-3 py-1 rounded-full border border-blue-700">Live 🟢</span>
+            </div>
+            
+            <!-- 2x3 차트 격자 레이아웃 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 h-[80%]">
+                
+                <!-- 차트 위젯 1: S&P 500 -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">S&P 500</h3>
+                    <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                        "symbol": "SP:SPX",
+                        "width": "100%",
+                        "height": "100%",
+                        "locale": "kr",
+                        "dateRange": "1D",
+                        "colorTheme": "dark",
+                        "isTransparent": true,
+                        "autosize": true,
+                        "largeChartUrl": ""
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- 차트 위젯 2: 나스닥 100 -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">NASDAQ 100</h3>
+                    <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                        "symbol": "NASDAQ:NDX",
+                        "width": "100%",
+                        "height": "100%",
+                        "locale": "kr",
+                        "dateRange": "1D",
+                        "colorTheme": "dark",
+                        "isTransparent": true,
+                        "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- 차트 위젯 3: 다우존스 -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">DOW JONES</h3>
+                    <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                        "symbol": "DJ:DJI",
+                        "width": "100%",
+                        "height": "100%",
+                        "locale": "kr",
+                        "dateRange": "1D",
+                        "colorTheme": "dark",
+                        "isTransparent": true,
+                        "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- 차트 위젯 4: 러셀 2000 -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">RUSSELL 2000</h3>
+                    <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                        "symbol": "RUSSELL:RUT",
+                        "width": "100%",
+                        "height": "100%",
+                        "locale": "kr",
+                        "dateRange": "1D",
+                        "colorTheme": "dark",
+                        "isTransparent": true,
+                        "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- 차트 위젯 5: 환율 (USD/KRW) -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">USD / KRW</h3>
+                    <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                        "symbol": "FX_IDC:USDKRW",
+                        "width": "100%",
+                        "height": "100%",
+                        "locale": "kr",
+                        "dateRange": "1D",
+                        "colorTheme": "dark",
+                        "isTransparent": true,
+                        "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+                
+                <!-- 차트 위젯 6: VIX (공포지수) -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">VIX (공포지수)</h3>
+                    <div class="tradingview-widget-container" style="height: 100%; width: 100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px); width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                        "symbol": "CBOE:VIX",
+                        "width": "100%",
+                        "height": "100%",
+                        "locale": "kr",
+                        "dateRange": "1D",
+                        "colorTheme": "dark",
+                        "isTransparent": true,
+                        "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 빈 페이지들 (클릭 시 화면 전환용 임시 구조) -->
+        <section id="page2" class="page-content h-full flex items-center justify-center text-gray-500">
+            <h2 class="text-2xl">뉴스 & 브리핑 (대기 중)</h2>
+        </section>
+        <section id="page3" class="page-content h-full flex items-center justify-center text-gray-500">
+            <h2 class="text-2xl">타점 분석 (대기 중)</h2>
+        </section>
+        <section id="page4" class="page-content h-full flex items-center justify-center text-gray-500">
+            <h2 class="text-2xl">액티브 포트폴리오 (대기 중)</h2>
+        </section>
+        <section id="page5" class="page-content h-full flex items-center justify-center text-gray-500">
+            <h2 class="text-2xl">커스텀 스크리너 (대기 중)</h2>
+        </section>
+
+    </main>
+
+    <!-- 탭 전환 자바스크립트 -->
+    <script>
+        function switchTab(pageId) {
+            // 모든 페이지 숨기기
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            // 선택한 페이지만 보이기
+            document.getElementById(pageId).classList.add('active');
+            
+            // 사이드바 버튼 색상 업데이트 (선택된 탭 강조)
+            const buttons = document.querySelectorAll('aside nav button');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-gray-700', 'text-white');
+                btn.classList.add('text-gray-400');
+            });
+            
+            // 방금 클릭한 버튼 찾아서 강조
+            const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(pageId));
+            if(activeBtn) {
+                activeBtn.classList.remove('text-gray-400');
+                activeBtn.classList.add('bg-gray-700', 'text-white');
+            }
+        }
+    </script>
+</body>
+</html>
