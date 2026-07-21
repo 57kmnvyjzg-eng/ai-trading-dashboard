@@ -4,260 +4,242 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Trading Dashboard - Senior PM Edition</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lightweight Charts 3.8.0 고정 버전 -->
     <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
     
     <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1f2937; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         
-        .page-content { display: none; height: 100%; }
-        .page-content.active { display: flex; flex-direction: column; animation: fadeIn 0.2s ease-in-out; }
+        .page-content { display: none; }
+        .page-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .modal-active { display: flex !important; animation: fadeModalIn 0.2s ease-out forwards; }
         @keyframes fadeModalIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: #a855f7; width: 20px; height: 20px; animation: spin 1s ease-in-out infinite; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: #a855f7; width: 24px; height: 24px; animation: spin 1s ease-in-out infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         
         @keyframes pulseAlert { 0%, 100% { background-color: rgba(239, 68, 68, 0.2); border-color: #ef4444; } 50% { background-color: rgba(239, 68, 68, 0.5); border-color: #f87171; } }
         .alert-active { animation: pulseAlert 1.5s infinite; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 h-screen w-screen flex overflow-hidden font-sans">
+<body class="bg-gray-900 text-gray-100 h-screen flex overflow-hidden relative font-sans">
 
-    <!-- 좌측 사이드바 (고정 너비 256px) -->
-    <aside class="w-64 min-w-[256px] bg-gray-800 border-r border-gray-700 flex flex-col z-20 shadow-xl shrink-0">
-        <div class="p-5 border-b border-gray-700">
-            <h1 class="text-xl font-bold text-white tracking-wider flex items-center gap-1">
-                <span class="text-blue-500">AI</span> TRADER <span class="text-xs text-purple-400 bg-purple-950/80 px-1.5 py-0.5 rounded border border-purple-800">PRO</span>
+    <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col hidden md:flex z-10 shadow-2xl">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold text-white tracking-wider">
+                <span class="text-blue-500">AI</span> TRADER <span class="text-xs text-purple-400 align-top">PRO</span>
             </h1>
-            <p class="text-xs text-gray-400 mt-1 font-medium">Senior PM Execution Desk</p>
+            <p class="text-xs text-gray-400 mt-1 font-semibold">Senior PM Execution Desk</p>
         </div>
-        <nav class="flex-1 p-3 space-y-1.5 flex flex-col overflow-y-auto">
-            <button onclick="switchTab('page1')" class="w-full flex items-center p-3 text-left text-gray-300 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
-                <span class="mr-3 text-base">📊</span> 1. 매크로 차트
+        <nav class="flex-1 p-4 space-y-2 flex flex-col">
+            <button onclick="switchTab('page1')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
+                <span class="mr-3 text-lg">📊</span> 1. 매크로 차트
             </button>
-            <button onclick="switchTab('page2')" class="w-full flex items-center p-3 text-left text-gray-300 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
-                <span class="mr-3 text-base">🧠</span> 2. AI 딥스캔
+            <button onclick="switchTab('page2')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
+                <span class="mr-3 text-lg">🧠</span> 2. AI 딥스캔
             </button>
-            <button onclick="switchTab('page3', '1D')" id="navPage3" class="w-full flex items-center p-3 text-left text-gray-300 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white relative">
-                <span class="mr-3 text-base">🎯</span> 3. 타점 시나리오
-                <span id="navAlertDot" class="absolute right-3 top-4 w-2 h-2 bg-red-500 rounded-full animate-ping hidden"></span>
+            <button onclick="switchTab('page3')" id="navPage3" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white relative">
+                <span class="mr-3 text-lg">🎯</span> 3. 타점 시나리오
+                <span id="navAlertDot" class="absolute right-3 top-3.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping hidden"></span>
             </button>
-            <button onclick="switchTab('page4')" id="navPage4" class="w-full flex items-center p-3 text-left text-gray-300 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
-                <span class="mr-3 text-base">🗂️</span> 4. 포트폴리오
+            <button onclick="switchTab('page4')" id="navPage4" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
+                <span class="mr-3 text-lg">🗂️</span> 4. 포트폴리오
             </button>
             
-            <div class="mt-auto pt-3 border-t border-gray-700">
+            <div class="mt-auto pt-4 border-t border-gray-700">
                 <button onclick="openApiModal()" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
-                    <span class="mr-3 text-base">⚙️</span> 시스템 설정
+                    <span class="mr-3 text-lg">⚙️</span> 시스템 설정
                 </button>
             </div>
         </nav>
     </aside>
 
-    <!-- 메인 컨텐츠 영역 -->
-    <main class="flex-1 min-w-0 h-full p-6 bg-gray-900 overflow-y-auto relative">
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto z-0 relative bg-gray-900">
         
-        <section id="page1" class="page-content">
-            <h2 class="text-2xl font-bold mb-4">📊 매크로 차트 보드</h2>
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 flex-1 flex items-center justify-center text-gray-500">(기존 1페이지 구역)</div>
+        <section id="page1" class="page-content h-full">
+            <h2 class="text-2xl font-bold mb-6">📊 매크로 차트 보드</h2>
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">(1페이지 구역)</div>
         </section>
         
-        <section id="page2" class="page-content">
-            <h2 class="text-2xl font-bold mb-4">🧠 AI 딥스캔 브리핑</h2>
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 flex-1 flex items-center justify-center text-gray-500">(기존 2페이지 구역)</div>
+        <section id="page2" class="page-content h-full">
+            <h2 class="text-2xl font-bold mb-6">🧠 AI 딥스캔 브리핑</h2>
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">(2페이지 구역)</div>
         </section>
 
-        <!-- 페이지 3: 타점 시나리오 (미래 1주일치 7개 캔들 적용 완결판) -->
-        <section id="page3" class="page-content active">
-            <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-gray-800 shrink-0">
+        <section id="page3" class="page-content active h-full">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                 <div>
-                    <h2 class="text-xl font-bold flex items-center gap-2">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
                         🎯 타점 시나리오 
-                        <span id="timeframeBadge" class="bg-purple-900/60 border border-purple-500 text-purple-300 text-xs px-2.5 py-1 rounded-md font-bold">⏱️ 일봉 (7D)</span>
+                        <span id="timeframeBadge" class="text-xs bg-purple-900 text-purple-300 px-2 py-0.5 rounded border border-purple-700">일봉 (7일치 기본)</span>
                     </h2>
-                    <p id="page3Desc" class="text-xs text-gray-400 mt-1">과거 일봉 + 미래 1주일(7개 캔들) 다중 시나리오 예측 궤적</p>
+                    <p class="text-sm text-gray-400 mt-1" id="page3SubText">기본 7일 일봉 데이터 및 투명 시나리오 캔들 오버레이</p>
                 </div>
-                <div class="flex items-center gap-2 flex-wrap">
+                <div class="flex items-center gap-2">
                     <button onclick="toggleMonitoring()" id="btnMonitor" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg font-bold transition-colors">
-                        🛡️ 실시간 모니터링: OFF
+                        🛡️ 자동 새로고침 감지: OFF
                     </button>
-                    <div class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 flex items-center">
-                        <span class="text-gray-400 text-xs mr-2">티커:</span>
-                        <input type="text" id="p3Ticker" value="NVDA" class="bg-transparent text-white font-bold w-16 outline-none uppercase text-center text-sm" />
+                    <div class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 flex items-center shadow-inner">
+                        <span class="text-gray-400 text-sm mr-2">티커:</span>
+                        <input type="text" id="p3Ticker" value="NVDA" class="bg-transparent text-white font-bold w-16 outline-none uppercase text-center" />
                     </div>
-                    <button onclick="runGeminiAnalysis()" id="btnRunAi" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-lg">
-                        <span>⚡ AI 실시간 분석</span>
+                    <button onclick="runAnalysis(currentMode)" id="btnRunAi" class="bg-purple-600 hover:bg-purple-500 text-white text-sm px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-lg">
+                        <span>⚡ 시나리오 차트 갱신</span>
                     </button>
                 </div>
             </div>
 
-            <!-- 이탈 경고 배너 -->
-            <div id="warningBanner" class="hidden mb-4 p-3 rounded-lg border text-sm font-bold flex items-center justify-between alert-active shrink-0">
-                <span id="warningText" class="text-red-200 flex items-center gap-2">⚠️ [경고] 가격이 주요 지지선을 이탈했습니다! 포지션 리스크 관리 필요.</span>
-                <span onclick="dismissWarning()" class="cursor-pointer text-xs bg-red-800 hover:bg-red-700 text-white px-3 py-1.5 rounded font-semibold">확인 완료</span>
+            <div id="warningBanner" class="hidden mb-4 p-3 rounded-lg border text-sm font-bold flex items-center justify-between alert-active">
+                <span id="warningText" class="text-red-300">⚠️ [이탈 경고] 가격이 허용 타점 범위를 이탈했습니다! 포지션 위험 관리 필요.</span>
+                <button onclick="dismissWarning()" class="text-xs bg-red-800 hover:bg-red-700 text-white px-2.5 py-1 rounded">경고 해제</button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
-                <!-- 메인 차트 (좌측 7컬럼) -->
-                <div class="lg:col-span-7 bg-gray-800 rounded-xl border border-gray-700 p-4 flex flex-col h-full min-h-[420px]">
-                    <div class="flex items-center justify-between mb-3 shrink-0">
-                        <h3 class="text-sm font-bold text-gray-200" id="chartTitle">📈 미래 1주일(7개 캔들) 궤적 예측 대기중...</h3>
-                        <div class="flex gap-1.5" id="chartLegends" style="display:none;">
-                            <span class="text-[10px] bg-green-900/40 text-green-400 border border-green-700 px-1.5 py-0.5 rounded">Plan A (상승 7일)</span>
-                            <span class="text-[10px] bg-blue-900/40 text-blue-400 border border-blue-700 px-1.5 py-0.5 rounded">Plan B (횡보 7일)</span>
-                            <span class="text-[10px] bg-red-900/40 text-red-400 border border-red-700 px-1.5 py-0.5 rounded">Plan C (이탈 7일)</span>
+            <div class="flex flex-col lg:flex-row gap-6 h-[72vh]">
+                <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-4 flex flex-col h-full relative">
+                    <div class="flex justify-between items-center mb-4 z-10">
+                        <h3 class="text-md font-bold text-gray-200" id="chartTitle">📈 궤적 예측 차트</h3>
+                        <div class="flex gap-1" id="chartLegends">
+                            <span class="text-[10px] bg-green-900/50 text-green-400 border border-green-700 px-1.5 py-0.5 rounded">Plan A</span>
+                            <span class="text-[10px] bg-blue-900/50 text-blue-400 border border-blue-700 px-1.5 py-0.5 rounded">Plan B</span>
+                            <span class="text-[10px] bg-red-900/50 text-red-400 border border-red-700 px-1.5 py-0.5 rounded">Plan C</span>
                         </div>
                     </div>
-                    <div class="flex-1 w-full relative min-h-0">
-                        <div id="main_chart_container" class="absolute inset-0 bg-gray-900 rounded-lg border border-gray-700 flex items-center justify-center overflow-hidden">
-                            <span id="chartPlaceholder" class="text-gray-500 text-sm flex items-center gap-2">💡 [AI 실시간 분석] 버튼을 눌러주세요.</span>
+                    <div class="flex-1 w-full relative">
+                        <div id="main_chart_container" class="absolute inset-0 bg-gray-900 rounded-lg border border-gray-700 overflow-hidden flex items-center justify-center">
+                            <span id="chartPlaceholder" class="text-gray-500 flex items-center gap-2">💡 차트 로딩 중...</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 우측 플랜 설명 (우측 5컬럼) -->
-                <div class="lg:col-span-5 flex flex-col gap-3 overflow-y-auto">
-                    <div class="bg-gray-800 rounded-xl border border-green-700/50 p-4 relative overflow-hidden shrink-0">
+                <div class="w-full lg:w-2/5 flex flex-col gap-3 h-full overflow-y-auto pr-1">
+                    <div class="bg-gray-800 rounded-xl border border-green-700/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
-                        <h3 class="text-base font-bold text-green-400 mb-1">Plan A: 상방 돌파 궤적 (향후 7일)</h3>
-                        <p class="text-xs text-gray-300 leading-relaxed">주요 지지선 방어 성공 시 1주일간 7개의 캔들이 연속 우상향하며 목표 고점($145)까지 투명 캔들 궤도 형성.</p>
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-md font-bold text-green-400">🟢 Plan A: 우상향 돌파 타점</h3>
+                            <span class="text-[11px] bg-green-950 text-green-300 px-2 py-0.5 rounded border border-green-800">목표가 $135+</span>
+                        </div>
+                        <p class="text-xs text-gray-300 mb-2" id="planA_desc">주요 지지선 상단 지지 확인 후 상승하는 최선 시나리오.</p>
+                        <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
+                            <span>진입 타점: 지지선 리테스트 반등</span>
+                            <span class="text-green-400 font-bold">승률 68%</span>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-xl border border-blue-600/50 p-4 relative overflow-hidden shrink-0">
+
+                    <div class="bg-gray-800 rounded-xl border border-blue-600/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
-                        <h3 class="text-base font-bold text-blue-400 mb-1">Plan B: 박스권 수렴 (향후 7일)</h3>
-                        <p class="text-xs text-gray-300 leading-relaxed">거래량 감소와 함께 일주일 동안 $123~$129 주가 범위 내에서 위아래 꼬리를 달며 기간 조정 진행.</p>
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-md font-bold text-blue-400">🔵 Plan B: 박스권 횡보 수렴</h3>
+                            <span class="text-[11px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800">구간 $124~$129</span>
+                        </div>
+                        <p class="text-xs text-gray-300 mb-2" id="planB_desc">상단 저항과 하단 지지 사이에서 수렴 후 방향성 타진.</p>
+                        <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
+                            <span>진입 타점: 박스권 하단 눌림목</span>
+                            <span class="text-blue-400 font-bold">승률 54%</span>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-xl border border-red-700/50 p-4 relative overflow-hidden shrink-0">
+
+                    <div class="bg-gray-800 rounded-xl border border-red-700/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
-                        <h3 class="text-base font-bold text-red-400 mb-1">Plan C: 하방 이탈 (향후 7일)</h3>
-                        <p class="text-xs text-gray-300 leading-relaxed">지지선($120) 하회 시 7일간 계단식 하락 캔들이 발생하며 투매 물량 유입. <span class="text-red-400 font-bold">60분봉 전환 시 실시간 추적.</span></p>
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-md font-bold text-red-400">🔴 Plan C: 스톱헌팅 & 이탈</h3>
+                            <span class="text-[11px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800">손절가 $121 하회</span>
+                        </div>
+                        <p class="text-xs text-gray-300 mb-2" id="planC_desc">단기 지지선 하향 이탈 시 경고 발동 및 비중 축소 구간.</p>
+                        <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
+                            <span>대응 기준: 실시간 이탈 경고 발생 시 손절</span>
+                            <span class="text-red-400 font-bold">리스크 방어</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 페이지 4: 포트폴리오 -->
-        <section id="page4" class="page-content">
-            <h2 class="text-2xl font-bold mb-4">🗂️ 개별종목 포트폴리오 & 매매 관리</h2>
-            <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 overflow-hidden shadow-xl">
-                <p class="text-xs text-amber-400 font-semibold mb-4 flex items-center gap-1">
-                    <span>💡</span> 종목을 클릭하면 즉시 [페이지 3]의 <b class="underline">60분봉 실시간 추적 모드</b>로 전환되어 이탈 여부를 모니터링합니다.
-                </p>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-gray-300 min-w-[600px]">
-                        <thead class="bg-gray-700/50 text-gray-200 uppercase text-xs">
-                            <tr>
-                                <th class="p-3">티커</th>
-                                <th class="p-3">종목명</th>
-                                <th class="p-3">보유수량</th>
-                                <th class="p-3">평단가</th>
-                                <th class="p-3">현재가</th>
-                                <th class="p-3">상태</th>
-                                <th class="p-3">추적 액션</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700">
-                            <tr class="hover:bg-gray-700/40 cursor-pointer transition-colors" onclick="selectStock('NVDA')">
-                                <td class="p-3 font-bold text-white">NVDA</td>
-                                <td class="p-3">NVIDIA Corp</td>
-                                <td class="p-3">15주</td>
-                                <td class="p-3">$118.50</td>
-                                <td class="p-3 text-red-400 font-bold">$121.20</td>
-                                <td class="p-3"><span class="bg-amber-900/50 text-amber-300 text-xs px-2 py-0.5 rounded border border-amber-600 font-semibold">지지선 테스트중</span></td>
-                                <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold shadow">60분봉 추적</button></td>
-                            </tr>
-                            <tr class="hover:bg-gray-700/40 cursor-pointer transition-colors" onclick="selectStock('AAPL')">
-                                <td class="p-3 font-bold text-white">AAPL</td>
-                                <td class="p-3">Apple Inc</td>
-                                <td class="p-3">20주</td>
-                                <td class="p-3">$175.20</td>
-                                <td class="p-3 text-green-400 font-bold">$182.10</td>
-                                <td class="p-3"><span class="bg-green-900/50 text-green-400 text-xs px-2 py-0.5 rounded border border-green-700 font-semibold">안정권</span></td>
-                                <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold shadow">60분봉 추적</button></td>
-                            </tr>
-                            <tr class="hover:bg-gray-700/40 cursor-pointer transition-colors" onclick="selectStock('TSLA')">
-                                <td class="p-3 font-bold text-white">TSLA</td>
-                                <td class="p-3">Tesla Inc</td>
-                                <td class="p-3">10주</td>
-                                <td class="p-3">$210.00</td>
-                                <td class="p-3 text-red-400 font-bold">$204.50</td>
-                                <td class="p-3"><span class="bg-red-900/50 text-red-400 text-xs px-2 py-0.5 rounded border border-red-700 font-semibold">지지선 근접</span></td>
-                                <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold shadow">60분봉 추적</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <section id="page4" class="page-content h-full">
+            <h2 class="text-2xl font-bold mb-6">🗂️ 개별종목 포트폴리오 & 매매 관리</h2>
+            <div class="bg-gray-800 rounded-xl border border-gray-700 p-6 overflow-hidden shadow-xl">
+                <p class="text-xs text-gray-400 mb-4">💡 포트폴리오 종목을 클릭하시면 **[페이지 3] 60분봉 실시간 차트**로 자동 전환되며, 이탈 감지 모드가 실행됩니다.</p>
+                <table class="w-full text-left text-sm text-gray-300">
+                    <thead class="bg-gray-700/50 text-gray-200 uppercase text-xs">
+                        <tr>
+                            <th class="p-3">티커</th>
+                            <th class="p-3">종목명</th>
+                            <th class="p-3">보유수량</th>
+                            <th class="p-3">평단가</th>
+                            <th class="p-3">현재가</th>
+                            <th class="p-3">상태</th>
+                            <th class="p-3">60분봉 연동 추적</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        <tr class="hover:bg-gray-700/40 cursor-pointer transition-colors" onclick="selectStockAndSwitchToHourly('NVDA')">
+                            <td class="p-3 font-bold text-white">NVDA</td>
+                            <td class="p-3">NVIDIA Corp</td>
+                            <td class="p-3">15주</td>
+                            <td class="p-3">$118.50</td>
+                            <td class="p-3 text-green-400 font-bold">$127.00</td>
+                            <td class="p-3"><span class="bg-green-900/50 text-green-400 text-xs px-2 py-0.5 rounded border border-green-700">안정권</span></td>
+                            <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold">60분봉 추적 시작</button></td>
+                        </tr>
+                        <tr class="hover:bg-gray-700/40 cursor-pointer transition-colors" onclick="selectStockAndSwitchToHourly('AAPL')">
+                            <td class="p-3 font-bold text-white">AAPL</td>
+                            <td class="p-3">Apple Inc</td>
+                            <td class="p-3">20주</td>
+                            <td class="p-3">$175.20</td>
+                            <td class="p-3 text-green-400 font-bold">$182.10</td>
+                            <td class="p-3"><span class="bg-green-900/50 text-green-400 text-xs px-2 py-0.5 rounded border border-green-700">안정권</span></td>
+                            <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold">60분봉 추적 시작</button></td>
+                        </tr>
+                        <tr class="hover:bg-gray-700/40 cursor-pointer transition-colors" onclick="selectStockAndSwitchToHourly('TSLA')">
+                            <td class="p-3 font-bold text-white">TSLA</td>
+                            <td class="p-3">Tesla Inc</td>
+                            <td class="p-3">10주</td>
+                            <td class="p-3">$210.00</td>
+                            <td class="p-3 text-red-400 font-bold">$204.50</td>
+                            <td class="p-3"><span class="bg-red-900/50 text-red-400 text-xs px-2 py-0.5 rounded border border-red-700">주의 필요</span></td>
+                            <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold">60분봉 추적 시작</button></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </section>
     </main>
 
-    <!-- 시스템 설정 모달 -->
-    <div id="apiModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden p-6">
+    <div id="apiModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md p-6">
             <h2 class="text-xl font-bold text-white mb-2">⚙️ 시스템 설정</h2>
-            <p class="text-xs text-gray-300 mb-6 leading-relaxed">
-                현재 <b>일봉(7D) / 60분봉 실시간 자동 전환 퀀트 시뮬레이터</b>가 작동 중입니다.
-            </p>
+            <p class="text-sm text-gray-300 mb-6 leading-relaxed">일봉(7일 기본) 및 60분봉 포트폴리오 연동 퀀트 엔진이 가동 중입니다.</p>
             <div class="flex justify-end">
-                <button onclick="closeApiModal()" class="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg transition-colors">확인</button>
+                <button onclick="closeApiModal()" class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-lg">확인</button>
             </div>
         </div>
     </div>
 
     <script>
-        let currentTimeframe = '1D'; 
+        let currentMode = 'daily'; // 'daily' (일봉 7일치) or 'hourly' (60분봉)
         let mainChartInstance = null;
-        let mainSeriesInstance = null;
+        let mainSeries = null;
         let monitoringInterval = null;
-        let liveRefreshInterval = null;
         let isMonitoringActive = false;
-        let currentChartData = null;
+        let activeCandleData = [];
 
-        function switchTab(pageId, forcedTimeframe = null) {
+        function switchTab(pageId) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-gray-700', 'text-white');
-            });
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('bg-gray-700', 'text-white'));
             if(pageId === 'page3') document.getElementById('navPage3').classList.add('bg-gray-700', 'text-white');
             if(pageId === 'page4') document.getElementById('navPage4').classList.add('bg-gray-700', 'text-white');
-
-            if (forcedTimeframe) {
-                currentTimeframe = forcedTimeframe;
-            } else if (pageId === 'page3' && !forcedTimeframe && currentTimeframe !== '60m') {
-                currentTimeframe = '1D';
-            }
-
-            updateTimeframeUI();
 
             if (pageId === 'page3' && mainChartInstance) {
                 setTimeout(() => {
                     const container = document.getElementById('main_chart_container');
                     mainChartInstance.resize(container.clientWidth, container.clientHeight);
                 }, 100);
-            }
-        }
-
-        function updateTimeframeUI() {
-            const badge = document.getElementById('timeframeBadge');
-            const desc = document.getElementById('page3Desc');
-            if (currentTimeframe === '60m') {
-                badge.className = "bg-amber-900/80 border border-amber-500 text-amber-300 text-xs px-2.5 py-1 rounded-md font-bold animate-pulse";
-                badge.innerHTML = "⚡ 60분봉 실시간 추적 모드";
-                desc.textContent = "포트폴리오 연동 모드: 일정 주기로 차트가 새로고침되며 지지선 이탈을 감지합니다.";
-            } else {
-                badge.className = "bg-purple-900/60 border border-purple-500 text-purple-300 text-xs px-2.5 py-1 rounded-md font-bold";
-                badge.innerHTML = "⏱️ 일봉 (7D) 기준";
-                desc.textContent = "과거 일봉 + 미래 1주일(7개 캔들) 다중 시나리오 예측 궤적";
             }
         }
 
@@ -271,10 +253,21 @@
             document.getElementById('apiModal').classList.remove('modal-active');
         }
 
-        function selectStock(ticker) {
+        // 페이지 4에서 종목 선택 시 60분봉 모드로 전환 후 연동
+        function selectStockAndSwitchToHourly(ticker) {
             document.getElementById('p3Ticker').value = ticker;
-            switchTab('page3', '60m');
-            runGeminiAnalysis();
+            currentMode = 'hourly';
+            
+            // 배지 및 설명 문구 업데이트
+            document.getElementById('timeframeBadge').className = "text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded border border-blue-700";
+            document.getElementById('timeframeBadge').textContent = `60분봉 실시간 연동 (${ticker})`;
+            document.getElementById('page3SubText').textContent = `포트폴리오 연동 60분봉 실시간 새로고침 및 자리아탈 감지 모드`;
+            
+            switchTab('page3');
+            runAnalysis('hourly');
+            
+            // 60분봉 연동 시 자동 새로고침 ON
+            if(!isMonitoringActive) toggleMonitoring();
         }
 
         const chartOptions = {
@@ -282,19 +275,20 @@
             grid: { vertLines: { color: '#374151', style: 1 }, horzLines: { color: '#374151', style: 1 } },
             crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
             rightPriceScale: { borderColor: '#374151' },
-            timeScale: { borderColor: '#374151', timeVisible: true, secondsVisible: false },
+            timeScale: { borderColor: '#374151', timeVisible: true },
         };
 
+        // 자동 새로고침 및 자리아탈 감지 루프
         function toggleMonitoring() {
             isMonitoringActive = !isMonitoringActive;
             const btn = document.getElementById('btnMonitor');
             if(isMonitoringActive) {
                 btn.className = "bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-2 rounded-lg font-bold transition-colors";
-                btn.innerHTML = "🛡️ 실시간 모니터링: ON";
+                btn.innerHTML = "🛡️ 자동 새로고침 감지: ON";
                 startMonitoringLoop();
             } else {
                 btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg font-bold transition-colors";
-                btn.innerHTML = "🛡️ 실시간 모니터링: OFF";
+                btn.innerHTML = "🛡️ 자동 새로고침 감지: OFF";
                 stopMonitoringLoop();
                 dismissWarning();
             }
@@ -302,12 +296,32 @@
 
         function startMonitoringLoop() {
             if(monitoringInterval) clearInterval(monitoringInterval);
+            
+            // 일정 주기로 차트를 미세 갱신하며 가격 이탈 여부 체크
             monitoringInterval = setInterval(() => {
-                const isDeviation = Math.random() < 0.3;
-                if(isDeviation) {
-                    showWarning("⚠️ [모니터링 감지] 시세 변동성 확대 및 주요 지지선 테스트 구간 진입!");
+                if(!mainSeries || activeCandleData.length === 0) return;
+
+                const lastIndex = activeCandleData.length - 1;
+                const lastCandle = { ...activeCandleData[lastIndex] };
+                
+                // 가격 틱 변동 시뮬레이션
+                const tickChange = (Math.random() - 0.52) * 0.9;
+                lastCandle.close = Number((lastCandle.close + tickChange).toFixed(2));
+                lastCandle.high = Math.max(lastCandle.high, lastCandle.close);
+                lastCandle.low = Math.min(lastCandle.low, lastCandle.close);
+
+                activeCandleData[lastIndex] = lastCandle;
+                mainSeries.update(lastCandle);
+
+                const ticker = document.getElementById('p3Ticker').value.trim() || 'NVDA';
+
+                // 60분봉 기준 지지선($122.00) 이탈 시 경고 발동
+                if (currentMode === 'hourly' && lastCandle.close < 122.50) {
+                    showWarning(`⚠️ [자리 이탈 경고] ${ticker} 60분봉 가격($${lastCandle.close})이 주요 지지선($122.50)을 하향 이탈했습니다!`);
+                } else if (currentMode === 'daily' && lastCandle.close < 118.00) {
+                    showWarning(`⚠️ [자리 이탈 경고] ${ticker} 일봉 가격($${lastCandle.close})이 손절 지지대를 위협하고 있습니다!`);
                 }
-            }, 6000);
+            }, 1500); // 1.5초 주기 새로고침
         }
 
         function stopMonitoringLoop() {
@@ -316,8 +330,7 @@
 
         function showWarning(msg) {
             const banner = document.getElementById('warningBanner');
-            const text = document.getElementById('warningText');
-            text.innerHTML = msg;
+            document.getElementById('warningText').textContent = msg;
             banner.classList.remove('hidden');
             document.getElementById('navAlertDot').classList.remove('hidden');
         }
@@ -327,193 +340,108 @@
             document.getElementById('navAlertDot').classList.add('hidden');
         }
 
-        function runGeminiAnalysis() {
-            if (liveRefreshInterval) clearInterval(liveRefreshInterval);
-            dismissWarning();
-
-            const ticker = document.getElementById('p3Ticker').value.trim().toUpperCase() || 'NVDA';
+        // 데이터 생성 및 분석 실행
+        function runAnalysis(mode = 'daily') {
+            currentMode = mode;
+            const ticker = document.getElementById('p3Ticker').value.trim() || 'NVDA';
             const btn = document.getElementById('btnRunAi');
             const container = document.getElementById('main_chart_container');
             
             btn.innerHTML = `<div class="spinner"></div><span>연산 중...</span>`;
             btn.disabled = true;
-            
-            const modeText = currentTimeframe === '60m' ? '60분봉 실시간 궤적' : '미래 1주일(7개 캔들) 시나리오';
-            container.innerHTML = `<span class="text-purple-400 flex flex-col items-center gap-3 text-sm"><div class="spinner" style="width:32px;height:32px;"></div>퀀트 엔진이 ${ticker}의 ${modeText} 데이터를 연산 중...</span>`;
 
             setTimeout(() => {
                 try {
-                    let simulatedJsonData;
-                    const now = Math.floor(Date.now() / 1000);
+                    let simulatedData;
 
-                    if (currentTimeframe === '60m') {
-                        const baseTime = now - (3600 * 15);
-                        simulatedJsonData = {
-                            "supportPrice": 120.00,
-                            "baseData": [
-                                {"time": baseTime, "open": 124.5, "high": 125.8, "low": 123.9, "close": 125.0},
-                                {"time": baseTime + 3600, "open": 125.0, "high": 126.2, "low": 124.1, "close": 124.8},
-                                {"time": baseTime + 7200, "open": 124.8, "high": 125.5, "low": 123.5, "close": 124.0},
-                                {"time": baseTime + 10800, "open": 124.0, "high": 124.5, "low": 122.8, "close": 123.2},
-                                {"time": baseTime + 14400, "open": 123.2, "high": 123.8, "low": 122.0, "close": 122.5},
-                                {"time": baseTime + 18000, "open": 122.5, "high": 123.0, "low": 121.5, "close": 121.8},
-                                {"time": baseTime + 21600, "open": 121.8, "high": 122.2, "low": 120.8, "close": 121.2}
-                            ],
+                    if (mode === 'hourly') {
+                        // 60분봉 데이터 (7개 봉)
+                        activeCandleData = [
+                            {"time": 1715010000, "open": 125.0, "high": 126.2, "low": 124.5, "close": 126.0},
+                            {"time": 1715013600, "open": 126.0, "high": 127.0, "low": 125.5, "close": 126.8},
+                            {"time": 1715017200, "open": 126.8, "high": 127.8, "low": 126.2, "close": 127.2},
+                            {"time": 1715020800, "open": 127.2, "high": 128.0, "low": 126.8, "close": 127.5},
+                            {"time": 1715024400, "open": 127.5, "high": 128.5, "low": 127.0, "close": 128.0},
+                            {"time": 1715028000, "open": 128.0, "high": 128.8, "low": 126.5, "close": 127.0},
+                            {"time": 1715031600, "open": 127.0, "high": 127.5, "low": 122.2, "close": 122.4} // 기준봉 (이탈 감지 지점)
+                        ];
+
+                        simulatedData = {
+                            "baseData": activeCandleData,
                             "planA": {
-                                "lineData": [
-                                    {"time": baseTime + 21600, "value": 121.2}, 
-                                    {"time": baseTime + 25200, "value": 123.5}, 
-                                    {"time": baseTime + 28800, "value": 125.0}
-                                ],
+                                "lineData": [{"time": 1715031600, "value": 122.4}, {"time": 1715035200, "value": 126.0}, {"time": 1715038800, "value": 129.5}],
                                 "ghostCandles": [
-                                    {"time": baseTime + 25200, "open": 121.2, "high": 124.0, "low": 121.0, "close": 123.5},
-                                    {"time": baseTime + 28800, "open": 123.5, "high": 125.8, "low": 123.0, "close": 125.0}
+                                    {"time": 1715035200, "open": 122.4, "high": 127.0, "low": 122.0, "close": 126.0},
+                                    {"time": 1715038800, "open": 126.0, "high": 130.5, "low": 125.5, "close": 129.5}
+                                ]
+                            },
+                            "planB": {
+                                "lineData": [{"time": 1715031600, "value": 122.4}, {"time": 1715035200, "value": 124.0}, {"time": 1715038800, "value": 125.2}],
+                                "ghostCandles": [
+                                    {"time": 1715035200, "open": 122.4, "high": 125.0, "low": 122.0, "close": 124.0},
+                                    {"time": 1715038800, "open": 124.0, "high": 126.0, "low": 123.5, "close": 125.2}
                                 ]
                             },
                             "planC": {
-                                "lineData": [
-                                    {"time": baseTime + 21600, "value": 121.2}, 
-                                    {"time": baseTime + 25200, "value": 119.5}, 
-                                    {"time": baseTime + 28800, "value": 118.0}
-                                ],
+                                "lineData": [{"time": 1715031600, "value": 122.4}, {"time": 1715035200, "value": 119.5}, {"time": 1715038800, "value": 118.0}],
                                 "ghostCandles": [
-                                    {"time": baseTime + 25200, "open": 121.2, "high": 121.5, "low": 119.0, "close": 119.5},
-                                    {"time": baseTime + 28800, "open": 119.5, "high": 120.0, "low": 117.5, "close": 118.0}
+                                    {"time": 1715035200, "open": 122.4, "high": 122.5, "low": 119.0, "close": 119.5},
+                                    {"time": 1715038800, "open": 119.5, "high": 120.0, "low": 117.5, "close": 118.0}
                                 ]
                             }
                         };
                     } else {
-                        // [요구사항 반영 완결]: 미래 1주일치 정확히 7개의 일일 고스트 캔들 생성 (Day 1 ~ Day 7)
-                        const t0 = 1715018400; // 과거 마지막 날짜
-                        const d = 86400;       // 1일 초(seconds)
+                        // 일봉 7일치 데이터 (정확히 7개 일봉)
+                        activeCandleData = [
+                            {"time": 1714500000, "open": 115, "high": 117, "low": 113, "close": 116},
+                            {"time": 1714586400, "open": 116, "high": 118, "low": 114, "close": 117},
+                            {"time": 1714672800, "open": 117, "high": 120, "low": 116, "close": 119},
+                            {"time": 1714759200, "open": 119, "high": 121, "low": 118, "close": 120},
+                            {"time": 1714845600, "open": 120, "high": 124, "low": 119, "close": 123},
+                            {"time": 1714932000, "open": 123, "high": 126, "low": 122, "close": 125},
+                            {"time": 1715018400, "open": 125, "high": 128, "low": 121, "close": 127}
+                        ];
 
-                        simulatedJsonData = {
-                            "baseData": [
-                                {"time": t0 - d*6, "open": 115, "high": 117, "low": 113, "close": 116},
-                                {"time": t0 - d*5, "open": 116, "high": 118, "low": 114, "close": 117},
-                                {"time": t0 - d*4, "open": 117, "high": 120, "low": 116, "close": 119},
-                                {"time": t0 - d*3, "open": 119, "high": 121, "low": 118, "close": 120},
-                                {"time": t0 - d*2, "open": 120, "high": 124, "low": 119, "close": 123},
-                                {"time": t0 - d*1, "open": 123, "high": 126, "low": 122, "close": 125},
-                                {"time": t0, "open": 125, "high": 128, "low": 121, "close": 127}
-                            ],
-                            // Plan A: 7일 연속 우상향 돌파 시나리오 ($127 -> $145)
+                        simulatedData = {
+                            "baseData": activeCandleData,
                             "planA": {
-                                "lineData": [
-                                    {"time": t0, "value": 127}, 
-                                    {"time": t0 + d*1, "value": 129}, 
-                                    {"time": t0 + d*2, "value": 132},
-                                    {"time": t0 + d*3, "value": 131},
-                                    {"time": t0 + d*4, "value": 135},
-                                    {"time": t0 + d*5, "value": 138},
-                                    {"time": t0 + d*6, "value": 141},
-                                    {"time": t0 + d*7, "value": 145}
-                                ],
+                                "lineData": [{"time": 1715018400, "value": 127}, {"time": 1715104800, "value": 131}, {"time": 1715191200, "value": 135}],
                                 "ghostCandles": [
-                                    {"time": t0 + d*1, "open": 127, "high": 130, "low": 126, "close": 129},
-                                    {"time": t0 + d*2, "open": 129, "high": 133, "low": 128, "close": 132},
-                                    {"time": t0 + d*3, "open": 132, "high": 134, "low": 130, "close": 131},
-                                    {"time": t0 + d*4, "open": 131, "high": 136, "low": 131, "close": 135},
-                                    {"time": t0 + d*5, "open": 135, "high": 139, "low": 134, "close": 138},
-                                    {"time": t0 + d*6, "open": 138, "high": 142, "low": 137, "close": 141},
-                                    {"time": t0 + d*7, "open": 141, "high": 146, "low": 140, "close": 145}
+                                    {"time": 1715104800, "open": 127, "high": 133, "low": 126, "close": 131},
+                                    {"time": 1715191200, "open": 131, "high": 137, "low": 130, "close": 135}
                                 ]
                             },
-                            // Plan B: 7일간 박스권 횡보 수렴 시나리오 ($123 ~ $129)
                             "planB": {
-                                "lineData": [
-                                    {"time": t0, "value": 127}, 
-                                    {"time": t0 + d*1, "value": 126}, 
-                                    {"time": t0 + d*2, "value": 125},
-                                    {"time": t0 + d*3, "value": 128},
-                                    {"time": t0 + d*4, "value": 127},
-                                    {"time": t0 + d*5, "value": 124},
-                                    {"time": t0 + d*6, "value": 126},
-                                    {"time": t0 + d*7, "value": 128}
-                                ],
+                                "lineData": [{"time": 1715018400, "value": 127}, {"time": 1715104800, "value": 126}, {"time": 1715191200, "value": 128}],
                                 "ghostCandles": [
-                                    {"time": t0 + d*1, "open": 127, "high": 129, "low": 125, "close": 126},
-                                    {"time": t0 + d*2, "open": 126, "high": 128, "low": 124, "close": 125},
-                                    {"time": t0 + d*3, "open": 125, "high": 129, "low": 124, "close": 128},
-                                    {"time": t0 + d*4, "open": 128, "high": 130, "low": 126, "close": 127},
-                                    {"time": t0 + d*5, "open": 127, "high": 128, "low": 123, "close": 124},
-                                    {"time": t0 + d*6, "open": 124, "high": 127, "low": 123, "close": 126},
-                                    {"time": t0 + d*7, "open": 126, "high": 129, "low": 125, "close": 128}
+                                    {"time": 1715104800, "open": 127, "high": 129, "low": 124, "close": 126},
+                                    {"time": 1715191200, "open": 126, "high": 130, "low": 125, "close": 128}
                                 ]
                             },
-                            // Plan C: 7일간 지지선 하향 이탈 투매 시나리오 ($127 -> $109)
                             "planC": {
-                                "lineData": [
-                                    {"time": t0, "value": 127}, 
-                                    {"time": t0 + d*1, "value": 123}, 
-                                    {"time": t0 + d*2, "value": 120},
-                                    {"time": t0 + d*3, "value": 116},
-                                    {"time": t0 + d*4, "value": 115},
-                                    {"time": t0 + d*5, "value": 112},
-                                    {"time": t0 + d*6, "value": 114},
-                                    {"time": t0 + d*7, "value": 109}
-                                ],
+                                "lineData": [{"time": 1715018400, "value": 127}, {"time": 1715104800, "value": 120}, {"time": 1715191200, "value": 117}],
                                 "ghostCandles": [
-                                    {"time": t0 + d*1, "open": 127, "high": 127, "low": 122, "close": 123},
-                                    {"time": t0 + d*2, "open": 123, "high": 124, "low": 119, "close": 120},
-                                    {"time": t0 + d*3, "open": 120, "high": 121, "low": 115, "close": 116},
-                                    {"time": t0 + d*4, "open": 116, "high": 118, "low": 114, "close": 115},
-                                    {"time": t0 + d*5, "open": 115, "high": 116, "low": 111, "close": 112},
-                                    {"time": t0 + d*6, "open": 112, "high": 115, "low": 110, "close": 114},
-                                    {"time": t0 + d*7, "open": 114, "high": 114, "low": 108, "close": 109}
+                                    {"time": 1715104800, "open": 127, "high": 127, "low": 119, "close": 120},
+                                    {"time": 1715191200, "open": 120, "high": 122, "low": 116, "close": 117}
                                 ]
                             }
                         };
                     }
 
-                    currentChartData = simulatedJsonData;
-                    drawChart(simulatedJsonData);
-                    
-                    const titleText = currentTimeframe === '60m' ? `⚡ ${ticker} 60분봉 실시간 궤적 & 이탈 모니터링` : `📈 ${ticker} 미래 1주일(7개 캔들) 타점 시나리오`;
-                    document.getElementById('chartTitle').textContent = titleText;
-                    document.getElementById('chartLegends').style.display = 'flex';
-
-                    if (currentTimeframe === '60m') {
-                        startLive60mRefresh(ticker);
-                    }
+                    drawChart(simulatedData);
+                    document.getElementById('chartTitle').textContent = `📈 ${ticker} ${mode === 'hourly' ? '60분봉 실시간' : '7일 일봉'} 타점 시나리오`;
 
                 } catch (error) {
                     console.error(error);
-                    container.innerHTML = `<div class="text-red-400 text-center px-4">차트 렌더링 실패: ${error.message}</div>`;
+                    container.innerHTML = `<div class="text-red-400 text-center px-4">차트 렌더링 에러: ${error.message}</div>`;
                 } finally {
-                    btn.innerHTML = `<span>⚡ AI 실시간 분석</span>`;
+                    btn.innerHTML = `<span>⚡ 시나리오 차트 갱신</span>`;
                     btn.disabled = false;
                 }
-            }, 600); 
+            }, 500);
         }
 
-        function startLive60mRefresh(ticker) {
-            let step = 0;
-            liveRefreshInterval = setInterval(() => {
-                if (!currentChartData || !mainSeriesInstance) return;
-                
-                step++;
-                const lastCandle = currentChartData.baseData[currentChartData.baseData.length - 1];
-                const newTime = lastCandle.time + 3600;
-
-                let newClose = step === 1 ? 120.4 : (step === 2 ? 119.5 : 118.8);
-                let newCandle = {
-                    time: newTime,
-                    open: lastCandle.close,
-                    high: Math.max(lastCandle.close, newClose) + 0.3,
-                    low: Math.min(lastCandle.close, newClose) - 0.5,
-                    close: newClose
-                };
-
-                mainSeriesInstance.update(newCandle);
-                currentChartData.baseData.push(newCandle);
-
-                if (newClose < currentChartData.supportPrice) {
-                    showWarning(`🚨 <b>[60분봉 긴급 경고]</b> ${ticker} 현재가(<b>$${newClose.toFixed(2)}</b>)가 Plan C 주요 지지선($${currentChartData.supportPrice.toFixed(2)})을 하향 이탈했습니다!`);
-                }
-            }, 3500);
-        }
-
+        // 차트 렌더링 함수 (투명 시나리오 캔들 + 실시간 캔들 연동)
         function drawChart(data) {
             const container = document.getElementById('main_chart_container');
             container.innerHTML = '';
@@ -524,38 +452,38 @@
                 height: container.clientHeight
             });
             
-            mainSeriesInstance = mainChartInstance.addCandlestickSeries({ 
-                upColor: '#22c55e', 
-                downColor: '#ef4444', 
-                borderVisible: false, 
-                wickUpColor: '#22c55e', 
-                wickDownColor: '#ef4444' 
+            // 실시간 메인 캔들 (불투명)
+            mainSeries = mainChartInstance.addCandlestickSeries({ 
+                upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444' 
             });
-            mainSeriesInstance.setData(data.baseData);
+            mainSeries.setData(data.baseData);
 
+            // Plan A (투명한 초록빛 시나리오 캔들)
             if(data.planA) {
                 const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
                 lineA.setData(data.planA.lineData || []);
                 const ghostA = mainChartInstance.addCandlestickSeries({ 
-                    upColor: 'transparent', downColor: 'transparent', 
+                    upColor: 'rgba(34, 197, 94, 0.25)', downColor: 'rgba(34, 197, 94, 0.25)', 
                     borderVisible: true, borderColor: '#22c55e', wickColor: '#22c55e' 
                 });
                 ghostA.setData(data.planA.ghostCandles || []);
             }
+            // Plan B (투명한 푸른빛 시나리오 캔들)
             if(data.planB) {
                 const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
                 lineB.setData(data.planB.lineData || []);
                 const ghostB = mainChartInstance.addCandlestickSeries({ 
-                    upColor: 'transparent', downColor: 'transparent', 
+                    upColor: 'rgba(59, 130, 246, 0.25)', downColor: 'rgba(59, 130, 246, 0.25)', 
                     borderVisible: true, borderColor: '#3b82f6', wickColor: '#3b82f6' 
                 });
                 ghostB.setData(data.planB.ghostCandles || []);
             }
+            // Plan C (투명한 붉은빛 시나리오 캔들)
             if(data.planC) {
                 const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
                 lineC.setData(data.planC.lineData || []);
                 const ghostC = mainChartInstance.addCandlestickSeries({ 
-                    upColor: 'transparent', downColor: 'transparent', 
+                    upColor: 'rgba(239, 68, 68, 0.25)', downColor: 'rgba(239, 68, 68, 0.25)', 
                     borderVisible: true, borderColor: '#ef4444', wickColor: '#ef4444' 
                 });
                 ghostC.setData(data.planC.ghostCandles || []);
@@ -571,8 +499,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => { 
-            switchTab('page3', '1D'); 
-            runGeminiAnalysis(); 
+            switchTab('page3'); 
+            runAnalysis('daily'); // 초기 실행 시 7일 일봉 모드 적용
         });
     </script>
 </body>
