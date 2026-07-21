@@ -6,8 +6,8 @@
     <title>AI Trading Dashboard - Senior PM Edition</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lightweight Charts (미래 궤적 드로잉용 차트 엔진) -->
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- Lightweight Charts 안전한 cdnjs 버전으로 교체 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightweight-charts/3.8.0/lightweight-charts.standalone.production.js"></script>
     
     <style>
         /* 커스텀 스크롤바 */
@@ -28,7 +28,6 @@
         @keyframes fadeModalIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* 포트폴리오 아코디언 애니메이션 */
         .accordion-content { display: none; }
         .accordion-content.open { display: table-row; animation: fadeModalIn 0.3s ease-in-out; }
     </style>
@@ -50,7 +49,7 @@
             <button onclick="switchTab('page2')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group">
                 <span class="mr-3 text-lg group-hover:scale-110 transition-transform">🧠</span> 2. AI 딥스캔 브리핑
             </button>
-            <button onclick="switchTab('page3')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group relative">
+            <button onclick="switchTab('page3')" class="w-full flex items-center p-3 text-left bg-gray-700 text-white rounded-lg font-medium transition-colors hover:bg-gray-600 group relative">
                 <span class="mr-3 text-lg group-hover:scale-110 transition-transform">🎯</span> 3. 타점 시나리오
                 <span class="absolute right-3 top-3.5 w-2 h-2 bg-purple-500 rounded-full animate-ping"></span>
             </button>
@@ -66,7 +65,7 @@
     <!-- 우측 메인 콘텐츠 -->
     <main class="flex-1 p-6 md:p-8 overflow-y-auto z-0 relative bg-gray-900">
         
-        <!-- 페이지 1: 실시간 매크로 차트 보드 (유지) -->
+        <!-- 페이지 1: 실시간 매크로 차트 보드 -->
         <section id="page1" class="page-content h-full">
             <div class="flex justify-between items-center mb-6">
                 <div>
@@ -87,10 +86,9 @@
             </div>
         </section>
 
-        <!-- 페이지 2: AI 딥스캔 브리핑 & 뉴스 (유지) -->
+        <!-- 페이지 2: AI 딥스캔 브리핑 & 뉴스 -->
         <section id="page2" class="page-content h-full">
             <div class="flex flex-col lg:flex-row gap-6 h-full">
-                <!-- 좌측: 딥스캔 브리핑 (새로고침 기능) -->
                 <div class="w-full lg:w-1/2 flex flex-col h-full bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
                     <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-r from-blue-900/20 to-transparent"></div>
@@ -106,7 +104,6 @@
                     </div>
                     <div class="p-6 overflow-y-auto flex-1 bg-gray-800" id="briefingContentArea"></div>
                 </div>
-                <!-- 우측: 실시간 뉴스 피드 -->
                 <div class="w-full lg:w-1/2 flex flex-col h-full bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
                     <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
                         <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>⚡</span> 실시간 뉴스 피드</h2>
@@ -135,7 +132,7 @@
         </section>
 
         <!-- ============================================== -->
-        <!-- 페이지 3: 타점 시나리오 (Senior PM Mode 8) - ★ 차트 엔진 교체 ★ -->
+        <!-- 페이지 3: 타점 시나리오 (오류 완벽 수정본) -->
         <!-- ============================================== -->
         <section id="page3" class="page-content active h-full">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -156,7 +153,7 @@
 
             <div class="flex flex-col lg:flex-row gap-6 h-[75vh]">
                 
-                <!-- 좌측: 메인 수급 차트 (Lightweight Charts 기반 3개 궤적 통합 오버레이) -->
+                <!-- 좌측: 메인 수급 차트 -->
                 <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-4 flex flex-col h-full z-0 relative">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-md font-bold text-gray-200 flex items-center gap-2">
@@ -168,9 +165,8 @@
                         <span class="text-xs text-gray-400 bg-gray-900 px-2 py-1 rounded border border-gray-600">60m / 1D</span>
                     </div>
                     
-                    <!-- 커스텀 차트 컨테이너 -->
+                    <!-- 차트 컨테이너 -->
                     <div class="flex-1 rounded-lg overflow-hidden border border-gray-700 w-full h-full relative" id="main_chart_container">
-                        <!-- Lightweight Charts가 여기에 렌더링 됩니다 (하단 JS 참고) -->
                     </div>
                 </div>
 
@@ -222,7 +218,7 @@
             </div>
         </section>
 
-        <!-- 페이지 4, 5는 구조 유지 (생략 없이 포함) -->
+        <!-- 페이지 4, 5는 구조 유지 -->
         <section id="page4" class="page-content h-full">
             <div class="flex justify-between items-center mb-6"><div><h2 class="text-2xl font-bold flex items-center gap-2">🗂️ 포트폴리오 & 매매 로그</h2></div></div>
             <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 mb-6 shadow-lg"><h3 class="text-sm font-bold text-gray-300 mb-4 flex items-center gap-2"><span class="text-blue-500">✍️</span> 포지션 수동 등록</h3><div class="flex flex-wrap items-end gap-4"><button onclick="alert('등록 로직')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1.5 px-6 rounded transition-colors text-sm shadow-md h-[34px]">등록</button></div></div>
@@ -235,12 +231,12 @@
     </main>
 
     <!-- ============================================== -->
-    <!-- 통일된 타점 시나리오 (Senior PM) 모달 -->
+    <!-- 통일된 타점 시나리오 모달 -->
     <!-- ============================================== -->
     <div id="unifiedModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
         <div id="modalBox" class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-6xl overflow-hidden relative flex flex-col md:flex-row h-[85vh] md:h-[650px]">
             
-            <!-- 좌측: 모달 내 전용 차트 영역 (단일 시나리오 집중 뷰) -->
+            <!-- 좌측: 모달 내 전용 차트 영역 -->
             <div class="w-full md:w-[60%] bg-gray-900 border-r border-gray-700 flex flex-col relative">
                 <div class="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800 z-10 relative">
                     <h3 class="text-sm font-bold text-gray-200 flex items-center gap-2">
@@ -251,11 +247,10 @@
                 </div>
                 <!-- 전용 차트 컨테이너 -->
                 <div class="flex-1 w-full h-full relative" id="modal_chart_container">
-                    <!-- Lightweight Charts (모달용) 렌더링 -->
                 </div>
             </div>
             
-            <!-- 우측: 매트릭스 셋업 영역 (유지) -->
+            <!-- 우측: 매트릭스 셋업 영역 -->
             <div class="w-full md:w-[40%] p-6 flex flex-col h-full overflow-y-auto">
                 <div class="flex justify-between items-start mb-4">
                     <div>
@@ -317,13 +312,12 @@
         </div>
     </div>
 
-    <!-- UI 동작 및 Lightweight Charts 드로잉 스크립트 -->
+    <!-- 스크립트 -->
     <script>
         function switchTab(pageId) {
             document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             
-            // 사이드바 버튼 업데이트
             const buttons = document.querySelectorAll('aside nav button');
             buttons.forEach(btn => {
                 btn.classList.remove('bg-gray-700', 'text-white');
@@ -336,23 +330,21 @@
                 activeBtn.classList.add('bg-gray-700', 'text-white');
             }
 
-            // 페이지 3로 탭 전환 시 차트 리사이즈 대응
             if (pageId === 'page3' && mainChartInstance) {
                 setTimeout(() => {
                     const container = document.getElementById('main_chart_container');
                     mainChartInstance.resize(container.clientWidth, container.clientHeight);
-                }, 100);
+                }, 150);
             }
         }
 
         // ==========================================
-        // 차트 데이터 및 AI 시나리오 궤적 생성 로직
+        // 차트 데이터 및 AI 시나리오 궤적 생성
         // ==========================================
-        
-        // 1. 과거 캔들 더미 데이터 (최근 30개)
         const generateBaseData = () => {
             const data = [];
-            let time = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60); // 30일 전
+            // UTC 기준 1일 단위 Unix timestamp (지속 증가)
+            let time = 1710000000; 
             let price = 120;
             for (let i = 0; i < 30; i++) {
                 const open = price;
@@ -361,7 +353,7 @@
                 const low = Math.min(open, close) - Math.random() * 2;
                 data.push({ time: time, open, high, low, close });
                 price = close;
-                time += 24 * 60 * 60; // 1일 추가
+                time += 86400; // 1일 추가
             }
             return data;
         };
@@ -369,27 +361,24 @@
         const lastBaseTime = baseData[baseData.length - 1].time;
         const lastBaseClose = baseData[baseData.length - 1].close;
 
-        // 2. AI 예측 시나리오 (Plan A, B, C) 궤적 데이터 생성기
         const generateTrajectory = (planType) => {
             const lineData = [];
             const ghostCandles = [];
             let currentTime = lastBaseTime;
             let currentPrice = lastBaseClose;
 
-            // Plan 시작점 (기존 차트 마지막 지점과 연결)
             lineData.push({ time: currentTime, value: currentPrice });
 
             for (let i = 1; i <= 5; i++) {
-                currentTime += 24 * 60 * 60; // 1일 간격 (미래 예측)
-                
+                currentTime += 86400;
                 let close, open, high, low;
-                if (planType === 'A') { // 보합권 눌림 후 반등 (Target: ~130)
+                if (planType === 'A') {
                     open = currentPrice;
-                    close = i <= 2 ? currentPrice - 1 : currentPrice + 2; 
-                } else if (planType === 'B') { // 갭상승 후 눌림 (Target: ~135)
+                    close = i <= 2 ? currentPrice - 1 : currentPrice + 2.5; 
+                } else if (planType === 'B') {
                     open = i === 1 ? currentPrice + 3 : currentPrice;
                     close = i <= 2 ? open - 1.5 : open + 2.5;
-                } else if (planType === 'C') { // 갭하락 후 스톱헌팅 (Target: ~128)
+                } else if (planType === 'C') {
                     open = i === 1 ? currentPrice - 4 : currentPrice;
                     close = i === 2 ? open - 2 : open + 3;
                 }
@@ -408,13 +397,8 @@
         const planBData = generateTrajectory('B');
         const planCData = generateTrajectory('C');
 
-        // ==========================================
-        // Lightweight Charts 렌더링 함수
-        // ==========================================
-        
-        // 차트 테마 공통 설정
         const chartOptions = {
-            layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#9ca3af' },
+            layout: { backgroundColor: '#1f2937', textColor: '#9ca3af' },
             grid: { vertLines: { color: '#374151' }, horzLines: { color: '#374151' } },
             crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
             rightPriceScale: { borderColor: '#374151' },
@@ -424,18 +408,23 @@
         let mainChartInstance = null;
         let modalChartInstance = null;
 
-        // 1. 메인 차트 그리기 (통합 뷰)
+        // 메인 차트 렌더링
         function initMainChart() {
             const container = document.getElementById('main_chart_container');
-            mainChartInstance = LightweightCharts.createChart(container, chartOptions);
+            container.innerHTML = ''; // 초기화
             
-            // 기존 캔들
+            mainChartInstance = LightweightCharts.createChart(container, {
+                ...chartOptions,
+                width: container.clientWidth,
+                height: container.clientHeight
+            });
+            
             const mainSeries = mainChartInstance.addCandlestickSeries({
                 upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444',
             });
             mainSeries.setData(baseData);
 
-            // Plan A (초록) 궤적 & 유령 캔들
+            // Plan A
             const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
             lineA.setData(planAData.lineData);
             const ghostA = mainChartInstance.addCandlestickSeries({
@@ -443,7 +432,7 @@
             });
             ghostA.setData(planAData.ghostCandles);
 
-            // Plan B (파랑) 궤적 & 유령 캔들
+            // Plan B
             const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
             lineB.setData(planBData.lineData);
             const ghostB = mainChartInstance.addCandlestickSeries({
@@ -451,7 +440,7 @@
             });
             ghostB.setData(planBData.ghostCandles);
 
-            // Plan C (빨강) 궤적 & 유령 캔들
+            // Plan C
             const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
             lineC.setData(planCData.lineData);
             const ghostC = mainChartInstance.addCandlestickSeries({
@@ -460,17 +449,14 @@
             ghostC.setData(planCData.ghostCandles);
 
             mainChartInstance.timeScale().fitContent();
-            
-            // 반응형 리사이즈
-            new ResizeObserver(entries => {
-                if (entries.length === 0 || entries[0].target !== container) return;
-                mainChartInstance.resize(container.clientWidth, container.clientHeight);
-            }).observe(container);
+
+            window.addEventListener('resize', () => {
+                if(container && mainChartInstance) {
+                    mainChartInstance.resize(container.clientWidth, container.clientHeight);
+                }
+            });
         }
 
-        // ==========================================
-        // 모달 전용 로직 (각 플랜 개별 차트 렌더링)
-        // ==========================================
         const modalData = {
             'A': { title: "Plan A: 보합권 개장 (-3% ~ +3%)", type: "지정가 예약", color: "green", entry: 125.50, target: 130.00, stop: 123.00, desc: "60분봉 지지선 타점 대기 매매", chartData: planAData, hex: '#22c55e' },
             'B': { title: "Plan B: 갭상승 개장 (+4% 이상)", type: "분할 대기", color: "blue", entry: 128.00, target: 135.00, stop: 126.50, desc: "시초가 갭상승 후 눌림목 저항대 진입", chartData: planBData, hex: '#3b82f6' },
@@ -480,7 +466,6 @@
         function openScenarioModal(plan) {
             const data = modalData[plan];
             
-            // 텍스트/색상 업데이트
             document.getElementById('modTitle').textContent = data.title;
             document.getElementById('modTitle').className = `text-2xl font-bold mb-1 text-${data.color}-400`;
             document.getElementById('modalChartIcon').className = `text-${data.color}-400`;
@@ -495,30 +480,29 @@
             document.getElementById('matStop').value = data.stop.toFixed(2);
             calcMatrix(); 
 
-            // 모달 열기
             document.getElementById('unifiedModal').classList.remove('hidden');
             document.getElementById('unifiedModal').classList.add('modal-active');
             document.getElementById('modalBox').classList.add('modal-card-active');
 
-            // --- 모달 전용 차트 그리기 (해당 플랜만 표시) ---
             const modalContainer = document.getElementById('modal_chart_container');
-            modalContainer.innerHTML = ''; // 기존 캔버스 삭제 초기화
+            modalContainer.innerHTML = '';
             
-            // 모달 크기가 완전히 계산될 시간을 잠시 벌어준 뒤 렌더링
             setTimeout(() => {
-                modalChartInstance = LightweightCharts.createChart(modalContainer, chartOptions);
+                modalChartInstance = LightweightCharts.createChart(modalContainer, {
+                    ...chartOptions,
+                    layout: { backgroundColor: '#111827', textColor: '#9ca3af' },
+                    width: modalContainer.clientWidth,
+                    height: modalContainer.clientHeight
+                });
                 
-                // 베이스 캔들
                 const baseSeries = modalChartInstance.addCandlestickSeries({
                     upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444',
                 });
                 baseSeries.setData(baseData);
 
-                // 선택된 플랜의 궤적 및 유령캔들만 추가
                 const planLine = modalChartInstance.addLineSeries({ color: data.hex, lineStyle: 2, lineWidth: 3 });
                 planLine.setData(data.chartData.lineData);
                 
-                // RGB 변환용 (투명도 조절)
                 const rgbaColor = plan === 'A' ? 'rgba(34, 197, 94, 0.4)' : plan === 'B' ? 'rgba(59, 130, 246, 0.4)' : 'rgba(239, 68, 68, 0.4)';
                 const planGhost = modalChartInstance.addCandlestickSeries({
                     upColor: rgbaColor, downColor: rgbaColor, borderVisible: true, borderColor: data.hex, wickColor: data.hex
@@ -526,7 +510,7 @@
                 planGhost.setData(data.chartData.ghostCandles);
 
                 modalChartInstance.timeScale().fitContent();
-            }, 50);
+            }, 100);
         }
 
         function closeScenarioModal() {
@@ -558,10 +542,11 @@
             }
         }
 
-        // 앱 초기화 
         document.addEventListener('DOMContentLoaded', () => {
-            switchTab('page3'); // 초기화면 페이지 3 설정
-            initMainChart();    // 메인 오버레이 차트 렌더링
+            switchTab('page3');
+            setTimeout(() => {
+                initMainChart();
+            }, 200);
         });
     </script>
 </body>
