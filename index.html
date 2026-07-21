@@ -27,6 +27,12 @@
         
         @keyframes pulseAlert { 0%, 100% { background-color: rgba(239, 68, 68, 0.2); border-color: #ef4444; } 50% { background-color: rgba(239, 68, 68, 0.5); border-color: #f87171; } }
         .alert-active { animation: pulseAlert 1.5s infinite; }
+        
+        /* 플랜 박스 클릭 인터랙션을 위한 전환 효과 */
+        .plan-box { transition: all 0.2s ease-in-out; cursor: pointer; }
+        .plan-box:hover { transform: translateY(-2px); }
+        .plan-box.dimmed { opacity: 0.4; filter: grayscale(50%); }
+        .plan-box.active { box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 h-screen flex overflow-hidden relative font-sans">
@@ -75,7 +81,7 @@
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">(2페이지 구역)</div>
         </section>
 
-        <!-- 페이지 3: 타점 시나리오 (수면 매매 3대 시나리오 + 수급 진단 + 리스크 매트릭스) -->
+        <!-- 페이지 3: 타점 시나리오 -->
         <section id="page3" class="page-content active h-full space-y-4">
             
             <!-- 상단 컨트롤 헤더 -->
@@ -85,20 +91,19 @@
                         🎯 타점 시나리오 
                         <span id="timeframeBadge" class="text-xs bg-purple-900 text-purple-300 px-2 py-0.5 rounded border border-purple-700">일봉 (미래 7캔들 예측)</span>
                     </h2>
-                    <p class="text-xs text-gray-400 mt-1" id="page3SubText">기관 수급 진단 기반 수면 매매 3대 시나리오 & MTS 예약 주문 셋업</p>
+                    <p class="text-xs text-gray-400 mt-1" id="page3SubText">기관 수급 진단 기반 수면 매매 3대 시나리오 (플랜 상자를 클릭해보세요!)</p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <!-- 유저 스탠스 선택기 -->
                     <div class="bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1 flex items-center text-xs">
                         <span class="text-gray-400 mr-2">스탠스:</span>
-                        <select id="userStance" onchange="onStanceChange()" class="bg-gray-900 text-purple-300 font-bold outline-none rounded px-1.5 py-0.5 border border-purple-700">
-                            <option value="Moderate" selected>Moderate (중립적)</option>
-                            <option value="Aggressive">Aggressive (공격적)</option>
-                            <option value="Defensive">Defensive (보수적)</option>
+                        <select id="userStance" onchange="onStanceChange()" class="bg-gray-900 text-purple-300 font-bold outline-none rounded px-1.5 py-0.5 border border-purple-700 cursor-pointer">
+                            <option value="Moderate" selected>Moderate (중립)</option>
+                            <option value="Aggressive">Aggressive (공격)</option>
+                            <option value="Defensive">Defensive (보수)</option>
                         </select>
                     </div>
                     <button onclick="toggleMonitoring()" id="btnMonitor" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-colors">
-                        🛡️ 자동 새로고침 감지: OFF
+                        🛡️ 감지: OFF
                     </button>
                     <div class="bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1 flex items-center shadow-inner text-xs">
                         <span class="text-gray-400 mr-2">티커:</span>
@@ -110,7 +115,7 @@
                 </div>
             </div>
 
-            <!-- 1. 기관급 수급 진단 패널 (User Stance & Institutional Supply/Demand) -->
+            <!-- 1. 기관급 수급 진단 패널 -->
             <div class="bg-gray-800/90 border border-gray-700/80 rounded-xl p-3.5 shadow-md">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs font-bold text-purple-400 flex items-center gap-1.5">
@@ -149,11 +154,9 @@
                 <!-- 좌측: 차트 -->
                 <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-3.5 flex flex-col h-full relative">
                     <div class="flex justify-between items-center mb-2 z-10">
-                        <h3 class="text-xs font-bold text-gray-200" id="chartTitle">📈 실시간 궤적 예측 차트 (7캔들 예측)</h3>
+                        <h3 class="text-xs font-bold text-gray-200" id="chartTitle">📈 실시간 궤적 예측 차트</h3>
                         <div class="flex gap-1" id="chartLegends">
-                            <span class="text-[10px] bg-green-900/50 text-green-400 border border-green-700 px-1.5 py-0.5 rounded">Plan A</span>
-                            <span class="text-[10px] bg-blue-900/50 text-blue-400 border border-blue-700 px-1.5 py-0.5 rounded">Plan B</span>
-                            <span class="text-[10px] bg-red-900/50 text-red-400 border border-red-700 px-1.5 py-0.5 rounded">Plan C</span>
+                            <button onclick="selectPlan('ALL')" id="btnShowAll" class="text-[10px] bg-gray-700 text-white px-2 py-0.5 rounded hover:bg-gray-600 transition-colors">전체 보기</button>
                         </div>
                     </div>
                     <div class="flex-1 w-full relative">
@@ -163,14 +166,16 @@
                     </div>
                 </div>
 
-                <!-- 우측: [수면 매매 전용] 3대 시나리오 카드 -->
+                <!-- 우측: [수면 매매 전용] 3대 시나리오 카드 (클릭 가능) -->
                 <div class="w-full lg:w-2/5 flex flex-col gap-2.5 h-full overflow-y-auto pr-1">
-                    <div class="text-xs font-bold text-gray-300 flex items-center gap-1">
-                        <span>🌙</span> 2. [수면 매매 전용] 3대 시나리오별 실전 타점 & 주문 방식
+                    <div class="text-xs font-bold text-gray-300 flex items-center justify-between">
+                        <div class="flex items-center gap-1">
+                            <span>🌙</span> 2. 시나리오별 실전 타점 (클릭하여 궤적 확인)
+                        </div>
                     </div>
 
                     <!-- Plan A Card -->
-                    <div class="bg-gray-800 rounded-xl border border-green-700/60 p-3 relative overflow-hidden shadow-sm hover:border-green-500 transition-colors">
+                    <div id="boxPlanA" onclick="selectPlan('A')" class="plan-box bg-gray-800 rounded-xl border border-green-700/60 p-3 relative overflow-hidden shadow-sm active">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
                         <div class="flex justify-between items-center mb-1">
                             <h4 class="text-xs font-bold text-green-400">🎯 [Plan A] 보합권 개장 (-3% ~ +3%)</h4>
@@ -186,7 +191,7 @@
                     </div>
 
                     <!-- Plan B Card -->
-                    <div class="bg-gray-800 rounded-xl border border-blue-600/60 p-3 relative overflow-hidden shadow-sm hover:border-blue-500 transition-colors">
+                    <div id="boxPlanB" onclick="selectPlan('B')" class="plan-box bg-gray-800 rounded-xl border border-blue-600/60 p-3 relative overflow-hidden shadow-sm active">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
                         <div class="flex justify-between items-center mb-1">
                             <h4 class="text-xs font-bold text-blue-400">🚀 [Plan B] 갭상승 개장 (+4% ~ +5%+)</h4>
@@ -196,13 +201,13 @@
                             [시초가 -3%] 눌림 타점 또는 S/R Flip 저항대 가격 제시. (추격 금지)
                         </p>
                         <div class="text-[10px] bg-gray-900/80 p-1.5 rounded border border-gray-700/80 flex justify-between items-center">
-                            <span class="text-gray-300 font-semibold">주문 유형: <span class="text-blue-400">관망 혹은 지정가(Limit) 분할 대기</span></span>
+                            <span class="text-gray-300 font-semibold">주문 유형: <span class="text-blue-400">관망 혹은 지정가 분할 대기</span></span>
                             <span class="text-gray-400">타점: $125.00</span>
                         </div>
                     </div>
 
                     <!-- Plan C Card -->
-                    <div class="bg-gray-800 rounded-xl border border-red-700/60 p-3 relative overflow-hidden shadow-sm hover:border-red-500 transition-colors">
+                    <div id="boxPlanC" onclick="selectPlan('C')" class="plan-box bg-gray-800 rounded-xl border border-red-700/60 p-3 relative overflow-hidden shadow-sm active">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
                         <div class="flex justify-between items-center mb-1">
                             <h4 class="text-xs font-bold text-red-400">📉 [Plan C] 건전한 갭하락 (-4% ~ -5%)</h4>
@@ -212,14 +217,14 @@
                             전저점 직하단 스톱헌팅 구역(Stop Hunt Zone) 및 감마 장벽 제시.
                         </p>
                         <div class="text-[10px] bg-gray-900/80 p-1.5 rounded border border-gray-700/80 flex justify-between items-center">
-                            <span class="text-gray-300 font-semibold">주문 유형: <span class="text-red-400 font-bold">LOC(종가 지정가) 주문 필수</span></span>
+                            <span class="text-gray-300 font-semibold">주문 유형: <span class="text-red-400 font-bold">LOC(종가 지정가) 필수</span></span>
                             <span class="text-gray-400">방어선: $118.00</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. 리스크 관리 매트릭스 & MTS 예약 주문 요약 테이블 -->
+            <!-- 3. 리스크 관리 매트릭스 -->
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-3.5 shadow-lg">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-xs font-bold text-gray-200 flex items-center gap-1.5">
@@ -298,11 +303,11 @@
         </section>
     </main>
 
-    <!-- 시스템 설정 모달 -->
+    <!-- 모달 -->
     <div id="apiModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md p-6">
             <h2 class="text-xl font-bold text-white mb-2">⚙️ 시스템 설정</h2>
-            <p class="text-sm text-gray-300 mb-6 leading-relaxed">기관급 수급 진단 및 수면 매매 전용 3대 시나리오 퀀트 엔진이 가동 중입니다.</p>
+            <p class="text-sm text-gray-300 mb-6 leading-relaxed">기관급 수급 진단 및 수면 매매 전용 3대 시나리오 엔진 작동 완료.</p>
             <div class="flex justify-end">
                 <button onclick="closeApiModal()" class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-lg">확인</button>
             </div>
@@ -310,12 +315,16 @@
     </div>
 
     <script>
-        let currentMode = 'daily'; // 'daily' or 'hourly'
+        let currentMode = 'daily'; 
         let mainChartInstance = null;
         let mainSeries = null;
         let monitoringInterval = null;
         let isMonitoringActive = false;
         let activeCandleData = [];
+        
+        // 플랜 클릭 인터랙션을 위한 글로벌 변수
+        let lastSimulatedData = null;
+        let currentSelectedPlan = 'ALL';
 
         function switchTab(pageId) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
@@ -349,12 +358,35 @@
             
             document.getElementById('timeframeBadge').className = "text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded border border-blue-700";
             document.getElementById('timeframeBadge').textContent = `60분봉 실시간 연동 (${ticker})`;
-            document.getElementById('page3SubText').textContent = `포트폴리오 연동 60분봉 실시간 새로고침 및 수면 매매 시나리오 추적`;
             
             switchTab('page3');
             runAnalysis('hourly');
             
             if(!isMonitoringActive) toggleMonitoring();
+        }
+
+        // --- 플랜 박스 클릭 인터랙션 핵심 함수 ---
+        function selectPlan(planId) {
+            if(!lastSimulatedData) return;
+            currentSelectedPlan = planId;
+
+            // UI 박스 스타일 업데이트 (선택된 박스 강조, 나머지는 흐리게)
+            const boxes = ['A', 'B', 'C'];
+            boxes.forEach(p => {
+                const box = document.getElementById('boxPlan' + p);
+                if(planId === 'ALL' || planId === p) {
+                    box.classList.remove('dimmed');
+                    box.classList.add('active');
+                    box.style.borderWidth = planId === 'ALL' ? '1px' : '2px';
+                } else {
+                    box.classList.add('dimmed');
+                    box.classList.remove('active');
+                    box.style.borderWidth = '1px';
+                }
+            });
+
+            // 차트 다시 그리기 (선택된 플랜의 궤적만 렌더링)
+            drawChart(lastSimulatedData);
         }
 
         const chartOptions = {
@@ -365,7 +397,6 @@
             timeScale: { borderColor: '#374151', timeVisible: true },
         };
 
-        // 스탠스 변경 시 리스크 매트릭스 재튜닝
         function onStanceChange() {
             const stance = document.getElementById('userStance').value;
             const statusText = document.getElementById('stanceStatusText');
@@ -385,11 +416,11 @@
             const btn = document.getElementById('btnMonitor');
             if(isMonitoringActive) {
                 btn.className = "bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-colors";
-                btn.innerHTML = "🛡️ 자동 새로고침 감지: ON";
+                btn.innerHTML = "🛡️ 감지: ON";
                 startMonitoringLoop();
             } else {
                 btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-colors";
-                btn.innerHTML = "🛡️ 자동 새로고침 감지: OFF";
+                btn.innerHTML = "🛡️ 감지: OFF";
                 stopMonitoringLoop();
                 dismissWarning();
             }
@@ -438,7 +469,6 @@
             document.getElementById('navAlertDot').classList.add('hidden');
         }
 
-        // 리스크 관리 매트릭스 표 렌더링
         function renderRiskMatrix() {
             const tbody = document.getElementById('riskMatrixBody');
             const stance = document.getElementById('userStance').value;
@@ -448,41 +478,42 @@
 
             tbody.innerHTML = `
                 <tr class="hover:bg-gray-700/30">
-                    <td class="p-2 font-bold text-green-400">Plan A (보합 개장)</td>
+                    <td class="p-2 font-bold text-green-400">Plan A (보합)</td>
                     <td class="p-2">$122.50</td>
                     <td class="p-2 text-red-400">$${(122.50 * slMultiplier).toFixed(2)} (${slPct})</td>
                     <td class="p-2 text-green-400">$135.00 (+10.2%)</td>
                     <td class="p-2 text-green-400">+$125.00 / -$${(1225 * (1 - slMultiplier)).toFixed(2)}</td>
-                    <td class="p-2"><span class="bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">지정가(Limit) 예약</span></td>
+                    <td class="p-2"><span class="bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">Limit 예약</span></td>
                 </tr>
                 <tr class="hover:bg-gray-700/30">
-                    <td class="p-2 font-bold text-blue-400">Plan B (갭상승 개장)</td>
+                    <td class="p-2 font-bold text-blue-400">Plan B (갭상승)</td>
                     <td class="p-2">$125.00</td>
                     <td class="p-2 text-red-400">$${(125.00 * slMultiplier).toFixed(2)} (${slPct})</td>
                     <td class="p-2 text-green-400">$138.00 (+10.4%)</td>
                     <td class="p-2 text-green-400">+$130.00 / -$${(1250 * (1 - slMultiplier)).toFixed(2)}</td>
-                    <td class="p-2"><span class="bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800">관망 / 지정가 분할</span></td>
+                    <td class="p-2"><span class="bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800">관망 / 분할 대기</span></td>
                 </tr>
                 <tr class="hover:bg-gray-700/30">
-                    <td class="p-2 font-bold text-red-400">Plan C (건전한 갭하락)</td>
+                    <td class="p-2 font-bold text-red-400">Plan C (갭하락)</td>
                     <td class="p-2">$118.00</td>
                     <td class="p-2 text-red-400">$${(118.00 * slMultiplier).toFixed(2)} (${slPct})</td>
                     <td class="p-2 text-green-400">$128.00 (+8.5%)</td>
                     <td class="p-2 text-green-400">+$100.00 / -$${(1180 * (1 - slMultiplier)).toFixed(2)}</td>
-                    <td class="p-2"><span class="bg-red-950 text-red-300 px-1.5 py-0.5 rounded border border-red-800 font-bold">LOC (종가 지정가)</span></td>
+                    <td class="p-2"><span class="bg-red-950 text-red-300 px-1.5 py-0.5 rounded border border-red-800 font-bold">LOC 필수</span></td>
                 </tr>
             `;
         }
 
-        // 일봉 및 60분봉 모드 연산 (미래 예측 투명 캔들 7개 보장)
         function runAnalysis(mode = 'daily') {
             currentMode = mode;
-            const ticker = document.getElementById('p3Ticker').value.trim() || 'NVDA';
             const btn = document.getElementById('btnRunAi');
             const container = document.getElementById('main_chart_container');
             
             btn.innerHTML = `<div class="spinner" style="width:16px;height:16px;"></div><span>연산 중...</span>`;
             btn.disabled = true;
+
+            // 전체 보기 모드로 초기화
+            selectPlan('ALL');
 
             setTimeout(() => {
                 try {
@@ -620,9 +651,9 @@
                         };
                     }
 
+                    lastSimulatedData = simulatedData;
                     drawChart(simulatedData);
                     renderRiskMatrix();
-                    document.getElementById('chartTitle').textContent = `📈 ${ticker} ${mode === 'hourly' ? '60분봉 실시간' : '미래 7개 예측'} 타점 시나리오`;
 
                 } catch (error) {
                     console.error(error);
@@ -634,6 +665,7 @@
             }, 500);
         }
 
+        // 클릭된 플랜박스(currentSelectedPlan)에 따라 필터링하여 렌더링
         function drawChart(data) {
             const container = document.getElementById('main_chart_container');
             container.innerHTML = '';
@@ -649,32 +681,29 @@
             });
             mainSeries.setData(data.baseData);
 
-            // Plan A (투명 캔들 7개)
-            if(data.planA) {
+            if(data.planA && (currentSelectedPlan === 'ALL' || currentSelectedPlan === 'A')) {
                 const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
                 lineA.setData(data.planA.lineData || []);
                 const ghostA = mainChartInstance.addCandlestickSeries({ 
-                    upColor: 'rgba(34, 197, 94, 0.3)', downColor: 'rgba(34, 197, 94, 0.3)', 
+                    upColor: 'rgba(34, 197, 94, 0.35)', downColor: 'rgba(34, 197, 94, 0.35)', 
                     borderVisible: true, borderColor: '#22c55e', wickColor: '#22c55e' 
                 });
                 ghostA.setData(data.planA.ghostCandles || []);
             }
-            // Plan B (투명 캔들 7개)
-            if(data.planB) {
+            if(data.planB && (currentSelectedPlan === 'ALL' || currentSelectedPlan === 'B')) {
                 const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
                 lineB.setData(data.planB.lineData || []);
                 const ghostB = mainChartInstance.addCandlestickSeries({ 
-                    upColor: 'rgba(59, 130, 246, 0.3)', downColor: 'rgba(59, 130, 246, 0.3)', 
+                    upColor: 'rgba(59, 130, 246, 0.35)', downColor: 'rgba(59, 130, 246, 0.35)', 
                     borderVisible: true, borderColor: '#3b82f6', wickColor: '#3b82f6' 
                 });
                 ghostB.setData(data.planB.ghostCandles || []);
             }
-            // Plan C (투명 캔들 7개)
-            if(data.planC) {
+            if(data.planC && (currentSelectedPlan === 'ALL' || currentSelectedPlan === 'C')) {
                 const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
                 lineC.setData(data.planC.lineData || []);
                 const ghostC = mainChartInstance.addCandlestickSeries({ 
-                    upColor: 'rgba(239, 68, 68, 0.3)', downColor: 'rgba(239, 68, 68, 0.3)', 
+                    upColor: 'rgba(239, 68, 68, 0.35)', downColor: 'rgba(239, 68, 68, 0.35)', 
                     borderVisible: true, borderColor: '#ef4444', wickColor: '#ef4444' 
                 });
                 ghostC.setData(data.planC.ghostCandles || []);
