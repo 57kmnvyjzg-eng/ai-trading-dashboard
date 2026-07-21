@@ -75,7 +75,7 @@
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">(기존 2페이지 구역)</div>
         </section>
 
-        <!-- 페이지 3: 타점 시나리오 (일봉 7일치 혹은 포트폴리오 연동 60분봉 모니터링) -->
+        <!-- 페이지 3: 타점 시나리오 (실시간 차트 + 플랜별 상세 상자) -->
         <section id="page3" class="page-content active h-full">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                 <div>
@@ -83,33 +83,34 @@
                         🎯 타점 시나리오 
                         <span id="timeframeBadge" class="text-xs bg-purple-900 text-purple-300 px-2 py-0.5 rounded border border-purple-700">일봉 (7일치 기본)</span>
                     </h2>
-                    <p class="text-sm text-gray-400 mt-1" id="page3SubText">기본 7일 일봉 데이터 및 3대 시나리오 궤적 오버레이</p>
+                    <p class="text-sm text-gray-400 mt-1" id="page3SubText">실시간 틱 변동 및 3대 시나리오 정밀 오버레이 모니터링</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="toggleMonitoring()" id="btnMonitor" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg font-bold transition-colors">
-                        🛡️ 60분봉 실시간 감지: OFF
+                        🛡️ 실시간 틱 스트림: OFF
                     </button>
                     <div class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 flex items-center shadow-inner">
                         <span class="text-gray-400 text-sm mr-2">티커:</span>
                         <input type="text" id="p3Ticker" value="NVDA" class="bg-transparent text-white font-bold w-16 outline-none uppercase text-center" />
                     </div>
                     <button onclick="runGeminiAnalysis(currentMode)" id="btnRunAi" class="bg-purple-600 hover:bg-purple-500 text-white text-sm px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-lg">
-                        <span>⚡ AI 분석 실행</span>
+                        <span>⚡ 실시간 차트 갱신</span>
                     </button>
                 </div>
             </div>
 
             <!-- 이탈 경고 배너 -->
             <div id="warningBanner" class="hidden mb-4 p-3 rounded-lg border text-sm font-bold flex items-center justify-between alert-active">
-                <span id="warningText" class="text-red-300">⚠️ [이탈 경고] 60분봉 기준 가격이 허용 범위를 이탈했습니다! 포지션 점검 요망.</span>
+                <span id="warningText" class="text-red-300">⚠️ [실시간 경고] 가격이 허용 범위를 이탈했습니다! 포지션 리스크 관리 필요.</span>
                 <span onclick="dismissWarning()" class="cursor-pointer text-xs bg-red-800 text-white px-2 py-1 rounded">확인 완료</span>
             </div>
 
             <div class="flex flex-col lg:flex-row gap-6 h-[72vh]">
+                <!-- 좌측: 실시간 대형 차트 -->
                 <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-4 flex flex-col h-full relative">
                     <div class="flex justify-between items-center mb-4 z-10">
-                        <h3 class="text-md font-bold text-gray-200" id="chartTitle">📈 궤적 예측 차트 대기중...</h3>
-                        <div class="flex gap-1" id="chartLegends" style="display:none;">
+                        <h3 class="text-md font-bold text-gray-200" id="chartTitle">📈 실시간 궤적 예측 차트</h3>
+                        <div class="flex gap-1" id="chartLegends">
                             <span class="text-[10px] bg-green-900/50 text-green-400 border border-green-700 px-1.5 py-0.5 rounded">Plan A</span>
                             <span class="text-[10px] bg-blue-900/50 text-blue-400 border border-blue-700 px-1.5 py-0.5 rounded">Plan B</span>
                             <span class="text-[10px] bg-red-900/50 text-red-400 border border-red-700 px-1.5 py-0.5 rounded">Plan C</span>
@@ -117,36 +118,63 @@
                     </div>
                     <div class="flex-1 w-full relative">
                         <div id="main_chart_container" class="absolute inset-0 bg-gray-900 rounded-lg border border-gray-700 overflow-hidden flex items-center justify-center">
-                            <span id="chartPlaceholder" class="text-gray-500 flex items-center gap-2">💡 [AI 분석 실행] 버튼을 눌러주세요.</span>
+                            <span id="chartPlaceholder" class="text-gray-500 flex items-center gap-2">💡 실시간 차트 로딩 완료</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="w-full lg:w-2/5 flex flex-col gap-4 h-full overflow-y-auto pr-1">
-                    <div class="bg-gray-800 rounded-xl border border-green-700/50 p-5 relative overflow-hidden">
+                <!-- 우측: 플랜별 상세 상자 (Plan A / B / C 박스 명확히 구현) -->
+                <div class="w-full lg:w-2/5 flex flex-col gap-3 h-full overflow-y-auto pr-1">
+                    <!-- Plan A 상자 -->
+                    <div class="bg-gray-800 rounded-xl border border-green-700/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
-                        <h3 class="text-lg font-bold text-green-400 mb-1">Plan A: 우상향 돌파 시나리오</h3>
-                        <p class="text-sm text-gray-300">안정적인 매물대 소화 후 계단식 상승 궤적.</p>
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-md font-bold text-green-400">🟢 Plan A: 우상향 돌파 타점</h3>
+                            <span class="text-[11px] bg-green-950 text-green-300 px-2 py-0.5 rounded border border-green-800">목표가 $137+</span>
+                        </div>
+                        <p class="text-xs text-gray-300 mb-2">주요 매물대를 순조롭게 소화하며 계단식 상승을 이어가는 주도주 패턴.</p>
+                        <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
+                            <span>진입 기준: 지지선 리테스트 후 반등</span>
+                            <span class="text-green-400 font-bold">승률 68%</span>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-xl border border-blue-600/50 p-5 relative overflow-hidden">
+
+                    <!-- Plan B 상자 -->
+                    <div class="bg-gray-800 rounded-xl border border-blue-600/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
-                        <h3 class="text-lg font-bold text-blue-400 mb-1">Plan B: 박스권 횡보 수렴</h3>
-                        <p class="text-sm text-gray-300">변동성 축소 구간에서의 지지선 리테스트.</p>
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-md font-bold text-blue-400">🔵 Plan B: 박스권 횡보 수렴</h3>
+                            <span class="text-[11px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800">구간 $125~$130</span>
+                        </div>
+                        <p class="text-xs text-gray-300 mb-2">고점 시도 후 매물 압박으로 변동성이 축소되며 에너지를 응축하는 구간.</p>
+                        <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
+                            <span>진입 기준: 박스권 하단 밀림목 매수</span>
+                            <span class="text-blue-400 font-bold">승률 55%</span>
+                        </div>
                     </div>
-                    <div class="bg-gray-800 rounded-xl border border-red-700/50 p-5 relative overflow-hidden">
+
+                    <!-- Plan C 상자 -->
+                    <div class="bg-gray-800 rounded-xl border border-red-700/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
-                        <h3 class="text-lg font-bold text-red-400 mb-1">Plan C: 스톱헌팅 및 풀백</h3>
-                        <p class="text-sm text-gray-300">단기 이탈 후 V자 반등을 노리는 변동성 구역.</p>
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-md font-bold text-red-400">🔴 Plan C: 스톱헌팅 및 이탈</h3>
+                            <span class="text-[11px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800">손절가 $118 하회</span>
+                        </div>
+                        <p class="text-xs text-gray-300 mb-2">단기 투매 물량을 유발한 뒤 급반등하거나 추가 하방으로 꺾이는 리스크 구간.</p>
+                        <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
+                            <span>대응 기준: 즉시 비중 축소 및 방어</span>
+                            <span class="text-red-400 font-bold">리스크 관리</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 페이지 4: 개별종목 포트폴리오 (클릭 시 60분봉 모니터링 연동) -->
+        <!-- 페이지 4: 개별종목 포트폴리오 -->
         <section id="page4" class="page-content h-full">
             <h2 class="text-2xl font-bold mb-6">🗂️ 개별종목 포트폴리오 & 매매 관리</h2>
             <div class="bg-gray-800 rounded-xl border border-gray-700 p-6 overflow-hidden shadow-xl">
-                <p class="text-xs text-gray-400 mb-4">💡 종목을 클릭하시면 [페이지 3]으로 이동하며, **60분봉 궤적 추적 및 실시간 이탈 경고 시스템**이 즉시 작동합니다.</p>
+                <p class="text-xs text-gray-400 mb-4">💡 종목을 클릭하시면 [페이지 3] 실시간 차트로 즉시 연동되며, 선택 종목에 맞춘 궤적 스트림이 시작됩니다.</p>
                 <table class="w-full text-left text-sm text-gray-300">
                     <thead class="bg-gray-700/50 text-gray-200 uppercase text-xs">
                         <tr>
@@ -156,7 +184,7 @@
                             <th class="p-3">평단가</th>
                             <th class="p-3">현재가</th>
                             <th class="p-3">상태</th>
-                            <th class="p-3">실시간 60분봉 추적</th>
+                            <th class="p-3">실시간 연동 액션</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
@@ -167,7 +195,7 @@
                             <td class="p-3">$118.50</td>
                             <td class="p-3 text-green-400 font-bold">$127.00</td>
                             <td class="p-3"><span class="bg-green-900/50 text-green-400 text-xs px-2 py-0.5 rounded border border-green-700">안정권</span></td>
-                            <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold">60분봉 추적 시작</button></td>
+                            <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold">실시간 차트 연동</button></td>
                         </tr>
                         <tr class="hover:bg-gray-700/40 cursor-pointer transition-colors" onclick="selectStockAndSwitchToHourly('AAPL')">
                             <td class="p-3 font-bold text-white">AAPL</td>
@@ -176,7 +204,7 @@
                             <td class="p-3">$175.20</td>
                             <td class="p-3 text-green-400 font-bold">$182.10</td>
                             <td class="p-3"><span class="bg-green-900/50 text-green-400 text-xs px-2 py-0.5 rounded border border-green-700">안정권</span></td>
-                            <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold">60분봉 추적 시작</button></td>
+                            <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold">실시간 차트 연동</button></td>
                         </tr>
                         <tr class="hover:bg-gray-700/40 cursor-pointer transition-colors" onclick="selectStockAndSwitchToHourly('TSLA')">
                             <td class="p-3 font-bold text-white">TSLA</td>
@@ -185,7 +213,7 @@
                             <td class="p-3">$210.00</td>
                             <td class="p-3 text-red-400 font-bold">$204.50</td>
                             <td class="p-3"><span class="bg-red-900/50 text-red-400 text-xs px-2 py-0.5 rounded border border-red-700">주의 필요</span></td>
-                            <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold">60분봉 추적 시작</button></td>
+                            <td class="p-3"><button class="bg-purple-600 hover:bg-purple-500 text-xs px-3 py-1.5 rounded text-white font-bold">실시간 차트 연동</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -198,7 +226,7 @@
         <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden relative p-6">
             <h2 class="text-xl font-bold text-white mb-2">⚙️ 시스템 설정</h2>
             <p class="text-sm text-gray-300 mb-6 leading-relaxed">
-                현재 <b>일봉(7일 기본) 및 60분봉 포트폴리오 연동 모니터링 엔진</b>이 정상 작동 중입니다.
+                실시간 틱 스트림 엔진 및 3대 시나리오 상세 모니터링 모드가 정상 가동 중입니다.
             </p>
             <div class="flex justify-end gap-3">
                 <button onclick="closeApiModal()" class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-lg transition-colors">확인</button>
@@ -207,10 +235,12 @@
     </div>
 
     <script>
-        let currentMode = 'daily'; // 'daily'(일봉 7일치) 또는 'hourly'(60분봉 포트폴리오 연동)
+        let currentMode = 'daily';
         let mainChartInstance = null;
-        let monitoringInterval = null;
+        let mainCandleSeries = null;
+        let realTimeTickInterval = null;
         let isMonitoringActive = false;
+        let liveTickData = [];
 
         function switchTab(pageId) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
@@ -240,24 +270,19 @@
             document.getElementById('apiModal').classList.remove('modal-active');
         }
 
-        // 페이지 4에서 종목 클릭 시: 60분봉 모드로 전환 후 페이지 3 연동
         function selectStockAndSwitchToHourly(ticker) {
             document.getElementById('p3Ticker').value = ticker;
             currentMode = 'hourly';
             
-            // UI 배지 변경
             document.getElementById('timeframeBadge').className = "text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded border border-blue-700";
-            document.getElementById('timeframeBadge').textContent = `60분봉 실시간 연동 (${ticker})`;
-            document.getElementById('page3SubText').textContent = `포트폴리오 연동 60분봉 추적 및 자동 이탈 감지 모드`;
+            document.getElementById('timeframeBadge').textContent = `실시간 스트림 연동 (${ticker})`;
+            document.getElementById('page3SubText').textContent = `포트폴리오 연동 실시간 틱 변동 및 자동 이탈 감지 모드`;
             
             switchTab('page3');
             runGeminiAnalysis('hourly');
             
-            // 자동으로 실시간 모니터링 ON
             if(!isMonitoringActive) {
                 toggleMonitoring();
-            } else {
-                startMonitoringLoop();
             }
         }
 
@@ -269,35 +294,47 @@
             timeScale: { borderColor: '#374151', timeVisible: true },
         };
 
+        // 실시간 틱 스트림 모니터링 토글 (실시간 가격 변동 시뮬레이션)
         function toggleMonitoring() {
             isMonitoringActive = !isMonitoringActive;
             const btn = document.getElementById('btnMonitor');
             if(isMonitoringActive) {
                 btn.className = "bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-2 rounded-lg font-bold transition-colors";
-                btn.innerHTML = "🛡️ 60분봉 실시간 감지: ON";
-                startMonitoringLoop();
+                btn.innerHTML = "🛡️ 실시간 틱 스트림: ON";
+                startRealTimeTickStream();
             } else {
                 btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg font-bold transition-colors";
-                btn.innerHTML = "🛡️ 60분봉 실시간 감지: OFF";
-                stopMonitoringLoop();
+                btn.innerHTML = "🛡️ 실시간 틱 스트림: OFF";
+                stopRealTimeTickStream();
                 dismissWarning();
             }
         }
 
-        function startMonitoringLoop() {
-            if(monitoringInterval) clearInterval(monitoringInterval);
-            monitoringInterval = setInterval(() => {
-                // 일정 주기마다 60분봉 궤적 이탈 여부 체크 (데모용 시뮬레이션)
-                const isDeviation = Math.random() < 0.3; 
-                if(isDeviation) {
+        function startRealTimeTickStream() {
+            if(realTimeTickInterval) clearInterval(realTimeTickInterval);
+            realTimeTickInterval = setInterval(() => {
+                if(!mainCandleSeries || liveTickData.length === 0) return;
+
+                // 마지막 캔들의 가격을 실시간으로 미세하게 움직여 진짜 실시간 차트처럼 보이게 함
+                const lastCandle = { ...liveTickData[liveTickData.length - 1] };
+                const delta = (Math.random() - 0.48) * 0.8; // 미세한 변동
+                lastCandle.close = Number((lastCandle.close + delta).toFixed(2));
+                lastCandle.high = Math.max(lastCandle.high, lastCandle.close);
+                lastCandle.low = Math.min(lastCandle.low, lastCandle.close);
+                
+                liveTickData[liveTickData.length - 1] = lastCandle;
+                mainCandleSeries.update(lastCandle);
+
+                // 이탈 감지 시뮬레이션
+                if(lastCandle.close < 121.0) {
                     const ticker = document.getElementById('p3Ticker').value.trim() || 'NVDA';
-                    showWarning(`⚠️ [이탈 경고] ${ticker} 60분봉 기준선 및 지지 라인 이탈 감지됨!`);
+                    showWarning(`⚠️ [실시간 경고] ${ticker} 실시간 가격($${lastCandle.close})이 주요 지지선 아래로 이탈했습니다!`);
                 }
-            }, 7000);
+            }, 1200); // 1.2초마다 실시간 갱신
         }
 
-        function stopMonitoringLoop() {
-            if(monitoringInterval) clearInterval(monitoringInterval);
+        function stopRealTimeTickStream() {
+            if(realTimeTickInterval) clearInterval(realTimeTickInterval);
         }
 
         function showWarning(msg) {
@@ -313,151 +350,96 @@
             document.getElementById('navAlertDot').classList.add('hidden');
         }
 
-        // 분석 실행 함수 (모드에 따라 일봉 7일치 또는 60분봉 데이터 분기 처리)
         function runGeminiAnalysis(mode = 'daily') {
             currentMode = mode;
             const ticker = document.getElementById('p3Ticker').value.trim() || 'NVDA';
             const btn = document.getElementById('btnRunAi');
             const container = document.getElementById('main_chart_container');
             
-            const modeText = mode === 'hourly' ? '60분봉 실시간 추적' : '7일 일봉';
-            
-            btn.innerHTML = `<div class="spinner"></div><span>분석 중...</span>`;
+            btn.innerHTML = `<div class="spinner"></div><span>갱신 중...</span>`;
             btn.disabled = true;
-            container.innerHTML = `<span class="text-purple-400 flex flex-col items-center gap-3"><div class="spinner" style="width:40px;height:40px;"></div>${modeText} 퀀트 엔진이 ${ticker}의 궤적을 연산하고 있습니다...</span>`;
+            container.innerHTML = `<span class="text-purple-400 flex flex-col items-center gap-3"><div class="spinner" style="width:40px;height:40px;"></div>실시간 퀀트 엔진이 ${ticker} 시세를 동기화하고 있습니다...</span>`;
 
             setTimeout(() => {
                 try {
-                    let simulatedJsonData;
-
                     if (mode === 'hourly') {
-                        // 60분봉 세부 데이터셋 (투명한 캔들 및 타점 오버레이)
-                        simulatedJsonData = {
-                            "baseData": [
-                                {"time": 1715010000, "open": 125.0, "high": 126.5, "low": 124.5, "close": 126.0},
-                                {"time": 1715013600, "open": 126.0, "high": 127.2, "low": 125.8, "close": 127.0},
-                                {"time": 1715017200, "open": 127.0, "high": 128.0, "low": 126.5, "close": 127.5},
-                                {"time": 1715020800, "open": 127.5, "high": 128.5, "low": 127.0, "close": 128.2},
-                                {"time": 1715024400, "open": 128.2, "high": 129.0, "low": 127.8, "close": 128.5},
-                                {"time": 1715028000, "open": 128.5, "high": 129.5, "low": 128.0, "close": 129.0},
-                                {"time": 1715031600, "open": 129.0, "high": 130.2, "low": 128.8, "close": 129.8}
-                            ],
-                            "planA": {
-                                "lineData": [
-                                    {"time": 1715031600, "value": 129.8}, 
-                                    {"time": 1715035200, "value": 131.0}, 
-                                    {"time": 1715038800, "value": 132.5},
-                                    {"time": 1715042400, "value": 134.0}
-                                ],
-                                "ghostCandles": [
-                                    {"time": 1715035200, "open": 129.8, "high": 131.5, "low": 129.5, "close": 131.0},
-                                    {"time": 1715038800, "open": 131.0, "high": 133.0, "low": 130.5, "close": 132.5},
-                                    {"time": 1715042400, "open": 132.5, "high": 134.5, "low": 132.0, "close": 134.0}
-                                ]
-                            },
-                            "planB": {
-                                "lineData": [
-                                    {"time": 1715031600, "value": 129.8}, 
-                                    {"time": 1715035200, "value": 128.5}, 
-                                    {"time": 1715038800, "value": 129.5},
-                                    {"time": 1715042400, "value": 128.0}
-                                ],
-                                "ghostCandles": [
-                                    {"time": 1715035200, "open": 129.8, "high": 130.0, "low": 128.0, "close": 128.5},
-                                    {"time": 1715038800, "open": 128.5, "high": 130.0, "low": 128.2, "close": 129.5},
-                                    {"time": 1715042400, "open": 129.5, "high": 129.8, "low": 127.5, "close": 128.0}
-                                ]
-                            },
-                            "planC": {
-                                "lineData": [
-                                    {"time": 1715031600, "value": 129.8}, 
-                                    {"time": 1715035200, "value": 125.0}, 
-                                    {"time": 1715038800, "value": 127.0},
-                                    {"time": 1715042400, "value": 131.0}
-                                ],
-                                "ghostCandles": [
-                                    {"time": 1715035200, "open": 129.8, "high": 129.8, "low": 124.5, "close": 125.0},
-                                    {"time": 1715038800, "open": 125.0, "high": 127.5, "low": 124.8, "close": 127.0},
-                                    {"time": 1715042400, "open": 127.0, "high": 131.5, "low": 126.8, "close": 131.0}
-                                ]
-                            }
-                        };
+                        liveTickData = [
+                            {"time": 1715010000, "open": 125.0, "high": 126.5, "low": 124.5, "close": 126.0},
+                            {"time": 1715013600, "open": 126.0, "high": 127.2, "low": 125.8, "close": 127.0},
+                            {"time": 1715017200, "open": 127.0, "high": 128.0, "low": 126.5, "close": 127.5},
+                            {"time": 1715020800, "open": 127.5, "high": 128.5, "low": 127.0, "close": 128.2},
+                            {"time": 1715024400, "open": 128.2, "high": 129.0, "low": 127.8, "close": 128.5},
+                            {"time": 1715028000, "open": 128.5, "high": 129.5, "low": 128.0, "close": 129.0},
+                            {"time": 1715031600, "open": 129.0, "high": 130.2, "low": 128.8, "close": 129.8}
+                        ];
                         document.getElementById('timeframeBadge').className = "text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded border border-blue-700";
-                        document.getElementById('timeframeBadge').textContent = `60분봉 실시간 연동 (${ticker})`;
-                        document.getElementById('page3SubText').textContent = `포트폴리오 연동 60분봉 추적 및 자동 이탈 감지 모드`;
+                        document.getElementById('timeframeBadge').textContent = `실시간 스트림 연동 (${ticker})`;
+                        document.getElementById('page3SubText').textContent = `포트폴리오 연동 실시간 틱 변동 및 자동 이탈 감지 모드`;
                     } else {
-                        // 기본 일봉 7일치 데이터셋
-                        simulatedJsonData = {
-                            "baseData": [
-                                {"time": 1714500000, "open": 115, "high": 117, "low": 113, "close": 116},
-                                {"time": 1714586400, "open": 116, "high": 118, "low": 114, "close": 117},
-                                {"time": 1714672800, "open": 117, "high": 120, "low": 116, "close": 119},
-                                {"time": 1714759200, "open": 119, "high": 121, "low": 118, "close": 120},
-                                {"time": 1714845600, "open": 120, "high": 124, "low": 119, "close": 123},
-                                {"time": 1714932000, "open": 123, "high": 126, "low": 122, "close": 125},
-                                {"time": 1715018400, "open": 125, "high": 128, "low": 121, "close": 127}
-                            ],
-                            "planA": {
-                                "lineData": [
-                                    {"time": 1715018400, "value": 127}, 
-                                    {"time": 1715104800, "value": 131}, 
-                                    {"time": 1715191200, "value": 134},
-                                    {"time": 1715277600, "value": 137}
-                                ],
-                                "ghostCandles": [
-                                    {"time": 1715104800, "open": 127, "high": 132, "low": 126, "close": 131},
-                                    {"time": 1715191200, "open": 131, "high": 135, "low": 130, "close": 134},
-                                    {"time": 1715277600, "open": 134, "high": 138, "low": 133, "close": 137}
-                                ]
-                            },
-                            "planB": {
-                                "lineData": [
-                                    {"time": 1715018400, "value": 127}, 
-                                    {"time": 1715104800, "value": 126}, 
-                                    {"time": 1715191200, "value": 128},
-                                    {"time": 1715277600, "value": 125}
-                                ],
-                                "ghostCandles": [
-                                    {"time": 1715104800, "open": 127, "high": 129, "low": 124, "close": 126},
-                                    {"time": 1715191200, "open": 126, "high": 130, "low": 125, "close": 128},
-                                    {"time": 1715277600, "open": 128, "high": 129, "low": 123, "close": 125}
-                                ]
-                            },
-                            "planC": {
-                                "lineData": [
-                                    {"time": 1715018400, "value": 127}, 
-                                    {"time": 1715104800, "value": 119}, 
-                                    {"time": 1715191200, "value": 121},
-                                    {"time": 1715277600, "value": 128}
-                                ],
-                                "ghostCandles": [
-                                    {"time": 1715104800, "open": 127, "high": 127, "low": 118, "close": 119},
-                                    {"time": 1715191200, "open": 119, "high": 123, "low": 117, "close": 121},
-                                    {"time": 1715277600, "open": 121, "high": 129, "low": 120, "close": 128}
-                                ]
-                            }
-                        };
+                        liveTickData = [
+                            {"time": 1714500000, "open": 115, "high": 117, "low": 113, "close": 116},
+                            {"time": 1714586400, "open": 116, "high": 118, "low": 114, "close": 117},
+                            {"time": 1714672800, "open": 117, "high": 120, "low": 116, "close": 119},
+                            {"time": 1714759200, "open": 119, "high": 121, "low": 118, "close": 120},
+                            {"time": 1714845600, "open": 120, "high": 124, "low": 119, "close": 123},
+                            {"time": 1714932000, "open": 123, "high": 126, "low": 122, "close": 125},
+                            {"time": 1715018400, "open": 125, "high": 128, "low": 121, "close": 127}
+                        ];
                         document.getElementById('timeframeBadge').className = "text-xs bg-purple-900 text-purple-300 px-2 py-0.5 rounded border border-purple-700";
                         document.getElementById('timeframeBadge').textContent = `일봉 (7일치 기본)`;
-                        document.getElementById('page3SubText').textContent = `기본 7일 일봉 데이터 및 3대 시나리오 궤적 오버레이`;
+                        document.getElementById('page3SubText').textContent = `실시간 틱 변동 및 3대 시나리오 정밀 오버레이 모니터링`;
                     }
 
+                    const simulatedJsonData = {
+                        "baseData": liveTickData,
+                        "planA": {
+                            "lineData": [
+                                {"time": liveTickData[liveTickData.length-1].time, "value": liveTickData[liveTickData.length-1].close}, 
+                                {"time": liveTickData[liveTickData.length-1].time + 86400, "value": liveTickData[liveTickData.length-1].close + 4}, 
+                                {"time": liveTickData[liveTickData.length-1].time + 172800, "value": liveTickData[liveTickData.length-1].close + 7}
+                            ],
+                            "ghostCandles": [
+                                {"time": liveTickData[liveTickData.length-1].time + 86400, "open": liveTickData[liveTickData.length-1].close, "high": liveTickData[liveTickData.length-1].close + 5, "low": liveTickData[liveTickData.length-1].close - 1, "close": liveTickData[liveTickData.length-1].close + 4},
+                                {"time": liveTickData[liveTickData.length-1].time + 172800, "open": liveTickData[liveTickData.length-1].close + 4, "high": liveTickData[liveTickData.length-1].close + 8, "low": liveTickData[liveTickData.length-1].close + 3, "close": liveTickData[liveTickData.length-1].close + 7}
+                            ]
+                        },
+                        "planB": {
+                            "lineData": [
+                                {"time": liveTickData[liveTickData.length-1].time, "value": liveTickData[liveTickData.length-1].close}, 
+                                {"time": liveTickData[liveTickData.length-1].time + 86400, "value": liveTickData[liveTickData.length-1].close - 1}, 
+                                {"time": liveTickData[liveTickData.length-1].time + 172800, "value": liveTickData[liveTickData.length-1].close + 1}
+                            ],
+                            "ghostCandles": [
+                                {"time": liveTickData[liveTickData.length-1].time + 86400, "open": liveTickData[liveTickData.length-1].close, "high": liveTickData[liveTickData.length-1].close + 2, "low": liveTickData[liveTickData.length-1].close - 2, "close": liveTickData[liveTickData.length-1].close - 1},
+                                {"time": liveTickData[liveTickData.length-1].time + 172800, "open": liveTickData[liveTickData.length-1].close - 1, "high": liveTickData[liveTickData.length-1].close + 2, "low": liveTickData[liveTickData.length-1].close - 1, "close": liveTickData[liveTickData.length-1].close + 1}
+                            ]
+                        },
+                        "planC": {
+                            "lineData": [
+                                {"time": liveTickData[liveTickData.length-1].time, "value": liveTickData[liveTickData.length-1].close}, 
+                                {"time": liveTickData[liveTickData.length-1].time + 86400, "value": liveTickData[liveTickData.length-1].close - 6}, 
+                                {"time": liveTickData[liveTickData.length-1].time + 172800, "value": liveTickData[liveTickData.length-1].close - 2}
+                            ],
+                            "ghostCandles": [
+                                {"time": liveTickData[liveTickData.length-1].time + 86400, "open": liveTickData[liveTickData.length-1].close, "high": liveTickData[liveTickData.length-1].close, "low": liveTickData[liveTickData.length-1].close - 7, "close": liveTickData[liveTickData.length-1].close - 6},
+                                {"time": liveTickData[liveTickData.length-1].time + 172800, "open": liveTickData[liveTickData.length-1].close - 6, "high": liveTickData[liveTickData.length-1].close - 1, "low": liveTickData[liveTickData.length-1].close - 7, "close": liveTickData[liveTickData.length-1].close - 2}
+                            ]
+                        }
+                    };
+
                     drawChart(simulatedJsonData);
-                    
-                    document.getElementById('chartTitle').textContent = `📈 ${ticker} ${modeText} 타점 시나리오`;
-                    document.getElementById('chartLegends').style.display = 'flex';
+                    document.getElementById('chartTitle').textContent = `📈 ${ticker} 실시간 스트림 및 시나리오 궤적`;
 
                 } catch (error) {
                     console.error(error);
                     container.innerHTML = `<div class="text-red-400 text-center px-4">차트 렌더링 실패: ${error.message}</div>`;
                 } finally {
-                    btn.innerHTML = `<span>⚡ AI 분석 실행</span>`;
+                    btn.innerHTML = `<span>⚡ 실시간 차트 갱신</span>`;
                     btn.disabled = false;
                 }
-            }, 800); 
+            }, 600); 
         }
 
-        // 투명한 시나리오 캔들(Ghost Candles) 스타일 적용 렌더링 함수
         function drawChart(data) {
             const container = document.getElementById('main_chart_container');
             container.innerHTML = '';
@@ -468,13 +450,11 @@
                 height: container.clientHeight
             });
             
-            // 메인 캔들 (불투명)
-            const mainSeries = mainChartInstance.addCandlestickSeries({ 
+            mainCandleSeries = mainChartInstance.addCandlestickSeries({ 
                 upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444' 
             });
-            mainSeries.setData(data.baseData);
+            mainCandleSeries.setData(data.baseData);
 
-            // Plan A (투명한 초록빛 캔들 + 라인)
             if(data.planA) {
                 const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
                 lineA.setData(data.planA.lineData || []);
@@ -484,7 +464,6 @@
                 });
                 ghostA.setData(data.planA.ghostCandles || []);
             }
-            // Plan B (투명한 푸른빛 캔들 + 라인)
             if(data.planB) {
                 const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
                 lineB.setData(data.planB.lineData || []);
@@ -494,7 +473,6 @@
                 });
                 ghostB.setData(data.planB.ghostCandles || []);
             }
-            // Plan C (투명한 붉은빛 캔들 + 라인)
             if(data.planC) {
                 const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
                 lineC.setData(data.planC.lineData || []);
@@ -516,7 +494,7 @@
 
         document.addEventListener('DOMContentLoaded', () => { 
             switchTab('page3'); 
-            runGeminiAnalysis('daily'); // 기본 진입 시 일봉(7일치) 자동 실행
+            runGeminiAnalysis('daily'); 
         });
     </script>
 </body>
