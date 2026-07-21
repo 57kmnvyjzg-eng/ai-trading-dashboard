@@ -6,7 +6,7 @@
     <title>AI Trading Dashboard - Senior PM Edition</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lightweight Charts 3.8.0 고정 안정 버전 -->
+    <!-- Lightweight Charts 3.8.0 안정 버전 -->
     <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
     
     <style>
@@ -75,15 +75,15 @@
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">(2페이지 구역)</div>
         </section>
 
-        <!-- 페이지 3: 타점 시나리오 (미래 7일치 투명 캔들 차트 + 플랜별 박스) -->
+        <!-- 페이지 3: 타점 시나리오 (미래 7개 투명캔들 보장 + 원래 원했던 플랜상자 내용 복구) -->
         <section id="page3" class="page-content active h-full">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                 <div>
                     <h2 class="text-2xl font-bold flex items-center gap-2">
                         🎯 타점 시나리오 
-                        <span id="timeframeBadge" class="text-xs bg-purple-900 text-purple-300 px-2 py-0.5 rounded border border-purple-700">일봉 (미래 7일 예측)</span>
+                        <span id="timeframeBadge" class="text-xs bg-purple-900 text-purple-300 px-2 py-0.5 rounded border border-purple-700">일봉 (미래 7캔들 예측)</span>
                     </h2>
-                    <p class="text-sm text-gray-400 mt-1" id="page3SubText">기준 일봉 7개 + 미래 7일치 시나리오 투명 캔들 오버레이</p>
+                    <p class="text-sm text-gray-400 mt-1" id="page3SubText">기준 캔들 7개 + 미래 예측 궤적 투명 캔들 7개 오버레이</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="toggleMonitoring()" id="btnMonitor" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg font-bold transition-colors">
@@ -109,11 +109,11 @@
                 <!-- 좌측: 대형 차트 -->
                 <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-4 flex flex-col h-full relative">
                     <div class="flex justify-between items-center mb-4 z-10">
-                        <h3 class="text-md font-bold text-gray-200" id="chartTitle">📈 실시간 궤적 예측 차트</h3>
+                        <h3 class="text-md font-bold text-gray-200" id="chartTitle">📈 실시간 궤적 예측 차트 (7캔들 예측)</h3>
                         <div class="flex gap-1" id="chartLegends">
-                            <span class="text-[10px] bg-green-900/50 text-green-400 border border-green-700 px-1.5 py-0.5 rounded">Plan A (+7일)</span>
-                            <span class="text-[10px] bg-blue-900/50 text-blue-400 border border-blue-700 px-1.5 py-0.5 rounded">Plan B (+7일)</span>
-                            <span class="text-[10px] bg-red-900/50 text-red-400 border border-red-700 px-1.5 py-0.5 rounded">Plan C (+7일)</span>
+                            <span class="text-[10px] bg-green-900/50 text-green-400 border border-green-700 px-1.5 py-0.5 rounded">Plan A (+7)</span>
+                            <span class="text-[10px] bg-blue-900/50 text-blue-400 border border-blue-700 px-1.5 py-0.5 rounded">Plan B (+7)</span>
+                            <span class="text-[10px] bg-red-900/50 text-red-400 border border-red-700 px-1.5 py-0.5 rounded">Plan C (+7)</span>
                         </div>
                     </div>
                     <div class="flex-1 w-full relative">
@@ -123,18 +123,18 @@
                     </div>
                 </div>
 
-                <!-- 우측: 플랜별 상세 상자 -->
+                <!-- 우측: 플랜별 상세 상자 (요청하신 초기 원본 내용 완벽 복구 반영) -->
                 <div class="w-full lg:w-2/5 flex flex-col gap-3 h-full overflow-y-auto pr-1">
                     <!-- Plan A 상자 -->
                     <div class="bg-gray-800 rounded-xl border border-green-700/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
                         <div class="flex justify-between items-center mb-1">
-                            <h3 class="text-md font-bold text-green-400">🟢 Plan A: 우상향 돌파 타점</h3>
-                            <span class="text-[11px] bg-green-950 text-green-300 px-2 py-0.5 rounded border border-green-800">7일 목표가 $143+</span>
+                            <h3 class="text-md font-bold text-green-400">🟢 Plan A: 보합권 개장</h3>
+                            <span class="text-[11px] bg-green-950 text-green-300 px-2 py-0.5 rounded border border-green-800">우상향 돌파</span>
                         </div>
-                        <p class="text-xs text-gray-300 mb-2">향후 7일간 우상향 궤적으로 계단식 매물대를 소화하는 최선의 시나리오.</p>
+                        <p class="text-xs text-gray-300 mb-2">60분봉 주요 지지선 타점 제시. 매물대 대기 및 안정적 우상향 궤적 형성.</p>
                         <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
-                            <span>진입 기준: 지지선 리테스트 반등</span>
+                            <span>전략: 지지선 리테스트 매수</span>
                             <span class="text-green-400 font-bold">승률 68%</span>
                         </div>
                     </div>
@@ -143,12 +143,12 @@
                     <div class="bg-gray-800 rounded-xl border border-blue-600/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
                         <div class="flex justify-between items-center mb-1">
-                            <h3 class="text-md font-bold text-blue-400">🔵 Plan B: 박스권 횡보 수렴</h3>
-                            <span class="text-[11px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800">7일 횡보 $125~$128</span>
+                            <h3 class="text-md font-bold text-blue-400">🔵 Plan B: 갭상승 개장</h3>
+                            <span class="text-[11px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800">박스권 수렴</span>
                         </div>
-                        <p class="text-xs text-gray-300 mb-2">7일간 일정 가격 박스권에 갇혀 에너지를 축적하는 수렴 시나리오.</p>
+                        <p class="text-xs text-gray-300 mb-2">시초가 -3% 눌림 타점 또는 S/R Flip 저항대 리테스트 후 박스권 수렴.</p>
                         <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
-                            <span>진입 기준: 박스권 하단 눌림목</span>
+                            <span>전략: -3% 눌림목 분할 진입</span>
                             <span class="text-blue-400 font-bold">승률 54%</span>
                         </div>
                     </div>
@@ -157,24 +157,24 @@
                     <div class="bg-gray-800 rounded-xl border border-red-700/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
                         <div class="flex justify-between items-center mb-1">
-                            <h3 class="text-md font-bold text-red-400">🔴 Plan C: 스톱헌팅 & 이탈</h3>
-                            <span class="text-[11px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800">손절가 $118 하회</span>
+                            <h3 class="text-md font-bold text-red-400">🔴 Plan C: 건전한 갭하락</h3>
+                            <span class="text-[11px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800">스톱헌팅 방어</span>
                         </div>
-                        <p class="text-xs text-gray-300 mb-2">하방 이탈 후 7일째 V자 반등을 시도하거나 투매가 일어나는 주의 구간.</p>
+                        <p class="text-xs text-gray-300 mb-2">스톱헌팅 구역(Stop Hunt Zone) 방어 확인 후 진입 / 지지선 하향 이탈 시 즉시 경고.</p>
                         <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
-                            <span>대응 기준: 실시간 이탈 경고 발생 시 손절</span>
-                            <span class="text-red-400 font-bold">리스크 방어</span>
+                            <span>대응: 스톱헌팅 확인 후 대응</span>
+                            <span class="text-red-400 font-bold">리스크 관리</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 페이지 4: 개별종목 포트폴리오 (클릭 시 60분봉 추적 연동) -->
+        <!-- 페이지 4: 개별종목 포트폴리오 (클릭 시 60분봉 7개 예측 연동) -->
         <section id="page4" class="page-content h-full">
             <h2 class="text-2xl font-bold mb-6">🗂️ 개별종목 포트폴리오 & 매매 관리</h2>
             <div class="bg-gray-800 rounded-xl border border-gray-700 p-6 overflow-hidden shadow-xl">
-                <p class="text-xs text-gray-400 mb-4">💡 종목을 클릭하시면 **[페이지 3] 60분봉 실시간 차트**로 자동 전환되어 궤적 추적이 시작됩니다.</p>
+                <p class="text-xs text-gray-400 mb-4">💡 종목을 클릭하시면 **[페이지 3] 60분봉 실시간 차트 (미래 7개 캔들 예측)**로 즉시 연동됩니다.</p>
                 <table class="w-full text-left text-sm text-gray-300">
                     <thead class="bg-gray-700/50 text-gray-200 uppercase text-xs">
                         <tr>
@@ -225,7 +225,7 @@
     <div id="apiModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md p-6">
             <h2 class="text-xl font-bold text-white mb-2">⚙️ 시스템 설정</h2>
-            <p class="text-sm text-gray-300 mb-6 leading-relaxed">일봉(미래 7일 예측) 및 60분봉 포트폴리오 연동 퀀트 엔진이 정상 가동 중입니다.</p>
+            <p class="text-sm text-gray-300 mb-6 leading-relaxed">일봉/60분봉 모드 모두 미래 7개 예측 투명 캔들 렌더링이 가동 중입니다.</p>
             <div class="flex justify-end">
                 <button onclick="closeApiModal()" class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-lg">확인</button>
             </div>
@@ -233,7 +233,7 @@
     </div>
 
     <script>
-        let currentMode = 'daily'; // 'daily' (일봉 7일치) or 'hourly' (60분봉)
+        let currentMode = 'daily'; // 'daily' or 'hourly'
         let mainChartInstance = null;
         let mainSeries = null;
         let monitoringInterval = null;
@@ -266,14 +266,13 @@
             document.getElementById('apiModal').classList.remove('modal-active');
         }
 
-        // 페이지 4에서 종목 선택 시 60분봉 모드로 전환
         function selectStockAndSwitchToHourly(ticker) {
             document.getElementById('p3Ticker').value = ticker;
             currentMode = 'hourly';
             
             document.getElementById('timeframeBadge').className = "text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded border border-blue-700";
             document.getElementById('timeframeBadge').textContent = `60분봉 실시간 연동 (${ticker})`;
-            document.getElementById('page3SubText').textContent = `포트폴리오 연동 60분봉 실시간 새로고침 및 자리아탈 감지 모드`;
+            document.getElementById('page3SubText').textContent = `포트폴리오 연동 60분봉 실시간 새로고침 및 미래 7개 캔들 예측 모드`;
             
             switchTab('page3');
             runAnalysis('hourly');
@@ -347,7 +346,7 @@
             document.getElementById('navAlertDot').classList.add('hidden');
         }
 
-        // 핵심 데이터 연산 함수: 일봉 모드일 때 투명 시나리오 캔들 정확히 7개 생성
+        // 핵심: 일봉/60분봉 모드 모두 미래 예측 투명 캔들(Ghost Candles)을 정확하게 7개씩 연산하여 생성함!
         function runAnalysis(mode = 'daily') {
             currentMode = mode;
             const ticker = document.getElementById('p3Ticker').value.trim() || 'NVDA';
@@ -362,6 +361,7 @@
                     let simulatedData;
 
                     if (mode === 'hourly') {
+                        // 1. 60분봉 과거 메인 캔들 (7개)
                         activeCandleData = [
                             {"time": 1715010000, "open": 125.0, "high": 126.2, "low": 124.5, "close": 126.0},
                             {"time": 1715013600, "open": 126.0, "high": 127.0, "low": 125.5, "close": 126.8},
@@ -372,32 +372,63 @@
                             {"time": 1715031600, "open": 127.0, "high": 127.5, "low": 122.2, "close": 122.4}
                         ];
 
+                        // 2. 60분봉 미래 예측 시나리오 (정확히 미래 7개 60분봉 투명 캔들 생성!)
                         simulatedData = {
                             "baseData": activeCandleData,
                             "planA": {
-                                "lineData": [{"time": 1715031600, "value": 122.4}, {"time": 1715035200, "value": 126.0}, {"time": 1715038800, "value": 129.5}],
+                                "lineData": [
+                                    {"time": 1715031600, "value": 122.4}, {"time": 1715035200, "value": 124.5},
+                                    {"time": 1715038800, "value": 126.2}, {"time": 1715042400, "value": 128.0},
+                                    {"time": 1715046000, "value": 129.5}, {"time": 1715049600, "value": 131.0},
+                                    {"time": 1715053200, "value": 132.8}, {"time": 1715056800, "value": 134.5}
+                                ],
                                 "ghostCandles": [
-                                    {"time": 1715035200, "open": 122.4, "high": 127.0, "low": 122.0, "close": 126.0},
-                                    {"time": 1715038800, "open": 126.0, "high": 130.5, "low": 125.5, "close": 129.5}
+                                    {"time": 1715035200, "open": 122.4, "high": 125.0, "low": 122.0, "close": 124.5},
+                                    {"time": 1715038800, "open": 124.5, "high": 126.8, "low": 124.0, "close": 126.2},
+                                    {"time": 1715042400, "open": 126.2, "high": 128.5, "low": 125.8, "close": 128.0},
+                                    {"time": 1715046000, "open": 128.0, "high": 130.0, "low": 127.5, "close": 129.5},
+                                    {"time": 1715049600, "open": 129.5, "high": 131.5, "low": 129.0, "close": 131.0},
+                                    {"time": 1715053200, "open": 131.0, "high": 133.2, "low": 130.5, "close": 132.8},
+                                    {"time": 1715056800, "open": 132.8, "high": 135.0, "low": 132.0, "close": 134.5}
                                 ]
                             },
                             "planB": {
-                                "lineData": [{"time": 1715031600, "value": 122.4}, {"time": 1715035200, "value": 124.0}, {"time": 1715038800, "value": 125.2}],
+                                "lineData": [
+                                    {"time": 1715031600, "value": 122.4}, {"time": 1715035200, "value": 123.5},
+                                    {"time": 1715038800, "value": 124.8}, {"time": 1715042400, "value": 124.0},
+                                    {"time": 1715046000, "value": 125.5}, {"time": 1715049600, "value": 124.8},
+                                    {"time": 1715053200, "value": 126.0}, {"time": 1715056800, "value": 125.2}
+                                ],
                                 "ghostCandles": [
-                                    {"time": 1715035200, "open": 122.4, "high": 125.0, "low": 122.0, "close": 124.0},
-                                    {"time": 1715038800, "open": 124.0, "high": 126.0, "low": 123.5, "close": 125.2}
+                                    {"time": 1715035200, "open": 122.4, "high": 124.0, "low": 122.0, "close": 123.5},
+                                    {"time": 1715038800, "open": 123.5, "high": 125.2, "low": 123.0, "close": 124.8},
+                                    {"time": 1715042400, "open": 124.8, "high": 125.5, "low": 123.5, "close": 124.0},
+                                    {"time": 1715046000, "open": 124.0, "high": 126.0, "low": 123.8, "close": 125.5},
+                                    {"time": 1715049600, "open": 125.5, "high": 126.0, "low": 124.2, "close": 124.8},
+                                    {"time": 1715053200, "open": 124.8, "high": 126.5, "low": 124.5, "close": 126.0},
+                                    {"time": 1715056800, "open": 126.0, "high": 126.2, "low": 124.8, "close": 125.2}
                                 ]
                             },
                             "planC": {
-                                "lineData": [{"time": 1715031600, "value": 122.4}, {"time": 1715035200, "value": 119.5}, {"time": 1715038800, "value": 118.0}],
+                                "lineData": [
+                                    {"time": 1715031600, "value": 122.4}, {"time": 1715035200, "value": 121.0},
+                                    {"time": 1715038800, "value": 119.5}, {"time": 1715042400, "value": 118.2},
+                                    {"time": 1715046000, "value": 117.5}, {"time": 1715049600, "value": 118.8},
+                                    {"time": 1715053200, "value": 120.2}, {"time": 1715056800, "value": 121.5}
+                                ],
                                 "ghostCandles": [
-                                    {"time": 1715035200, "open": 122.4, "high": 122.5, "low": 119.0, "close": 119.5},
-                                    {"time": 1715038800, "open": 119.5, "high": 120.0, "low": 117.5, "close": 118.0}
+                                    {"time": 1715035200, "open": 122.4, "high": 122.5, "low": 120.5, "close": 121.0},
+                                    {"time": 1715038800, "open": 121.0, "high": 121.5, "low": 119.0, "close": 119.5},
+                                    {"time": 1715042400, "open": 119.5, "high": 120.0, "low": 117.8, "close": 118.2},
+                                    {"time": 1715046000, "open": 118.2, "high": 118.5, "low": 116.8, "close": 117.5},
+                                    {"time": 1715049600, "open": 117.5, "high": 119.2, "low": 117.0, "close": 118.8},
+                                    {"time": 1715053200, "open": 118.8, "high": 120.8, "low": 118.5, "close": 120.2},
+                                    {"time": 1715056800, "open": 120.2, "high": 122.0, "low": 119.8, "close": 121.5}
                                 ]
                             }
                         };
                     } else {
-                        // 1. 기존 기준 일봉 (7개)
+                        // 일봉 과거 캔들 (7개)
                         activeCandleData = [
                             {"time": 1714500000, "open": 115, "high": 117, "low": 113, "close": 116},
                             {"time": 1714586400, "open": 116, "high": 118, "low": 114, "close": 117},
@@ -408,19 +439,15 @@
                             {"time": 1715018400, "open": 125, "high": 128, "low": 121, "close": 127}
                         ];
 
-                        // 2. 미래 예측 시나리오 (정확히 미래 7일치 일봉 투명 캔들 7개!)
+                        // 일봉 미래 예측 시나리오 (미래 7개 일봉 투명 캔들)
                         simulatedData = {
                             "baseData": activeCandleData,
                             "planA": {
                                 "lineData": [
-                                    {"time": 1715018400, "value": 127},
-                                    {"time": 1715104800, "value": 129},
-                                    {"time": 1715191200, "value": 131},
-                                    {"time": 1715277600, "value": 133},
-                                    {"time": 1715364000, "value": 135},
-                                    {"time": 1715450400, "value": 138},
-                                    {"time": 1715536800, "value": 140},
-                                    {"time": 1715623200, "value": 143}
+                                    {"time": 1715018400, "value": 127}, {"time": 1715104800, "value": 129},
+                                    {"time": 1715191200, "value": 131}, {"time": 1715277600, "value": 133},
+                                    {"time": 1715364000, "value": 135}, {"time": 1715450400, "value": 138},
+                                    {"time": 1715536800, "value": 140}, {"time": 1715623200, "value": 143}
                                 ],
                                 "ghostCandles": [
                                     {"time": 1715104800, "open": 127, "high": 130, "low": 126, "close": 129},
@@ -434,14 +461,10 @@
                             },
                             "planB": {
                                 "lineData": [
-                                    {"time": 1715018400, "value": 127},
-                                    {"time": 1715104800, "value": 126},
-                                    {"time": 1715191200, "value": 127},
-                                    {"time": 1715277600, "value": 126.5},
-                                    {"time": 1715364000, "value": 128},
-                                    {"time": 1715450400, "value": 127},
-                                    {"time": 1715536800, "value": 126},
-                                    {"time": 1715623200, "value": 127}
+                                    {"time": 1715018400, "value": 127}, {"time": 1715104800, "value": 126},
+                                    {"time": 1715191200, "value": 127}, {"time": 1715277600, "value": 126.5},
+                                    {"time": 1715364000, "value": 128}, {"time": 1715450400, "value": 127},
+                                    {"time": 1715536800, "value": 126}, {"time": 1715623200, "value": 127}
                                 ],
                                 "ghostCandles": [
                                     {"time": 1715104800, "open": 127, "high": 128, "low": 125, "close": 126},
@@ -455,14 +478,10 @@
                             },
                             "planC": {
                                 "lineData": [
-                                    {"time": 1715018400, "value": 127},
-                                    {"time": 1715104800, "value": 123},
-                                    {"time": 1715191200, "value": 120},
-                                    {"time": 1715277600, "value": 118},
-                                    {"time": 1715364000, "value": 117},
-                                    {"time": 1715450400, "value": 119},
-                                    {"time": 1715536800, "value": 121},
-                                    {"time": 1715623200, "value": 122}
+                                    {"time": 1715018400, "value": 127}, {"time": 1715104800, "value": 123},
+                                    {"time": 1715191200, "value": 120}, {"time": 1715277600, "value": 118},
+                                    {"time": 1715364000, "value": 117}, {"time": 1715450400, "value": 119},
+                                    {"time": 1715536800, "value": 121}, {"time": 1715623200, "value": 122}
                                 ],
                                 "ghostCandles": [
                                     {"time": 1715104800, "open": 127, "high": 127, "low": 122, "close": 123},
@@ -478,7 +497,7 @@
                     }
 
                     drawChart(simulatedData);
-                    document.getElementById('chartTitle').textContent = `📈 ${ticker} ${mode === 'hourly' ? '60분봉 실시간' : '미래 7일 예측'} 타점 시나리오`;
+                    document.getElementById('chartTitle').textContent = `📈 ${ticker} ${mode === 'hourly' ? '60분봉 실시간' : '미래 7개 예측'} 타점 시나리오`;
 
                 } catch (error) {
                     console.error(error);
@@ -490,7 +509,6 @@
             }, 500);
         }
 
-        // 차트 그리기 함수
         function drawChart(data) {
             const container = document.getElementById('main_chart_container');
             container.innerHTML = '';
@@ -501,13 +519,12 @@
                 height: container.clientHeight
             });
             
-            // 메인 과거 캔들 (불투명)
             mainSeries = mainChartInstance.addCandlestickSeries({ 
                 upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444' 
             });
             mainSeries.setData(data.baseData);
 
-            // Plan A (투명한 초록빛 캔들 7개 + 점선 궤적)
+            // Plan A (투명 캔들 7개)
             if(data.planA) {
                 const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
                 lineA.setData(data.planA.lineData || []);
@@ -517,7 +534,7 @@
                 });
                 ghostA.setData(data.planA.ghostCandles || []);
             }
-            // Plan B (투명한 푸른빛 캔들 7개 + 점선 궤적)
+            // Plan B (투명 캔들 7개)
             if(data.planB) {
                 const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
                 lineB.setData(data.planB.lineData || []);
@@ -527,7 +544,7 @@
                 });
                 ghostB.setData(data.planB.ghostCandles || []);
             }
-            // Plan C (투명한 붉은빛 캔들 7개 + 점선 궤적)
+            // Plan C (투명 캔들 7개)
             if(data.planC) {
                 const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
                 lineC.setData(data.planC.lineData || []);
