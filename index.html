@@ -6,7 +6,7 @@
     <title>AI Trading Dashboard - Senior PM Edition</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lightweight Charts (안정적인 최신 CDN) -->
+    <!-- Lightweight Charts -->
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     
     <style>
@@ -20,13 +20,8 @@
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .modal-active { display: flex !important; animation: fadeModalIn 0.2s ease-out forwards; }
-        .modal-card-active { animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeModalIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .accordion-content { display: none; }
-        .accordion-content.open { display: table-row; animation: fadeModalIn 0.3s ease-in-out; }
         
-        /* 로딩 스피너 애니메이션 */
         .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: #a855f7; width: 24px; height: 24px; animation: spin 1s ease-in-out infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
@@ -48,7 +43,7 @@
             <button onclick="switchTab('page2')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white">
                 <span class="mr-3 text-lg">🧠</span> 2. AI 딥스캔
             </button>
-            <button onclick="switchTab('page3')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white relative">
+            <button onclick="switchTab('page3')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white relative bg-gray-700 text-white">
                 <span class="mr-3 text-lg">🎯</span> 3. 타점 시나리오
                 <span class="absolute right-3 top-3.5 w-2 h-2 bg-purple-500 rounded-full animate-ping"></span>
             </button>
@@ -67,29 +62,20 @@
     <!-- 메인 콘텐츠 -->
     <main class="flex-1 p-6 md:p-8 overflow-y-auto z-0 relative bg-gray-900">
         
-        <!-- 페이지 1, 2, 4 코드는 길이상 간략화 (기존 코드와 동일하게 작동) -->
         <section id="page1" class="page-content h-full">
             <h2 class="text-2xl font-bold mb-6">📊 매크로 차트 보드</h2>
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">
-                (기존 1페이지 2x3 차트 위젯 구역 - 빠른 렌더링을 위해 임시 압축)
-            </div>
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">(기존 1페이지 구역)</div>
         </section>
         <section id="page2" class="page-content h-full">
             <h2 class="text-2xl font-bold mb-6">🧠 AI 딥스캔 브리핑</h2>
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">
-                (기존 2페이지 브리핑 및 뉴스 구역 - 임시 압축)
-            </div>
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">(기존 2페이지 구역)</div>
         </section>
         <section id="page4" class="page-content h-full">
             <h2 class="text-2xl font-bold mb-6">🗂️ 포트폴리오 & 매매 로그</h2>
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">
-                (기존 4페이지 현황판 구역 - 임시 압축)
-            </div>
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">(기존 4페이지 구역)</div>
         </section>
 
-        <!-- ============================================== -->
-        <!-- 페이지 3: 타점 시나리오 (AI 연동 기능 추가) -->
-        <!-- ============================================== -->
+        <!-- 페이지 3: 타점 시나리오 (핵심) -->
         <section id="page3" class="page-content active h-full">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div>
@@ -101,7 +87,6 @@
                         <span class="text-gray-400 text-sm mr-2">티커:</span>
                         <input type="text" id="p3Ticker" value="NVDA" class="bg-transparent text-white font-bold w-16 outline-none uppercase text-center" />
                     </div>
-                    <!-- AI 실행 버튼 -->
                     <button onclick="runGeminiAnalysis()" id="btnRunAi" class="bg-purple-600 hover:bg-purple-500 text-white text-sm px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-lg">
                         <span>⚡ AI 실시간 분석</span>
                     </button>
@@ -109,44 +94,36 @@
             </div>
 
             <div class="flex flex-col lg:flex-row gap-6 h-[75vh]">
-                
-                <!-- 메인 차트 (Lightweight Charts) -->
+                <!-- 차트 영역 -->
                 <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-4 flex flex-col h-full relative">
                     <div class="flex justify-between items-center mb-4 z-10">
-                        <h3 class="text-md font-bold text-gray-200 flex items-center gap-2" id="chartTitle">
-                            📈 궤적 예측 차트 대기중...
-                        </h3>
+                        <h3 class="text-md font-bold text-gray-200" id="chartTitle">📈 궤적 예측 차트 대기중...</h3>
                         <div class="flex gap-1" id="chartLegends" style="display:none;">
                             <span class="text-[10px] bg-green-900/50 text-green-400 border border-green-700 px-1.5 py-0.5 rounded">Plan A</span>
                             <span class="text-[10px] bg-blue-900/50 text-blue-400 border border-blue-700 px-1.5 py-0.5 rounded">Plan B</span>
                             <span class="text-[10px] bg-red-900/50 text-red-400 border border-red-700 px-1.5 py-0.5 rounded">Plan C</span>
                         </div>
                     </div>
-                    
-                    <!-- 차트 컨테이너 (부모 크기를 꽉 채우도록 position absolute 사용) -->
                     <div class="flex-1 w-full relative">
                         <div id="main_chart_container" class="absolute inset-0 bg-gray-900 rounded-lg border border-gray-700 overflow-hidden flex items-center justify-center">
-                            <!-- 로딩 전 안내 텍스트 -->
-                            <span id="chartPlaceholder" class="text-gray-500 flex items-center gap-2">
-                                💡 [AI 실시간 분석] 버튼을 눌러주세요.
-                            </span>
+                            <span id="chartPlaceholder" class="text-gray-500 flex items-center gap-2">💡 [AI 실시간 분석] 버튼을 눌러주세요.</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3대 시나리오 카드 -->
+                <!-- 시나리오 설명 영역 -->
                 <div class="w-full lg:w-2/5 flex flex-col gap-4 h-full overflow-y-auto pr-1">
-                    <div onclick="openScenarioModal('A')" class="cursor-pointer transition-all hover:-translate-y-1 hover:border-green-500 bg-gray-800 rounded-xl border border-green-700/50 p-5 relative overflow-hidden group">
+                    <div class="bg-gray-800 rounded-xl border border-green-700/50 p-5 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
                         <h3 class="text-lg font-bold text-green-400 mb-1">Plan A: 보합권 개장</h3>
                         <p class="text-sm text-gray-300">60분봉 주요 지지선 타점 제시. 매물대 대기.</p>
                     </div>
-                    <div onclick="openScenarioModal('B')" class="cursor-pointer transition-all hover:-translate-y-1 hover:border-blue-500 bg-gray-800 rounded-xl border border-blue-600/50 p-5 relative overflow-hidden group">
+                    <div class="bg-gray-800 rounded-xl border border-blue-600/50 p-5 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
                         <h3 class="text-lg font-bold text-blue-400 mb-1">Plan B: 갭상승 개장</h3>
                         <p class="text-sm text-gray-300">시초가 -3% 눌림 타점 또는 S/R Flip 저항대.</p>
                     </div>
-                    <div onclick="openScenarioModal('C')" class="cursor-pointer transition-all hover:-translate-y-1 hover:border-red-500 bg-gray-800 rounded-xl border border-red-700/50 p-5 relative overflow-hidden group">
+                    <div class="bg-gray-800 rounded-xl border border-red-700/50 p-5 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
                         <h3 class="text-lg font-bold text-red-400 mb-1">Plan C: 건전한 갭하락</h3>
                         <p class="text-sm text-gray-300">스톱헌팅 구역(Stop Hunt Zone) 방어 확인 후 진입.</p>
@@ -156,16 +133,12 @@
         </section>
     </main>
 
-    <!-- ============================================== -->
     <!-- API KEY 설정 모달 -->
-    <!-- ============================================== -->
     <div id="apiModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden relative p-6">
             <h2 class="text-xl font-bold text-white mb-2">⚙️ Gemini API 설정</h2>
-            <p class="text-xs text-gray-400 mb-6">AI 실시간 차트 예측을 위해 Google AI Studio에서 발급받은 API Key를 입력하세요. (브라우저에만 저장됩니다.)</p>
-            
-            <input type="password" id="inputApiKey" placeholder="AIzaSy..." class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white outline-none focus:border-purple-500 mb-6 font-mono text-sm">
-            
+            <p class="text-xs text-gray-400 mb-6">Google AI Studio에서 발급받은 AQ... 토큰을 입력하세요.</p>
+            <input type="password" id="inputApiKey" placeholder="AQ.Ab8RN6..." class="w-full bg-gray-900 border border-gray-600 rounded px-4 py-2 text-white outline-none focus:border-purple-500 mb-6 font-mono text-sm">
             <div class="flex justify-end gap-3">
                 <button onclick="closeApiModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white">취소</button>
                 <button onclick="saveApiKey()" class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-lg transition-colors">저장</button>
@@ -173,25 +146,19 @@
         </div>
     </div>
 
-    <!-- 스크립트: 차트 렌더링 및 API 통신 -->
     <script>
-        // --- UI 기본 로직 ---
         function switchTab(pageId) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             
-            const buttons = document.querySelectorAll('aside nav button');
-            buttons.forEach(btn => {
+            // 사이드바 활성화 디자인 변경
+            document.querySelectorAll('nav button').forEach(btn => {
                 btn.classList.remove('bg-gray-700', 'text-white');
-                btn.classList.add('text-gray-400');
+                if(btn.getAttribute('onclick').includes(pageId)) {
+                    btn.classList.add('bg-gray-700', 'text-white');
+                }
             });
-            const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(pageId));
-            if(activeBtn) {
-                activeBtn.classList.remove('text-gray-400');
-                activeBtn.classList.add('bg-gray-700', 'text-white');
-            }
 
-            // 페이지 3로 왔을 때 차트가 0px이 되지 않도록 리사이즈 트리거
             if (pageId === 'page3' && mainChartInstance) {
                 setTimeout(() => {
                     const container = document.getElementById('main_chart_container');
@@ -214,19 +181,13 @@
 
         function saveApiKey() {
             const key = document.getElementById('inputApiKey').value.trim();
-            if(!key) { alert("API Key를 입력해주세요."); return; }
+            if(!key) { alert("토큰을 입력해주세요."); return; }
             localStorage.setItem('gemini_api_key', key);
-            alert("저장되었습니다!");
+            alert("성공적으로 저장되었습니다!");
             closeApiModal();
         }
 
-        function openScenarioModal(plan) {
-            alert(`개별 시나리오(Plan ${plan}) 상세 모달입니다. (현재 버전에서는 메인 화면 차트 통합 표시에 집중했습니다.)`);
-        }
-
-        // --- 차트 엔진 전역 변수 ---
         let mainChartInstance = null;
-        let globalChartData = null; // AI가 응답한 데이터를 저장할 변수
 
         const chartOptions = {
             layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#9ca3af' },
@@ -236,11 +197,11 @@
             timeScale: { borderColor: '#374151', timeVisible: true },
         };
 
-        // --- AI API 통신 및 데이터 파싱 로직 ---
+        // 핵심 변경 부분: AQ 토큰을 위한 Authorization Bearer 헤더 통신
         async function runGeminiAnalysis() {
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if(!apiKey) {
-                alert("왼쪽 아래 [⚙️ API 설정]에서 Gemini API Key를 먼저 입력해주세요!");
+            const token = localStorage.getItem('gemini_api_key');
+            if(!token) {
+                alert("왼쪽 아래 [⚙️ API 설정]에서 AI Studio 토큰을 먼저 입력해주세요!");
                 openApiModal();
                 return;
             }
@@ -249,118 +210,84 @@
             const btn = document.getElementById('btnRunAi');
             const container = document.getElementById('main_chart_container');
             
-            // 로딩 UI 처리
             btn.innerHTML = `<div class="spinner"></div><span>분석 중...</span>`;
             btn.disabled = true;
             container.innerHTML = `<span class="text-purple-400 flex flex-col items-center gap-3"><div class="spinner" style="width:40px;height:40px;"></div>AI가 ${ticker} 차트 궤적을 연산하고 있습니다...</span>`;
 
-            // Gemini에게 보낼 프롬프트 (JSON 강제화)
-            const prompt = `
-            너는 월스트리트의 퀀트 트레이딩 AI 비서야.
-            사용자가 '${ticker}' 주식의 차트 분석을 요청했어.
-            반드시 아래의 JSON 구조로만 답변해야 해. 마크다운이나 다른 텍스트는 절대 쓰지 마.
-            
-            최근 20일간의 가상의 현실적인 일봉(OHLC) 데이터(baseData)와,
-            오늘 이후 5일간의 미래 시나리오 3개(PlanA, PlanB, PlanC)의 예상 종가 궤적(lineData) 및 유령 캔들(ghostCandles)을 숫자로 생성해줘.
-            
-            조건:
-            - time 값은 유닉스 타임스탬프(초) 기준 하루(86400) 간격으로 증가할 것.
-            - PlanA는 보합 후 상승, PlanB는 갭상승 후 눌림, PlanC는 갭하락 후 스톱헌팅 반등 시나리오로 가격을 설정.
-            
-            출력 형식:
-            {
-              "baseData": [ {"time": 1715000000, "open": 120, "high": 122, "low": 118, "close": 121}, ... (20개) ],
-              "planA": {
-                "lineData": [ {"time": 1716728000, "value": 121}, ... (5개) ],
-                "ghostCandles": [ {"time": 1716728000, "open": 121, "high": 123, "low": 120, "close": 122}, ... (5개) ]
-              },
-              "planB": { "lineData": [...], "ghostCandles": [...] },
-              "planC": { "lineData": [...], "ghostCandles": [...] }
-            }
-            `;
+            const prompt = `너는 월스트리트 퀀트 AI야. '${ticker}' 주식의 가상 일봉 20개(baseData)와 미래 5일 시나리오 3개(planA, planB, planC)의 lineData, ghostCandles를 오직 JSON 포맷으로만 생성해줘. 마크다운 백틱이나 다른 텍스트는 일체 쓰지 마. 형식: {"baseData":[{"time":1715000000,"open":120,"high":122,"low":118,"close":121}], "planA":{"lineData":[{"time":1716728000,"value":121}],"ghostCandles":[{"time":1716728000,"open":121,"high":123,"low":120,"close":122}]}, "planB":{"lineData":[],"ghostCandles":[]}, "planC":{"lineData":[],"ghostCandles":[]}}`;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                // 토큰 인증 방식을 Bearer 헤더로 변경했습니다!
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.2 } // 일관된 포맷을 위해 온도 낮춤
+                        generationConfig: { temperature: 0.2 }
                     })
                 });
 
-                if(!response.ok) throw new Error("API 요청 실패! API Key가 유효한지 확인하세요.");
+                if(!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`통신 실패 (코드: ${response.status}). 토큰이 올바른지 확인하세요.`);
+                }
 
                 const resData = await response.json();
                 let aiText = resData.candidates[0].content.parts[0].text;
-                
-                // 마크다운 백틱(```json ... ```) 제거 로직
                 aiText = aiText.replace(/```json/gi, '').replace(/```/g, '').trim();
                 
-                globalChartData = JSON.parse(aiText);
-                
-                // 차트 렌더링 함수 호출
-                drawChart(globalChartData, ticker);
+                const parsedData = JSON.parse(aiText);
+                drawChart(parsedData);
                 
                 document.getElementById('chartTitle').textContent = `📈 ${ticker} AI 실시간 궤적 예측`;
                 document.getElementById('chartLegends').style.display = 'flex';
 
             } catch (error) {
                 console.error(error);
-                container.innerHTML = `<span class="text-red-400">오류 발생: ${error.message}</span>`;
+                container.innerHTML = `<span class="text-red-400 text-center px-4">오류 발생: ${error.message}</span>`;
             } finally {
-                // UI 원복
                 btn.innerHTML = `<span>⚡ AI 실시간 분석</span>`;
                 btn.disabled = false;
             }
         }
 
-        // --- Lightweight Charts 렌더링 함수 ---
-        function drawChart(data, ticker) {
+        function drawChart(data) {
             const container = document.getElementById('main_chart_container');
-            container.innerHTML = ''; // 플레이스홀더 텍스트 제거
+            container.innerHTML = '';
 
-            // 1. 차트 인스턴스 생성 (부모 100% 사이즈)
             mainChartInstance = LightweightCharts.createChart(container, {
                 ...chartOptions,
                 width: container.clientWidth,
                 height: container.clientHeight
             });
             
-            // 2. 과거 캔들(Base) 세팅
-            const mainSeries = mainChartInstance.addCandlestickSeries({
-                upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444',
-            });
+            const mainSeries = mainChartInstance.addCandlestickSeries({ upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444' });
             mainSeries.setData(data.baseData);
 
-            // 3. Plan A (초록) 렌더링
-            const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
-            lineA.setData(data.planA.lineData);
-            const ghostA = mainChartInstance.addCandlestickSeries({
-                upColor: 'rgba(34, 197, 94, 0.3)', downColor: 'rgba(34, 197, 94, 0.3)', borderVisible: true, borderColor: '#22c55e', wickColor: '#22c55e'
-            });
-            ghostA.setData(data.planA.ghostCandles);
+            if(data.planA) {
+                const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
+                lineA.setData(data.planA.lineData || []);
+                const ghostA = mainChartInstance.addCandlestickSeries({ upColor: 'rgba(34, 197, 94, 0.3)', downColor: 'rgba(34, 197, 94, 0.3)', borderVisible: true, borderColor: '#22c55e', wickColor: '#22c55e' });
+                ghostA.setData(data.planA.ghostCandles || []);
+            }
+            if(data.planB) {
+                const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
+                lineB.setData(data.planB.lineData || []);
+                const ghostB = mainChartInstance.addCandlestickSeries({ upColor: 'rgba(59, 130, 246, 0.3)', downColor: 'rgba(59, 130, 246, 0.3)', borderVisible: true, borderColor: '#3b82f6', wickColor: '#3b82f6' });
+                ghostB.setData(data.planB.ghostCandles || []);
+            }
+            if(data.planC) {
+                const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
+                lineC.setData(data.planC.lineData || []);
+                const ghostC = mainChartInstance.addCandlestickSeries({ upColor: 'rgba(239, 68, 68, 0.3)', downColor: 'rgba(239, 68, 68, 0.3)', borderVisible: true, borderColor: '#ef4444', wickColor: '#ef4444' });
+                ghostC.setData(data.planC.ghostCandles || []);
+            }
 
-            // 4. Plan B (파랑) 렌더링
-            const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
-            lineB.setData(data.planB.lineData);
-            const ghostB = mainChartInstance.addCandlestickSeries({
-                upColor: 'rgba(59, 130, 246, 0.3)', downColor: 'rgba(59, 130, 246, 0.3)', borderVisible: true, borderColor: '#3b82f6', wickColor: '#3b82f6'
-            });
-            ghostB.setData(data.planB.ghostCandles);
-
-            // 5. Plan C (빨강) 렌더링
-            const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
-            lineC.setData(data.planC.lineData);
-            const ghostC = mainChartInstance.addCandlestickSeries({
-                upColor: 'rgba(239, 68, 68, 0.3)', downColor: 'rgba(239, 68, 68, 0.3)', borderVisible: true, borderColor: '#ef4444', wickColor: '#ef4444'
-            });
-            ghostC.setData(data.planC.ghostCandles);
-
-            // 차트 크기 맞춤
             mainChartInstance.timeScale().fitContent();
 
-            // 반응형 창 크기 조절 대응
             window.addEventListener('resize', () => {
                 if(container && mainChartInstance && container.clientWidth > 0) {
                     mainChartInstance.resize(container.clientWidth, container.clientHeight);
@@ -368,10 +295,7 @@
             });
         }
 
-        // 초기 화면 페이지 3 세팅
-        document.addEventListener('DOMContentLoaded', () => {
-            switchTab('page3');
-        });
+        document.addEventListener('DOMContentLoaded', () => { switchTab('page3'); });
     </script>
 </body>
 </html>
