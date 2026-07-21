@@ -238,4 +238,66 @@
 
                 const resData = await response.json();
                 let aiText = resData.candidates[0].content.parts[0].text;
-                aiText = aiText.replace(/```json/gi, '').replace(/
+                aiText = aiText.replace(/```json/gi, '').replace(/```/g, '').trim();
+                
+                const parsedData = JSON.parse(aiText);
+                drawChart(parsedData);
+                
+                document.getElementById('chartTitle').textContent = `📈 ${ticker} AI 실시간 궤적 예측`;
+                document.getElementById('chartLegends').style.display = 'flex';
+
+            } catch (error) {
+                console.error(error);
+                // 에러 상세 내용을 붉은 글씨로 화면에 크게 출력
+                container.innerHTML = `<div class="text-red-400 text-center px-4 bg-red-900/20 p-4 rounded-lg border border-red-700/50"><b>통신 실패!</b><br>${error.message}</div>`;
+            } finally {
+                btn.innerHTML = `<span>⚡ AI 실시간 분석</span>`;
+                btn.disabled = false;
+            }
+        }
+
+        function drawChart(data) {
+            const container = document.getElementById('main_chart_container');
+            container.innerHTML = '';
+
+            mainChartInstance = LightweightCharts.createChart(container, {
+                ...chartOptions,
+                width: container.clientWidth,
+                height: container.clientHeight
+            });
+            
+            const mainSeries = mainChartInstance.addCandlestickSeries({ upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444' });
+            mainSeries.setData(data.baseData);
+
+            if(data.planA) {
+                const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
+                lineA.setData(data.planA.lineData || []);
+                const ghostA = mainChartInstance.addCandlestickSeries({ upColor: 'rgba(34, 197, 94, 0.3)', downColor: 'rgba(34, 197, 94, 0.3)', borderVisible: true, borderColor: '#22c55e', wickColor: '#22c55e' });
+                ghostA.setData(data.planA.ghostCandles || []);
+            }
+            if(data.planB) {
+                const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
+                lineB.setData(data.planB.lineData || []);
+                const ghostB = mainChartInstance.addCandlestickSeries({ upColor: 'rgba(59, 130, 246, 0.3)', downColor: 'rgba(59, 130, 246, 0.3)', borderVisible: true, borderColor: '#3b82f6', wickColor: '#3b82f6' });
+                ghostB.setData(data.planB.ghostCandles || []);
+            }
+            if(data.planC) {
+                const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
+                lineC.setData(data.planC.lineData || []);
+                const ghostC = mainChartInstance.addCandlestickSeries({ upColor: 'rgba(239, 68, 68, 0.3)', downColor: 'rgba(239, 68, 68, 0.3)', borderVisible: true, borderColor: '#ef4444', wickColor: '#ef4444' });
+                ghostC.setData(data.planC.ghostCandles || []);
+            }
+
+            mainChartInstance.timeScale().fitContent();
+
+            window.addEventListener('resize', () => {
+                if(container && mainChartInstance && container.clientWidth > 0) {
+                    mainChartInstance.resize(container.clientWidth, container.clientHeight);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { switchTab('page3'); });
+    </script>
+</body>
+</html>
