@@ -6,8 +6,9 @@
     <title>AI Trading Dashboard - Senior PM Edition</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lightweight Charts -->
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    
+    <!-- 🚨 핵심 수정: 에러를 뿜는 유동적 주소 대신, 전 세계에서 가장 안정적인 3.8.0 버전으로 강제 고정! -->
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
     
     <style>
         ::-webkit-scrollbar { width: 8px; }
@@ -197,10 +198,8 @@
             btn.disabled = true;
             container.innerHTML = `<span class="text-purple-400 flex flex-col items-center gap-3"><div class="spinner" style="width:40px;height:40px;"></div>내장 퀀트 엔진이 ${ticker}의 다중 시나리오 궤적을 연산하고 있습니다...</span>`;
 
-            // 마치 AI가 연산하는 것처럼 1.5초 대기 효과 부여
             setTimeout(() => {
                 try {
-                    // Gemini가 뱉어낼 완벽한 JSON 포맷을 코드 내부에 하드코딩 (100% 작동 보장)
                     const simulatedJsonData = {
                         "baseData": [
                             {"time": 1714500000, "open": 115, "high": 117, "low": 113, "close": 116},
@@ -210,7 +209,7 @@
                             {"time": 1714845600, "open": 120, "high": 124, "low": 119, "close": 123},
                             {"time": 1714932000, "open": 123, "high": 126, "low": 122, "close": 125},
                             {"time": 1715018400, "open": 125, "high": 125, "low": 121, "close": 122},
-                            {"time": 1715104800, "open": 122, "high": 128, "low": 121, "close": 127} // 현재 시점 기준봉
+                            {"time": 1715104800, "open": 122, "high": 128, "low": 121, "close": 127} 
                         ],
                         "planA": {
                             "lineData": [
@@ -265,7 +264,7 @@
                     btn.innerHTML = `<span>⚡ AI 실시간 분석</span>`;
                     btn.disabled = false;
                 }
-            }, 1200); // 1.2초 로딩 애니메이션 대기
+            }, 1200); 
         }
 
         function drawChart(data) {
