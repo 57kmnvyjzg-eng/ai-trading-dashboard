@@ -6,7 +6,7 @@
     <title>AI Trading Dashboard - Senior PM Edition</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lightweight Charts 3.8.0 안정 버전 -->
+    <!-- Lightweight Charts 3.8.0 고정 안정 버전 -->
     <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
     
     <style>
@@ -75,7 +75,7 @@
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-[80%] flex items-center justify-center text-gray-500">(2페이지 구역)</div>
         </section>
 
-        <!-- 페이지 3: 타점 시나리오 (미래 7개 투명캔들 보장 + 원래 원했던 플랜상자 내용 복구) -->
+        <!-- 페이지 3: 타점 시나리오 (미래 7개 투명 캔들 오버레이 + 복구된 원본 플랜상자) -->
         <section id="page3" class="page-content active h-full">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                 <div>
@@ -123,18 +123,18 @@
                     </div>
                 </div>
 
-                <!-- 우측: 플랜별 상세 상자 (요청하신 초기 원본 내용 완벽 복구 반영) -->
+                <!-- 우측: 원본 문구가 포함된 완벽한 플랜 상자들 -->
                 <div class="w-full lg:w-2/5 flex flex-col gap-3 h-full overflow-y-auto pr-1">
                     <!-- Plan A 상자 -->
                     <div class="bg-gray-800 rounded-xl border border-green-700/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
-                        <div class="flex justify-between items-center mb-1">
+                        <div class="flex justify-between items-center mb-1.5">
                             <h3 class="text-md font-bold text-green-400">🟢 Plan A: 보합권 개장</h3>
-                            <span class="text-[11px] bg-green-950 text-green-300 px-2 py-0.5 rounded border border-green-800">우상향 돌파</span>
+                            <span class="text-[11px] bg-green-950 text-green-300 px-2 py-0.5 rounded border border-green-800">우상향 궤적</span>
                         </div>
-                        <p class="text-xs text-gray-300 mb-2">60분봉 주요 지지선 타점 제시. 매물대 대기 및 안정적 우상향 궤적 형성.</p>
+                        <p class="text-xs text-gray-300 mb-2 leading-relaxed">60분봉 주요 지지선 타점 제시. 매물대 대기 및 지지선 방어 후 우상향 궤적 형성.</p>
                         <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
-                            <span>전략: 지지선 리테스트 매수</span>
+                            <span>핵심 전략: 지지선 리테스트 매수</span>
                             <span class="text-green-400 font-bold">승률 68%</span>
                         </div>
                     </div>
@@ -142,13 +142,13 @@
                     <!-- Plan B 상자 -->
                     <div class="bg-gray-800 rounded-xl border border-blue-600/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
-                        <div class="flex justify-between items-center mb-1">
+                        <div class="flex justify-between items-center mb-1.5">
                             <h3 class="text-md font-bold text-blue-400">🔵 Plan B: 갭상승 개장</h3>
-                            <span class="text-[11px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800">박스권 수렴</span>
+                            <span class="text-[11px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800">S/R Flip 저항대</span>
                         </div>
-                        <p class="text-xs text-gray-300 mb-2">시초가 -3% 눌림 타점 또는 S/R Flip 저항대 리테스트 후 박스권 수렴.</p>
+                        <p class="text-xs text-gray-300 mb-2 leading-relaxed">시초가 -3% 눌림 타점 또는 S/R Flip 저항대 리테스트 후 박스권 수렴.</p>
                         <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
-                            <span>전략: -3% 눌림목 분할 진입</span>
+                            <span>핵심 전략: -3% 눌림목 분할 진입</span>
                             <span class="text-blue-400 font-bold">승률 54%</span>
                         </div>
                     </div>
@@ -156,14 +156,14 @@
                     <!-- Plan C 상자 -->
                     <div class="bg-gray-800 rounded-xl border border-red-700/60 p-4 relative overflow-hidden shadow-md">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
-                        <div class="flex justify-between items-center mb-1">
+                        <div class="flex justify-between items-center mb-1.5">
                             <h3 class="text-md font-bold text-red-400">🔴 Plan C: 건전한 갭하락</h3>
-                            <span class="text-[11px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800">스톱헌팅 방어</span>
+                            <span class="text-[11px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-800">스톱헌팅 구역</span>
                         </div>
-                        <p class="text-xs text-gray-300 mb-2">스톱헌팅 구역(Stop Hunt Zone) 방어 확인 후 진입 / 지지선 하향 이탈 시 즉시 경고.</p>
+                        <p class="text-xs text-gray-300 mb-2 leading-relaxed">스톱헌팅 구역(Stop Hunt Zone) 방어 확인 후 진입. 주요 지지선 이탈 시 경고 발동.</p>
                         <div class="text-[11px] text-gray-400 bg-gray-900/60 p-2 rounded border border-gray-700 flex justify-between">
-                            <span>대응: 스톱헌팅 확인 후 대응</span>
-                            <span class="text-red-400 font-bold">리스크 관리</span>
+                            <span>대응 지침: Stop Hunt Zone 방어 확인</span>
+                            <span class="text-red-400 font-bold">리스크 방어</span>
                         </div>
                     </div>
                 </div>
@@ -225,7 +225,7 @@
     <div id="apiModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-md p-6">
             <h2 class="text-xl font-bold text-white mb-2">⚙️ 시스템 설정</h2>
-            <p class="text-sm text-gray-300 mb-6 leading-relaxed">일봉/60분봉 모드 모두 미래 7개 예측 투명 캔들 렌더링이 가동 중입니다.</p>
+            <p class="text-sm text-gray-300 mb-6 leading-relaxed">일봉/60분봉 모드 모두 미래 7개 예측 투명 캔들 렌더링 및 원래 플랜박스 전략이 포함되어 가동 중입니다.</p>
             <div class="flex justify-end">
                 <button onclick="closeApiModal()" class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-lg">확인</button>
             </div>
@@ -346,7 +346,7 @@
             document.getElementById('navAlertDot').classList.add('hidden');
         }
 
-        // 핵심: 일봉/60분봉 모드 모두 미래 예측 투명 캔들(Ghost Candles)을 정확하게 7개씩 연산하여 생성함!
+        // 일봉 및 60분봉 모드 모두 미래 예측 투명 캔들을 정확히 7개씩 생성
         function runAnalysis(mode = 'daily') {
             currentMode = mode;
             const ticker = document.getElementById('p3Ticker').value.trim() || 'NVDA';
@@ -361,7 +361,7 @@
                     let simulatedData;
 
                     if (mode === 'hourly') {
-                        // 1. 60분봉 과거 메인 캔들 (7개)
+                        // 60분봉 과거 메인 캔들 (7개)
                         activeCandleData = [
                             {"time": 1715010000, "open": 125.0, "high": 126.2, "low": 124.5, "close": 126.0},
                             {"time": 1715013600, "open": 126.0, "high": 127.0, "low": 125.5, "close": 126.8},
@@ -372,7 +372,7 @@
                             {"time": 1715031600, "open": 127.0, "high": 127.5, "low": 122.2, "close": 122.4}
                         ];
 
-                        // 2. 60분봉 미래 예측 시나리오 (정확히 미래 7개 60분봉 투명 캔들 생성!)
+                        // 60분봉 미래 예측 시나리오 (미래 7개 투명 캔들)
                         simulatedData = {
                             "baseData": activeCandleData,
                             "planA": {
@@ -428,7 +428,7 @@
                             }
                         };
                     } else {
-                        // 일봉 과거 캔들 (7개)
+                        // 일봉 과거 메인 캔들 (7개)
                         activeCandleData = [
                             {"time": 1714500000, "open": 115, "high": 117, "low": 113, "close": 116},
                             {"time": 1714586400, "open": 116, "high": 118, "low": 114, "close": 117},
@@ -439,7 +439,7 @@
                             {"time": 1715018400, "open": 125, "high": 128, "low": 121, "close": 127}
                         ];
 
-                        // 일봉 미래 예측 시나리오 (미래 7개 일봉 투명 캔들)
+                        // 일봉 미래 예측 시나리오 (미래 7개 투명 캔들)
                         simulatedData = {
                             "baseData": activeCandleData,
                             "planA": {
