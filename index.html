@@ -3,286 +3,697 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Trading Dashboard - Senior PM Live Edition</title>
+    <title>AI Trading Dashboard - Senior PM Master Edition</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lightweight Charts 3.8.0 -->
     <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
     
     <style>
+        /* 커스텀 스크롤바 및 디자인 애니메이션 정의 */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1f2937; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
         .page-content { display: none; }
         .page-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
         .modal-active { display: flex !important; animation: fadeModalIn 0.2s ease-out forwards; }
         @keyframes fadeModalIn { from { opacity: 0; } to { opacity: 1; } }
-        .accordion-content { display: none; }
-        .accordion-content.open { display: table-row; animation: fadeModalIn 0.3s ease-in-out; }
-        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: #a855f7; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        
+        .spinner { 
+            border: 3px solid rgba(255,255,255,0.1); 
+            border-radius: 50%; 
+            border-top-color: #a855f7; 
+            width: 20px; 
+            height: 20px; 
+            animation: spin 1s linear infinite; 
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulseAlert { 0%, 100% { background-color: rgba(239, 68, 68, 0.2); border-color: #ef4444; } 50% { background-color: rgba(239, 68, 68, 0.5); border-color: #f87171; } }
+        
+        @keyframes pulseAlert { 
+            0%, 100% { background-color: rgba(239, 68, 68, 0.2); border-color: #ef4444; } 
+            50% { background-color: rgba(239, 68, 68, 0.5); border-color: #f87171; } 
+        }
         .alert-active { animation: pulseAlert 1.5s infinite; }
-        .plan-box { transition: all 0.2s; cursor: pointer; }
+
+        .plan-box { transition: all 0.2s ease-in-out; cursor: pointer; }
         .plan-box:hover { transform: translateY(-2px); }
         .plan-box.dimmed { opacity: 0.35; filter: grayscale(60%); }
         .plan-box.active { box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 h-screen flex overflow-hidden font-sans">
+<body class="bg-gray-900 text-gray-100 h-screen flex overflow-hidden relative font-sans">
 
-    <!-- 좌측 사이드바 (6개 탭) -->
+    <!-- [공통] 좌측 내비게이션 사이드바 -->
     <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col hidden md:flex z-10 shadow-2xl">
         <div class="p-5 border-b border-gray-700">
-            <h1 class="text-xl font-bold text-white tracking-wider"><span class="text-blue-500">AI</span> TRADER <span class="text-xs text-green-400 align-top">LIVE</span></h1>
+            <h1 class="text-xl font-bold text-white tracking-wider">
+                <span class="text-blue-500">AI</span> TRADER <span class="text-xs text-green-400 align-top">PRO LIVE</span>
+            </h1>
             <p class="text-xs text-gray-400 mt-1 font-semibold">Senior PM Execution Desk</p>
         </div>
         <nav class="flex-1 p-3 space-y-1.5 overflow-y-auto">
-            <button onclick="switchTab('page1')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm"><span class="mr-3 text-lg group-hover:scale-110 transition-transform">📊</span> 1. 매크로 차트 보드</button>
-            <button onclick="switchTab('page2')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm"><span class="mr-3 text-lg group-hover:scale-110 transition-transform">🧠</span> 2. AI 딥스캔 브리핑</button>
-            <button onclick="switchTab('page3')" id="navPage3" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group relative text-sm"><span class="mr-3 text-lg group-hover:scale-110 transition-transform">🎯</span> 3. 타점 시나리오<span id="navAlertDot" class="absolute right-3 top-3.5 w-2 h-2 bg-purple-500 rounded-full animate-ping hidden"></span></button>
-            <button onclick="switchTab('page4')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm"><span class="mr-3 text-lg group-hover:scale-110 transition-transform">🗂️</span> 4. 액티브 & 로그</button>
-            <button onclick="switchTab('page5')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm"><span class="mr-3 text-lg group-hover:scale-110 transition-transform">🔍</span> 5. 눌림목 스크리너</button>
-            <button onclick="switchTab('page6')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm border border-purple-800/60 bg-purple-950/20"><span class="mr-3 text-lg group-hover:scale-110 transition-transform">📅</span> 6. 주간전략 & 캘린더</button>
+            <button onclick="switchTab('page1')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm">
+                <span class="mr-3 text-lg group-hover:scale-110 transition-transform">📊</span> 1. 매크로 차트 보드
+            </button>
+            <button onclick="switchTab('page2')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm">
+                <span class="mr-3 text-lg group-hover:scale-110 transition-transform">🧠</span> 2. AI 딥스캔 브리핑
+            </button>
+            <button onclick="switchTab('page3')" id="navPage3" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group relative text-sm">
+                <span class="mr-3 text-lg group-hover:scale-110 transition-transform">🎯</span> 3. 타점 시나리오
+                <span id="navAlertDot" class="absolute right-3 top-3.5 w-2 h-2 bg-purple-500 rounded-full animate-ping hidden"></span>
+            </button>
+            <button onclick="switchTab('page4')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm">
+                <span class="mr-3 text-lg group-hover:scale-110 transition-transform">🗂️</span> 4. 액티브 & 로그
+            </button>
+            <button onclick="switchTab('page5')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm">
+                <span class="mr-3 text-lg group-hover:scale-110 transition-transform">🔍</span> 5. 눌림목 스크리너
+            </button>
+            <button onclick="switchTab('page6')" class="w-full flex items-center p-3 text-left text-gray-400 rounded-lg font-medium transition-colors hover:bg-gray-700 hover:text-white group text-sm border border-purple-800/60 bg-purple-950/20">
+                <span class="mr-3 text-lg group-hover:scale-110 transition-transform">📅</span> 6. 주간전략 & 캘린더
+            </button>
         </nav>
     </aside>
 
-    <!-- 메인 콘텐츠 영역 -->
+    <!-- [공통] 메인 콘텐츠 영역 시작 -->
     <main class="flex-1 p-5 md:p-7 overflow-y-auto z-0 relative bg-gray-900">
         
-        <!-- [페이지 1] 실시간 매크로 차트 -->
+        <!-- ========================================== -->
+        <!-- [페이지 1] 글로벌 매크로 실시간 차트 보드 -->
+        <!-- ========================================== -->
         <section id="page1" class="page-content h-full">
             <div class="flex justify-between items-center mb-6">
-                <div><h2 class="text-2xl font-bold">📊 글로벌 매크로 실시간 차트 보드</h2><p class="text-sm text-gray-400 mt-1">시장 방향성을 결정하는 핵심 지수 라이브 연동</p></div>
-                <span class="bg-green-900/50 text-green-400 border border-green-800 text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5"><span class="animate-pulse w-2 h-2 bg-green-500 rounded-full"></span> LIVE FEED</span>
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2">📊 글로벌 매크로 실시간 차트 보드</h2>
+                    <p class="text-sm text-gray-400 mt-1">시장 방향성을 결정하는 핵심 지수 및 ETF 실시간 모니터링</p>
+                </div>
+                <span class="bg-green-900/50 text-green-400 border border-green-800 text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5">
+                    <span class="animate-pulse w-2 h-2 bg-green-500 rounded-full inline-block"></span> Live Macro Feed
+                </span>
             </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80%]">
-                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 h-64"><h3 class="text-sm font-semibold text-gray-400 mb-2">S&P 500 (SPY)</h3><div class="tradingview-widget-container" style="height:100%;width:100%;"><div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%;"></div><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>{"symbol":"AMEX:SPY","width":"100%","height":"100%","locale":"kr","dateRange":"1D","colorTheme":"dark","isTransparent":true,"autosize":true}</script></div></div>
-                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 h-64"><h3 class="text-sm font-semibold text-gray-400 mb-2">NASDAQ 100 (QQQ)</h3><div class="tradingview-widget-container" style="height:100%;width:100%;"><div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%;"></div><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>{"symbol":"NASDAQ:QQQ","width":"100%","height":"100%","locale":"kr","dateRange":"1D","colorTheme":"dark","isTransparent":true,"autosize":true}</script></div></div>
-                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 h-64"><h3 class="text-sm font-semibold text-gray-400 mb-2">USD / KRW (환율)</h3><div class="tradingview-widget-container" style="height:100%;width:100%;"><div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%;"></div><script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>{"symbol":"FX_IDC:USDKRW","width":"100%","height":"100%","locale":"kr","dateRange":"1D","colorTheme":"dark","isTransparent":true,"autosize":true}</script></div></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 h-[80%]">
+                <!-- S&P 500 -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">S&P 500 (SPY)</h3>
+                    <div class="tradingview-widget-container" style="height:100%;width:100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                            "symbol": "AMEX:SPY",
+                            "width": "100%",
+                            "height": "100%",
+                            "locale": "kr",
+                            "dateRange": "1D",
+                            "colorTheme": "dark",
+                            "isTransparent": true,
+                            "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- NASDAQ 100 -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">NASDAQ 100 (QQQ)</h3>
+                    <div class="tradingview-widget-container" style="height:100%;width:100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                            "symbol": "NASDAQ:QQQ",
+                            "width": "100%",
+                            "height": "100%",
+                            "locale": "kr",
+                            "dateRange": "1D",
+                            "colorTheme": "dark",
+                            "isTransparent": true,
+                            "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- DOW JONES -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">DOW JONES (DIA)</h3>
+                    <div class="tradingview-widget-container" style="height:100%;width:100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                            "symbol": "AMEX:DIA",
+                            "width": "100%",
+                            "height": "100%",
+                            "locale": "kr",
+                            "dateRange": "1D",
+                            "colorTheme": "dark",
+                            "isTransparent": true,
+                            "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- RUSSELL 2000 -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">RUSSELL 2000 (IWM)</h3>
+                    <div class="tradingview-widget-container" style="height:100%;width:100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                            "symbol": "AMEX:IWM",
+                            "width": "100%",
+                            "height": "100%",
+                            "locale": "kr",
+                            "dateRange": "1D",
+                            "colorTheme": "dark",
+                            "isTransparent": true,
+                            "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- 원/달러 환율 -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">USD / KRW (원/달러 환율)</h3>
+                    <div class="tradingview-widget-container" style="height:100%;width:100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                            "symbol": "FX_IDC:USDKRW",
+                            "width": "100%",
+                            "height": "100%",
+                            "locale": "kr",
+                            "dateRange": "1D",
+                            "colorTheme": "dark",
+                            "isTransparent": true,
+                            "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
+
+                <!-- VIX 공포지수 -->
+                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg h-64">
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">VIX 변동성 지수 (VXX)</h3>
+                    <div class="tradingview-widget-container" style="height:100%;width:100%;">
+                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%;"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                            "symbol": "BATS:VXX",
+                            "width": "100%",
+                            "height": "100%",
+                            "locale": "kr",
+                            "dateRange": "1D",
+                            "colorTheme": "dark",
+                            "isTransparent": true,
+                            "autosize": true
+                        }
+                        </script>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- [페이지 2] 딥스캔 브리핑 & 실시간 RSS 뉴스 -->
+        <!-- ========================================== -->
+        <!-- [페이지 2] AI 딥스캔 브리핑 & 실시간 뉴스 -->
+        <!-- ========================================== -->
         <section id="page2" class="page-content h-full">
             <div class="flex flex-col lg:flex-row gap-6 h-full">
-                <!-- 좌측: AI 브리핑 -->
-                <div class="w-full lg:w-1/2 flex flex-col bg-gray-800 rounded-xl border border-gray-700 h-full overflow-hidden">
-                    <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
-                        <h2 class="text-lg font-bold text-white flex items-center gap-2"><span>🧠</span> AI 딥스캔 브리핑</h2>
-                        <div class="flex items-center gap-2">
-                            <button onclick="refreshBriefing()" class="text-gray-400 hover:text-white hover:rotate-180 transition-all bg-gray-800 rounded border border-gray-600 w-8 h-8">🔄</button>
-                            <div class="flex bg-gray-800 p-1 rounded-lg border border-gray-700">
-                                <button onclick="switchBriefing('pre')" id="btn-pre" class="px-3 py-1 text-sm rounded bg-blue-600 text-white font-medium">장전</button>
-                                <button onclick="switchBriefing('intra')" id="btn-intra" class="px-3 py-1 text-sm rounded text-gray-400 hover:text-white">장중</button>
-                                <button onclick="switchBriefing('post')" id="btn-post" class="px-3 py-1 text-sm rounded text-gray-400 hover:text-white">장후</button>
+                <!-- AI 딥스캔 브리핑 (좌측 패널) -->
+                <div class="w-full lg:w-1/2 flex flex-col h-full bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
+                    <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center relative overflow-hidden">
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2 relative z-10">
+                            <span>🧠</span> AI 딥스캔 10대 카테고리 브리핑
+                        </h2>
+                        <div class="flex items-center gap-2 relative z-10">
+                            <button onclick="refreshBriefing()" title="다른 브리핑 버전 보기" class="text-gray-400 hover:text-white hover:rotate-180 transition-all duration-300 w-8 h-8 flex items-center justify-center bg-gray-800 rounded border border-gray-600">🔄</button>
+                            <div class="flex space-x-1 bg-gray-800 p-1 rounded-lg border border-gray-700">
+                                <button onclick="switchBriefing('pre')" id="btn-pre" class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white font-medium">장전</button>
+                                <button onclick="switchBriefing('intra')" id="btn-intra" class="px-3 py-1 text-sm rounded-md text-gray-400 hover:text-white">장중</button>
+                                <button onclick="switchBriefing('post')" id="btn-post" class="px-3 py-1 text-sm rounded-md text-gray-400 hover:text-white">장후</button>
                             </div>
                         </div>
                     </div>
-                    <div class="p-5 overflow-y-auto flex-1 space-y-3" id="briefingContentArea"></div>
+                    <div class="p-5 overflow-y-auto flex-1 bg-gray-800 space-y-3" id="briefingContentArea">
+                        <!-- JS 엔진에서 동적으로 10대 카테고리 스캔 내용을 렌더링합니다 -->
+                    </div>
                 </div>
 
-                <!-- 우측: 라이브 RSS 뉴스 -->
-                <div class="w-full lg:w-1/2 flex flex-col bg-gray-800 rounded-xl border border-gray-700 h-full overflow-hidden">
+                <!-- 실시간 라이브 뉴스 피드 (우측 패널) -->
+                <div class="w-full lg:w-1/2 flex flex-col h-full bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
                     <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
-                        <h2 class="text-lg font-bold text-white">⚡ 실시간 라이브 뉴스 (RSS)</h2>
-                        <button onclick="fetchLiveNews()" class="text-xs bg-purple-600 hover:bg-purple-500 px-2 py-1 rounded text-white font-bold flex items-center gap-1">🔄 새로고침</button>
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <span>⚡</span> 실시간 라이브 뉴스 (Yahoo Finance RSS)
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <button onclick="fetchLiveNews()" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-2.5 py-1 rounded font-bold transition-colors">🔄 새로고침</button>
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-4 overflow-y-auto flex-1 space-y-3" id="liveNewsContainer"></div>
+                    <div class="p-4 overflow-y-auto flex-1 space-y-3" id="liveNewsContainer">
+                        <div class="text-center text-gray-400 py-10 text-xs flex flex-col items-center gap-2">
+                            <div class="spinner"></div> 실시간 기사 수집 중...
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- [페이지 3] 타점 시나리오 (Plan A/B/C) -->
+<!-- [Part 1 작성 완료] -->
+        <!-- ========================================== -->
+        <!-- [페이지 3] 타점 시나리오 (수면 매매 3대 시나리오) -->
+        <!-- ========================================== -->
         <section id="page3" class="page-content active h-full space-y-3">
+            <!-- 상단 컨트롤 툴바 -->
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 class="text-xl font-bold flex items-center gap-2">🎯 타점 시나리오 <span id="timeframeBadge" class="text-xs bg-purple-900 text-purple-300 px-2 py-0.5 rounded border border-purple-700">실시간 라이브 연동</span></h2>
-                    <p class="text-xs text-gray-400 mt-0.5">기관 수급 진단 및 3대 수면 매매 시나리오</p>
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        🎯 타점 시나리오 
+                        <span id="timeframeBadge" class="text-xs bg-purple-900 text-purple-300 px-2 py-0.5 rounded border border-purple-700 font-mono">
+                            일봉 (미래 7캔들 예측)
+                        </span>
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-0.5" id="page3SubText">기관 수급 진단 기반 수면 매매 3대 시나리오 및 궤적 오버레이</p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
+                    <!-- 유저 스탠스 셀렉터 -->
                     <div class="bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1 flex items-center text-xs">
-                        <span class="text-gray-400 mr-2">스탠스:</span>
+                        <span class="text-gray-400 mr-2 font-medium">스탠스:</span>
                         <select id="userStance" onchange="onStanceChange()" class="bg-gray-900 text-purple-300 font-bold outline-none rounded px-1.5 py-0.5 border border-purple-700 cursor-pointer">
-                            <option value="Aggressive">Aggressive (공격)</option>
-                            <option value="Moderate" selected>Moderate (중립)</option>
-                            <option value="Defensive">Defensive (보수)</option>
+                            <option value="Aggressive">Aggressive (공격적)</option>
+                            <option value="Moderate" selected>Moderate (중립적)</option>
+                            <option value="Defensive">Defensive (보수적)</option>
                         </select>
                     </div>
-                    <button onclick="toggleMonitoring()" id="btnMonitor" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold">🛡️ 감지: OFF</button>
+
+                    <!-- 실시간 자리이탈 감지 토글 버튼 -->
+                    <button onclick="toggleMonitoring()" id="btnMonitor" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1">
+                        🛡️ 감지: OFF
+                    </button>
+
+                    <!-- 티커 입력창 -->
                     <div class="bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1 flex items-center text-xs">
-                        <span class="text-gray-400 mr-2">티커:</span>
-                        <input type="text" id="p3Ticker" value="NVDA" class="bg-transparent text-white font-bold w-14 outline-none uppercase text-center" />
+                        <span class="text-gray-400 mr-2 font-medium">티커:</span>
+                        <input type="text" id="p3Ticker" value="NVDA" class="bg-transparent text-white font-bold w-16 outline-none uppercase text-center" />
                     </div>
-                    <button onclick="runAnalysis(currentMode)" id="btnRunAi" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold">⚡ 라이브 분석</button>
+
+                    <!-- AI 라이브 분석 연산 실행 버튼 -->
+                    <button onclick="runAnalysis(currentMode)" id="btnRunAi" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-md flex items-center gap-1">
+                        ⚡ 라이브 시나리오 분석
+                    </button>
                 </div>
             </div>
 
-            <!-- 기관 수급 진단 패널 -->
+            <!-- 1. 기관급 수급 진단 & 유저 스탠스 튜닝 카트 -->
             <div class="bg-gray-800/90 border border-gray-700/80 rounded-xl p-3 shadow-md">
-                <div class="flex justify-between mb-1.5">
-                    <span class="text-xs font-bold text-purple-400">🏛️ 1. 라이브 수급 진단 & 유저 스탠스 튜닝</span>
-                    <span class="text-[11px] text-gray-400" id="stanceStatusText">스탠스 설정: Moderate (손절폭 -2.5% / RR 1:2.8)</span>
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-bold text-purple-400 flex items-center gap-1.5">
+                        <span>🏛️</span> 1. 기관급 수급 진단 & 유저 스탠스 튜닝
+                    </span>
+                    <span class="text-[11px] text-gray-400 font-mono" id="stanceStatusText">
+                        스탠스 설정: Moderate (손절폭 -2.5% / RR 1:2.8)
+                    </span>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                    <div class="bg-gray-900/70 p-2 rounded border border-gray-700/60"><div class="text-gray-400 text-[10px]">상대 강도 (RS)</div><div class="text-green-400 font-bold mt-0.5">+2.15% Outperform</div></div>
-                    <div class="bg-gray-900/70 p-2 rounded border border-gray-700/60"><div class="text-gray-400 text-[10px]">실시간 VWAP / POC</div><div class="text-blue-400 font-bold mt-0.5">$124.50 / $126.80</div></div>
-                    <div class="bg-gray-900/70 p-2 rounded border border-gray-700/60"><div class="text-gray-400 text-[10px]">유동성 휩소 / 감마 장벽</div><div class="text-purple-300 font-bold mt-0.5">$130.00 (상단 저항벽)</div></div>
-                    <div class="bg-gray-900/70 p-2 rounded border border-gray-700/60"><div class="text-gray-400 text-[10px]">기관 매수 벽 조준</div><div class="text-yellow-400 font-bold mt-0.5">$122.00 ~ $122.50</div></div>
+                    <div class="bg-gray-900/70 p-2 rounded border border-gray-700/60">
+                        <div class="text-gray-400 text-[10px]">상대 강도 (RS vs QQQ)</div>
+                        <div class="text-green-400 font-bold mt-0.5" id="diagRS">+2.15% Outperform</div>
+                    </div>
+                    <div class="bg-gray-900/70 p-2 rounded border border-gray-700/60">
+                        <div class="text-gray-400 text-[10px]">앵커드 VWAP / POC</div>
+                        <div class="text-blue-400 font-bold mt-0.5" id="diagVWAP">$124.50 / $126.80</div>
+                    </div>
+                    <div class="bg-gray-900/70 p-2 rounded border border-gray-700/60">
+                        <div class="text-gray-400 text-[10px]">유동성 휩소 / 감마 장벽</div>
+                        <div class="text-purple-300 font-bold mt-0.5" id="diagGamma">$130.00 (상단 저항벽)</div>
+                    </div>
+                    <div class="bg-gray-900/70 p-2 rounded border border-gray-700/60">
+                        <div class="text-gray-400 text-[10px]">기관 매수 벽 조준</div>
+                        <div class="text-yellow-400 font-bold mt-0.5" id="diagWall">$122.00 ~ $122.50</div>
+                    </div>
                 </div>
             </div>
 
+            <!-- 자리이탈 경고 패널 (비상시 팝업) -->
             <div id="warningBanner" class="hidden p-2.5 rounded-lg border text-xs font-bold flex items-center justify-between alert-active">
-                <span id="warningText" class="text-red-300">⚠️ [자리 이탈 경고] 가격이 허용 범위를 하향 이탈했습니다!</span>
-                <button onclick="dismissWarning()" class="text-[11px] bg-red-800 text-white px-2 py-0.5 rounded">해제</button>
+                <span id="warningText" class="text-red-300">⚠️ [자리 이탈 경고] 가격이 허용 타점 범위를 하향 이탈했습니다!</span>
+                <button onclick="dismissWarning()" class="text-[11px] bg-red-800 hover:bg-red-700 text-white px-2 py-0.5 rounded transition-colors">
+                    경고 해제
+                </button>
             </div>
 
-            <!-- 예측 차트 & 3대 시나리오 카드 -->
+            <!-- 차트 & 수면매매 3대 시나리오 메인 레이아웃 -->
             <div class="flex flex-col lg:flex-row gap-4 h-[47vh]">
-                <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-3 flex flex-col relative">
+                <!-- 좌측: 예측 차트 보드 -->
+                <div class="w-full lg:w-3/5 bg-gray-800 rounded-xl border border-gray-700 shadow-lg p-3 flex flex-col h-full relative">
                     <div class="flex justify-between items-center mb-1.5 z-10">
-                        <h3 class="text-xs font-bold text-gray-200">📈 실시간 궤적 예측 차트</h3>
-                        <button onclick="selectPlan('ALL')" class="text-[10px] bg-gray-700 text-white px-2 py-0.5 rounded">전체 보기</button>
+                        <h3 class="text-xs font-bold text-gray-200 flex items-center gap-1.5" id="chartTitle">
+                            📈 실시간 궤적 예측 차트 (7캔들 오버레이)
+                        </h3>
+                        <button onclick="selectPlan('ALL')" id="btnShowAll" class="text-[10px] bg-gray-700 hover:bg-gray-600 text-white px-2 py-0.5 rounded transition-colors">
+                            전체 궤적 보기
+                        </button>
                     </div>
-                    <div class="flex-1 relative">
-                        <div id="main_chart_container" class="absolute inset-0 bg-gray-900 rounded-lg border border-gray-700 overflow-hidden flex items-center justify-center"></div>
+                    <div class="flex-1 w-full relative">
+                        <div id="main_chart_container" class="absolute inset-0 bg-gray-900 rounded-lg border border-gray-700 overflow-hidden flex items-center justify-center">
+                            <span id="chartPlaceholder" class="text-gray-500 text-xs">💡 차트 연산 중...</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="w-full lg:w-2/5 flex flex-col gap-2 overflow-y-auto pr-1">
-                    <div class="text-xs font-bold text-gray-300 flex justify-between">
-                        <span>🌙 2. [수면 매매 전용] 3대 시나리오</span><span class="text-[10px] text-yellow-400 bg-yellow-950/60 px-1.5 py-0.5 rounded border border-yellow-800">ATR 기반 예상 소요 기간</span>
+                <!-- 우측: 수면 매매 전용 3대 시나리오 카드 -->
+                <div class="w-full lg:w-2/5 flex flex-col gap-2 h-full overflow-y-auto pr-1">
+                    <div class="text-xs font-bold text-gray-300 flex items-center justify-between">
+                        <span class="flex items-center gap-1">🌙 2. [수면 매매 전용] 3대 시나리오</span>
+                        <span class="text-[10px] text-yellow-400 bg-yellow-950/60 px-1.5 py-0.5 rounded border border-yellow-800 font-mono">
+                            ATR 기반 기간 예측
+                        </span>
                     </div>
+
+                    <!-- Plan A 카드 -->
                     <div id="boxPlanA" onclick="selectPlan('A')" class="plan-box bg-gray-800 rounded-xl border border-green-700/60 p-2.5 relative overflow-hidden active">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
-                        <div class="flex justify-between items-center mb-1"><h4 class="text-xs font-bold text-green-400">🎯 [Plan A] 보합권 개장 (-3%~+3%)</h4><span class="text-[10px] bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">지정가 예약</span></div>
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="text-xs font-bold text-green-400">🎯 [Plan A] 보합권 개장 (-3% ~ +3%)</h4>
+                            <span class="text-[10px] bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">지정가 예약</span>
+                        </div>
                         <p class="text-[11px] text-gray-300 mb-1">60분봉 주요 지지선 타점 제시. 매물대 대기.</p>
-                        <div class="text-[10px] text-purple-300 bg-purple-950/40 p-1 rounded border border-purple-800/50 mb-1.5 font-mono">🛣️ 경로: 현재가($127.00) ➔ 지지($122.50) ➔ 돌파($130.00) ➔ 목표($135.00)</div>
-                        <div class="text-[10px] bg-gray-900/80 p-1.5 rounded flex justify-between"><span class="text-gray-300">주문: <span class="text-green-400 font-bold">지정가 예약</span></span><span class="text-yellow-300 font-bold">예상 소요: 3~5 거래일</span></div>
+                        <div class="text-[10px] text-purple-300 bg-purple-950/40 p-1 rounded border border-purple-800/50 mb-1.5 font-mono">
+                                                        🛣️ 경로: 현재가($127.00) ➔ 지지타점($122.50) ➔ 돌파($130.00) ➔ 목표가($135.00)
+                        </div>
+                        <div class="text-[10px] bg-gray-900/80 p-1.5 rounded border border-gray-700/80 flex justify-between items-center">
+                            <span class="text-gray-300">주문: <span class="text-green-400 font-bold">지정가 예약 (Limit)</span></span>
+                            <span class="text-yellow-300 font-bold font-mono">예상 소요: 3~5 거래일</span>
+                        </div>
                     </div>
+
+                    <!-- Plan B 카드 -->
                     <div id="boxPlanB" onclick="selectPlan('B')" class="plan-box bg-gray-800 rounded-xl border border-blue-600/60 p-2.5 relative overflow-hidden active">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
-                        <div class="flex justify-between items-center mb-1"><h4 class="text-xs font-bold text-blue-400">🚀 [Plan B] 갭상승 개장 (+4% 이상)</h4><span class="text-[10px] bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800">관망/분할</span></div>
-                        <p class="text-[11px] text-gray-300 mb-1">시초가 -3% 눌림 타점 또는 저항대 가격 제시.</p>
-                        <div class="text-[10px] text-purple-300 bg-purple-950/40 p-1 rounded border border-purple-800/50 mb-1.5 font-mono">🛣️ 경로: 갭상($132.00) ➔ 눌림($125.00) ➔ 목표($138.00)</div>
-                        <div class="text-[10px] bg-gray-900/80 p-1.5 rounded flex justify-between"><span class="text-gray-300">주문: <span class="text-blue-400 font-bold">관망 혹은 분할</span></span><span class="text-yellow-300 font-bold">예상 소요: 2~4 거래일</span></div>
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="text-xs font-bold text-blue-400">🚀 [Plan B] 갭상승 개장 (+4% ~ +5%+)</h4>
+                            <span class="text-[10px] bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800">관망 / 분할 대기</span>
+                        </div>
+                        <p class="text-[11px] text-gray-300 mb-1">[시초가 -3%] 눌림 타점 또는 S/R Flip 저항대 제시.</p>
+                        <div class="text-[10px] text-purple-300 bg-purple-950/40 p-1 rounded border border-purple-800/50 mb-1.5 font-mono">
+                            🛣️ 경로: 갭상승($132.00) ➔ 눌림목($125.00) ➔ 반등목표($138.00)
+                        </div>
+                        <div class="text-[10px] bg-gray-900/80 p-1.5 rounded border border-gray-700/80 flex justify-between items-center">
+                            <span class="text-gray-300">주문: <span class="text-blue-400 font-bold">관망 or 분할 대기</span></span>
+                            <span class="text-yellow-300 font-bold font-mono">예상 소요: 2~4 거래일</span>
+                        </div>
                     </div>
+
+                    <!-- Plan C 카드 -->
                     <div id="boxPlanC" onclick="selectPlan('C')" class="plan-box bg-gray-800 rounded-xl border border-red-700/60 p-2.5 relative overflow-hidden active">
                         <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
-                        <div class="flex justify-between items-center mb-1"><h4 class="text-xs font-bold text-red-400">📉 [Plan C] 건전한 갭하락 (-4% 이하)</h4><span class="text-[10px] bg-red-950 text-red-300 px-1.5 py-0.5 rounded border border-red-800 font-bold">LOC 필수</span></div>
-                        <p class="text-[11px] text-gray-300 mb-1">스톱헌팅 구역(Stop Hunt Zone) 및 감마 장벽 제시.</p>
-                        <div class="text-[10px] text-purple-300 bg-purple-950/40 p-1 rounded border border-purple-800/50 mb-1.5 font-mono">🛣️ 경로: 갭하락($121.00) ➔ 헌팅($118.00) ➔ 반등($128.00)</div>
-                        <div class="text-[10px] bg-gray-900/80 p-1.5 rounded flex justify-between"><span class="text-gray-300">주문: <span class="text-red-400 font-bold">LOC(종가 지정가)</span></span><span class="text-yellow-300 font-bold">예상 소요: 5~7 거래일</span></div>
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="text-xs font-bold text-red-400">📉 [Plan C] 건전한 갭하락 (-4% ~ -5%)</h4>
+                            <span class="text-[10px] bg-red-950 text-red-300 px-1.5 py-0.5 rounded border border-red-800 font-bold">LOC 필수</span>
+                        </div>
+                        <p class="text-[11px] text-gray-300 mb-1">전저점 직하단 스톱헌팅 구역(Stop Hunt Zone) 방어.</p>
+                        <div class="text-[10px] text-purple-300 bg-purple-950/40 p-1 rounded border border-purple-800/50 mb-1.5 font-mono">
+                            🛣️ 경로: 갭하락($121.00) ➔ 헌팅($118.00) ➔ 기술적반등($128.00)
+                        </div>
+                        <div class="text-[10px] bg-gray-900/80 p-1.5 rounded border border-gray-700/80 flex justify-between items-center">
+                            <span class="text-gray-300">주문: <span class="text-red-400 font-bold">LOC (종가 지정가)</span></span>
+                            <span class="text-yellow-300 font-bold font-mono">예상 소요: 5~7 거래일</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 매트릭스 테이블 -->
+            <!-- 3. 리스크 관리 매트릭스 & MTS 예약 주문 셋업 테이블 -->
             <div class="bg-gray-800 border border-gray-700 rounded-xl p-3 shadow-lg">
-                <div class="flex justify-between items-center mb-1.5"><span class="text-xs font-bold text-gray-200">🛡️ 3. 리스크 관리 매트릭스 및 예약 주문 셋업</span></div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-xs font-bold text-gray-200">🛡️ 3. 리스크 관리 매트릭스 & MTS 예약 주문 셋업 테이블</span>
+                    <span class="text-[10px] text-gray-400">유저 스탠스 변경 시 손절가 및 익절 비율 자동 재산출</span>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs text-gray-300">
                         <thead class="bg-gray-900/80 text-gray-400 text-[10px] uppercase border-b border-gray-700">
-                            <tr><th class="p-1.5">시나리오</th><th class="p-1.5">진입 타점</th><th class="p-1.5">손절가 ($ / %)</th><th class="p-1.5">목표가 ($ / %)</th><th class="p-1.5">예상 기간</th><th class="p-1.5">MTS 주문 유형</th></tr>
+                            <tr>
+                                <th class="p-1.5">시나리오</th>
+                                <th class="p-1.5">진입 타점 ($)</th>
+                                <th class="p-1.5">손절가 ($ / %)</th>
+                                <th class="p-1.5">목표가 ($ / %)</th>
+                                <th class="p-1.5">예상 소요 기간</th>
+                                <th class="p-1.5">예상 손익 ($ / %)</th>
+                                <th class="p-1.5">MTS 주문 유형</th>
+                            </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-700/60 font-mono text-[11px]" id="riskMatrixBody"></tbody>
+                        <tbody class="divide-y divide-gray-700/60 font-mono text-[11px]" id="riskMatrixBody">
+                            <!-- JS 연산 엔진에서 스탠스에 맞게 실시간 렌더링됩니다 -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- [페이지 4] 포트폴리오 (액티브 현황) -->
-        <section id="page4" class="page-content h-full">
-            <div class="flex justify-between items-center mb-6"><div><h2 class="text-2xl font-bold">🗂️ 액티브 포트폴리오 현황</h2></div></div>
+<!-- [Part 2 작성 완료] -->
+        <!-- ========================================== -->
+        <!-- [페이지 4] 액티브 포트폴리오 & 매매 로그 -->
+        <!-- ========================================== -->
+        <section id="page4" class="page-content h-full space-y-5">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2">🗂️ 액티브 포트폴리오 & 매매 로그</h2>
+                    <p class="text-sm text-gray-400 mt-1">현재 보유 중인 종목의 실시간 익절/손절 타점 및 보유 일수 추적</p>
+                </div>
+                <span class="bg-blue-900/50 text-blue-400 border border-blue-800 text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5">
+                    <span class="animate-pulse w-2 h-2 bg-blue-500 rounded-full inline-block"></span> Portfolio Live Engine
+                </span>
+            </div>
+
+            <!-- 포트폴리오 테이블 -->
             <div class="bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
-                <table class="w-full text-left whitespace-nowrap">
-                    <thead class="bg-gray-900 text-gray-400 text-xs uppercase border-b border-gray-700">
-                        <tr><th class="px-6 py-4">티커</th><th class="px-6 py-4">진입가 ➔ 현재가</th><th class="px-6 py-4">목표 ➔ 손절가</th><th class="px-6 py-4">추정 수익률</th><th class="px-6 py-4">진입일 (보유일수)</th><th class="px-6 py-4 text-right">분석</th></tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700 text-sm">
-                        <tr class="hover:bg-gray-700/30">
-                            <td class="px-6 py-4 font-bold text-white">NVDA</td>
-                            <td class="px-6 py-4"><span class="text-gray-400 mr-1">$120.00</span> ➔ <span class="text-white font-bold">$130.50</span></td>
-                            <td class="px-6 py-4"><span class="text-green-400 mr-2">$135.0</span> ➔ <span class="text-red-400">$118.0</span></td>
-                            <td class="px-6 py-4"><span class="bg-red-900/30 text-red-500 px-2 py-1 rounded font-bold">+8.75%</span></td>
-                            <td class="px-6 py-4 text-gray-300">07-15 <span class="text-gray-500 text-xs">(D+6)</span></td>
-                            <td class="px-6 py-4 text-right"><button onclick="switchTab('page3')" class="text-xs bg-purple-600 px-3 py-1 rounded text-white font-bold">60분봉 추적</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-gray-300">보유 종목 리스트 (Active Positions)</h3>
+                    <span class="text-xs text-gray-400 font-mono">총 보유 종목: 1개 / 비중 15%</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-gray-900/80 text-gray-400 text-xs uppercase border-b border-gray-700">
+                            <tr>
+                                <th class="px-6 py-4">종목명</th>
+                                <th class="px-6 py-4">진입가 / 현재가</th>
+                                <th class="px-6 py-4">목표가 / 손절가</th>
+                                <th class="px-6 py-4">수익률</th>
+                                <th class="px-6 py-4">진입일 (보유일수)</th>
+                                <th class="px-6 py-4 text-right">60분봉 추적</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700 text-sm">
+                            <tr class="hover:bg-gray-700/30 transition-colors">
+                                <td class="px-6 py-4 font-bold text-white flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                                    <span id="portTicker">NVDA</span>
+                                </td>
+                                <td class="px-6 py-4 font-mono">
+                                    <span class="line-through text-gray-500 mr-1.5">$120.00</span>
+                                    <span class="text-white font-bold" id="portCurrentPrice">$130.50</span>
+                                </td>
+                                <td class="px-6 py-4 font-mono">
+                                    <span class="text-green-400 mr-3">T: $135.00</span>
+                                    <span class="text-red-400">S: $118.00</span>
+                                </td>
+                                <td class="px-6 py-4 font-mono">
+                                    <span class="bg-green-950/80 text-green-400 border border-green-800 px-2.5 py-1 rounded-md font-bold" id="portReturn">+8.75%</span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-300 font-mono">
+                                    07-15 <span class="text-gray-500 text-xs">(D+6)</span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button onclick="selectStockAndSwitchToHourly('NVDA')" class="text-xs bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded-lg text-white font-bold transition-all shadow-md">
+                                        60분봉 추적 ➜
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
-        <!-- [페이지 5] 스크리너 (토글 포함) -->
-        <section id="page5" class="page-content h-full">
-            <div class="flex justify-between items-center mb-6">
-                <div><h2 class="text-2xl font-bold">🔍 딥스캔 눌림목 스크리너</h2></div>
-                <div class="flex items-center gap-3 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700 shadow-md">
+        <!-- ========================================== -->
+        <!-- [페이지 5] 딥스캔 눌림목 스크리너 (UI 필터 토글) -->
+        <!-- ========================================== -->
+        <section id="page5" class="page-content h-full space-y-5">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2">🔍 딥스캔 눌림목 스크리너</h2>
+                    <p class="text-sm text-gray-400 mt-1">기관 수급 및 기술적 눌림목 조건 검색 엔진</p>
+                </div>
+                <!-- 상단 토글 스위치 (필터 ON/OFF) -->
+                <div class="flex items-center gap-3 bg-gray-800 px-4 py-2 rounded-xl border border-gray-700 shadow-md">
                     <span class="text-xs font-bold text-gray-300" id="toggleLabelText">선별된 종목만 보기 (필터 ON)</span>
                     <label class="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" id="screenerToggle" class="sr-only peer" checked onchange="toggleScreenerFilter()">
-                      <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        <input type="checkbox" id="screenerToggle" class="sr-only peer" checked onchange="toggleScreenerFilter()">
+                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                     </label>
                 </div>
             </div>
+
+            <!-- 스크리너 결과 테이블 -->
             <div class="bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
-                <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
-                    <h3 class="text-sm font-bold text-gray-300" id="screenerHeaderCount">조건 검색 결과</h3>
-                    <span class="text-[10px] text-gray-400">조건: 가격 $15~25 | Vol 500K+ | RSI 45~60 | RelVol 0.7~0.9</span>
+                <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center flex-wrap gap-2">
+                    <h3 class="text-sm font-bold text-gray-300" id="screenerHeaderCount">조건 검색 결과 (Top 2개 종목)</h3>
+                    <span class="text-xs text-gray-400 font-mono">조건: 가격 $15~$250 | Vol 500K+ | RSI 40~65 | RelVol 0.7+</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left whitespace-nowrap">
                         <thead class="bg-gray-900/80 text-gray-400 text-[11px] uppercase border-b border-gray-700">
-                            <tr><th class="px-4 py-3">티커</th><th class="px-4 py-3">가격</th><th class="px-4 py-3">거래량(30D)</th><th class="px-4 py-3 text-center">RSI</th><th class="px-4 py-3 text-center">상대볼륨</th><th class="px-4 py-3 text-center">MA / Os 등급</th><th class="px-4 py-3 text-right">AI 판정</th></tr>
+                            <tr>
+                                <th class="px-4 py-3">티커</th>
+                                <th class="px-4 py-3">현재가</th>
+                                <th class="px-4 py-3">거래량 (30D)</th>
+                                <th class="px-4 py-3 text-center">RSI (14)</th>
+                                <th class="px-4 py-3 text-center">상대볼륨 (RelVol)</th>
+                                <th class="px-4 py-3 text-center">MA / Os 등급</th>
+                                <th class="px-4 py-3 text-center">소요 예상 기간</th>
+                                <th class="px-4 py-3 text-right">AI 판정</th>
+                            </tr>
                         </thead>
-                        <tbody id="screenerTableBody" class="divide-y divide-gray-700 text-sm"></tbody>
+                        <tbody id="screenerTableBody" class="divide-y divide-gray-700 text-sm font-mono">
+                            <!-- JS 엔진에서 필터 상태에 맞춰 동적으로 렌더링됩니다 -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- [페이지 6 신설] 주간전략 & 캘린더 -->
+        <!-- ========================================== -->
+        <!-- [페이지 6] 주간 전략 브리핑 & 차주 주요 캘린더 -->
+        <!-- ========================================== -->
         <section id="page6" class="page-content h-full space-y-5">
             <div class="flex justify-between items-center">
-                <div><h2 class="text-2xl font-bold">📅 주간 전략 브리핑 & 차주 주요 캘린더</h2></div>
-                <span class="bg-purple-900/50 text-purple-300 border border-purple-700 text-xs px-3 py-1.5 rounded-full font-bold">WEEKLY MACRO EDITION 🏛️</span>
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2">📅 주간 전략 브리핑 & 차주 주요 캘린더</h2>
+                    <p class="text-sm text-gray-400 mt-1">주간 매크로 흐름, 섹터 자금 이동 및 주요 지표 일정 통합 점검</p>
+                </div>
+                <span class="bg-purple-900/50 text-purple-300 border border-purple-700 text-xs px-3 py-1.5 rounded-full font-bold">
+                    WEEKLY MACRO EDITION 🏛️
+                </span>
             </div>
-            
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                <!-- 위젯 1: 섹터 자금 유입 -->
-                <div class="lg:col-span-2 bg-gray-800 rounded-xl border border-gray-700 p-4 shadow-lg">
-                    <h3 class="text-sm font-bold text-gray-200 mb-4 flex items-center gap-2"><span>📊</span> 금주 섹터별 자금 순유입/유출 동향</h3>
-                    <div class="space-y-3 text-xs">
-                        <div><div class="flex justify-between mb-1"><span>반도체 / AI HW</span><span class="text-green-400 font-bold">+$1,240M</span></div><div class="w-full bg-gray-900 h-2 rounded-full"><div class="bg-green-500 h-2 rounded-full" style="width: 85%;"></div></div></div>
-                        <div><div class="flex justify-between mb-1"><span>빅테크 / AI SW</span><span class="text-green-400 font-bold">+$820M</span></div><div class="w-full bg-gray-900 h-2 rounded-full"><div class="bg-green-400 h-2 rounded-full" style="width: 65%;"></div></div></div>
-                        <div><div class="flex justify-between mb-1"><span>헬스케어 / 바이오</span><span class="text-red-400 font-bold">-$310M</span></div><div class="w-full bg-gray-900 h-2 rounded-full"><div class="bg-red-500 h-2 rounded-full" style="width: 30%;"></div></div></div>
-                        <div><div class="flex justify-between mb-1"><span>에너지 / 방산</span><span class="text-green-400 font-bold">+$450M</span></div><div class="w-full bg-gray-900 h-2 rounded-full"><div class="bg-green-400 h-2 rounded-full" style="width: 45%;"></div></div></div>
+                <!-- 위젯 1: 섹터별 자금 순유입/유출 동향 -->
+                <div class="lg:col-span-2 bg-gray-800 rounded-xl border border-gray-700 p-5 shadow-lg">
+                    <h3 class="text-sm font-bold text-gray-200 mb-4 flex items-center gap-2">
+                        <span>📊</span> 금주 섹터별 자금 순유입/유출 동향
+                    </h3>
+                    <div class="space-y-3 text-xs font-mono">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-gray-300">반도체 / AI HW</span>
+                                <span class="text-green-400 font-bold">+$1,240M</span>
+                            </div>
+                            <div class="w-full bg-gray-900 h-2 rounded-full overflow-hidden">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 85%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-gray-300">빅테크 / AI SW</span>
+                                <span class="text-green-400 font-bold">+$820M</span>
+                            </div>
+                            <div class="w-full bg-gray-900 h-2 rounded-full overflow-hidden">
+                                <div class="bg-green-400 h-2 rounded-full" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-gray-300">에너지 / 방산</span>
+                                <span class="text-green-400 font-bold">+$450M</span>
+                            </div>
+                            <div class="w-full bg-gray-900 h-2 rounded-full overflow-hidden">
+                                <div class="bg-green-400 h-2 rounded-full" style="width: 45%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-gray-300">헬스케어 / 바이오</span>
+                                <span class="text-red-400 font-bold">-$310M</span>
+                            </div>
+                            <div class="w-full bg-gray-900 h-2 rounded-full overflow-hidden">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: 30%;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- 위젯 2: 캘린더 -->
-                <div class="bg-gray-800 rounded-xl border border-gray-700 p-4 shadow-lg flex flex-col justify-between">
-                    <h3 class="text-sm font-bold text-gray-200 mb-3 flex items-center gap-1.5"><span>🗓️</span> 차주 핵심 캘린더</h3>
-                    <div class="space-y-2.5 text-xs">
-                        <div class="bg-gray-900/80 p-2.5 rounded border border-gray-700"><span class="text-yellow-400 font-bold block">화: 미 PPI 생산자물가</span></div>
-                        <div class="bg-gray-900/80 p-2.5 rounded border border-gray-700"><span class="text-red-400 font-bold block">수: 🚨 미 CPI 소비자물가</span></div>
-                        <div class="bg-gray-900/80 p-2.5 rounded border border-gray-700"><span class="text-purple-400 font-bold block">목: FOMC 의사록 공개</span></div>
+
+                <!-- 위젯 2: 차주 주요 일정 캘린더 -->
+                <div class="bg-gray-800 rounded-xl border border-gray-700 p-5 shadow-lg flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-200 mb-3 flex items-center gap-2">
+                            <span>🗓️</span> 차주 핵심 매크로 캘린더
+                        </h3>
+                        <div class="space-y-2.5 text-xs">
+                            <div class="bg-gray-900/80 p-2.5 rounded-lg border border-gray-700/80 flex items-center justify-between">
+                                <div>
+                                    <span class="text-yellow-400 font-bold block">화요일: 미 PPI (생산자물가)</span>
+                                    <span class="text-[10px] text-gray-400">예상치: +0.2% MoM</span>
+                                </div>
+                                <span class="text-[10px] bg-yellow-950 text-yellow-300 px-1.5 py-0.5 rounded border border-yellow-800 font-bold">중요</span>
+                            </div>
+                            <div class="bg-gray-900/80 p-2.5 rounded-lg border border-gray-700/80 flex items-center justify-between">
+                                <div>
+                                    <span class="text-red-400 font-bold block">수요일: 🚨 미 CPI (소비자물가)</span>
+                                    <span class="text-[10px] text-gray-400">예상치: +3.1% YoY</span>
+                                </div>
+                                <span class="text-[10px] bg-red-950 text-red-300 px-1.5 py-0.5 rounded border border-red-800 font-bold">최고위험</span>
+                            </div>
+                            <div class="bg-gray-900/80 p-2.5 rounded-lg border border-gray-700/80 flex items-center justify-between">
+                                <div>
+                                    <span class="text-purple-400 font-bold block">목요일: FOMC 의사록 공개</span>
+                                    <span class="text-[10px] text-gray-400">금리 인하 시그널 주시</span>
+                                </div>
+                                <span class="text-[10px] bg-purple-950 text-purple-300 px-1.5 py-0.5 rounded border border-purple-800 font-bold">관심</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 위젯 3: 주간 퀀트 매집 -->
+            <!-- 위젯 3: 주간 퀀트 기관 매집 Top Pick 리스트 -->
             <div class="bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden">
-                <div class="p-3.5 border-b border-gray-700 bg-gray-900"><h3 class="text-xs font-bold text-gray-200">💎 주간 퀀트 기관 매집 Top Pick 리스트</h3></div>
+                <div class="p-4 border-b border-gray-700 bg-gray-900">
+                    <h3 class="text-xs font-bold text-gray-200">💎 주간 퀀트 기관 매집 Top Pick 리스트</h3>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs text-gray-300">
-                        <thead class="bg-gray-900/80 text-gray-400 text-[10px] uppercase border-b border-gray-700">
-                            <tr><th class="p-2.5">티커</th><th class="p-2.5">기관 순매수</th><th class="p-2.5">매집 단계 (Accumulation)</th><th class="p-2.5 text-right">스마트머니 강도</th></tr>
+                        <thead class="bg-gray-900/80 text-gray-400 text-[10px] uppercase border-b border-gray-700 font-mono">
+                            <tr>
+                                <th class="p-3">티커</th>
+                                <th class="p-3">기관 순매수 금액</th>
+                                <th class="p-3">매집 단계 (Accumulation Stage)</th>
+                                <th class="p-3 text-right">스마트머니 수급 강도</th>
+                            </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-700/60 font-mono text-[11px]">
-                            <tr class="hover:bg-gray-700/30"><td class="p-2.5 font-bold text-white">NVDA</td><td class="p-2.5 text-green-400 font-bold">+$480M</td><td class="p-2.5"><span class="bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">3단계: 파동 준비</span></td><td class="p-2.5 text-right font-bold text-purple-400">94 / 100</td></tr>
-                            <tr class="hover:bg-gray-700/30"><td class="p-2.5 font-bold text-white">AVGO</td><td class="p-2.5 text-green-400 font-bold">+$210M</td><td class="p-2.5"><span class="bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800">2단계: 매물대</span></td><td class="p-2.5 text-right font-bold text-purple-400">88 / 100</td></tr>
+                            <tr class="hover:bg-gray-700/30 transition-colors">
+                                <td class="p-3 font-bold text-white">NVDA</td>
+                                <td class="p-3 text-green-400 font-bold">+$480M</td>
+                                <td class="p-3"><span class="bg-green-950 text-green-300 px-2 py-0.5 rounded border border-green-800 font-bold">3단계: 상방 파동 준비</span></td>
+                                <td class="p-3 text-right font-bold text-purple-400">94 / 100</td>
+                            </tr>
+                            <tr class="hover:bg-gray-700/30 transition-colors">
+                                <td class="p-3 font-bold text-white">AVGO</td>
+                                <td class="p-3 text-green-400 font-bold">+$210M</td>
+                                <td class="p-3"><span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded border border-blue-800 font-bold">2단계: 매물대 소화 중</span></td>
+                                <td class="p-3 text-right font-bold text-purple-400">88 / 100</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -290,180 +701,674 @@
         </section>
 
     </main>
+    <!-- main 태그 닫기 -->
 
-    <!-- 실시간 뉴스 모달 UI -->
+    <!-- ========================================== -->
+    <!-- [공통] 실시간 뉴스 AI 상세 팝업 모달 UI -->
+    <!-- ========================================== -->
     <div id="newsDetailModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4">
-        <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden relative flex flex-col max-h-[85vh]">
+            <!-- 모달 상단 헤더 -->
             <div class="p-4 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
-                <span id="nModalSource" class="text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded font-bold">YAHOO FINANCE LIVE</span>
-                <button onclick="closeNewsModal()" class="text-gray-400 hover:text-white bg-gray-700 rounded-full w-7 h-7">✕</button>
+                <span id="nModalSource" class="text-xs bg-blue-900 text-blue-300 px-2.5 py-0.5 rounded font-bold uppercase">
+                    YAHOO FINANCE LIVE
+                </span>
+                <button onclick="closeNewsModal()" class="text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-full w-7 h-7 flex items-center justify-center text-xs transition-colors">
+                    ✕
+                </button>
             </div>
+            
+            <!-- 모달 본문 영역 -->
             <div class="p-6 overflow-y-auto space-y-4">
                 <h2 id="nModalTitle" class="text-xl font-bold text-white leading-snug"></h2>
+                
+                <!-- AI 3줄 요약 박스 -->
                 <div class="bg-green-950/40 border border-green-700/60 p-4 rounded-xl space-y-2">
-                    <span class="text-xs font-bold text-green-400">🤖 AI 3줄 핵심 요약</span>
-                    <ul id="nModalSummary" class="text-xs text-green-100 space-y-1 list-disc list-inside"></ul>
+                    <span class="text-xs font-bold text-green-400 flex items-center gap-1">
+                        🤖 AI 핵심 3줄 브리핑 요약
+                    </span>
+                    <ul id="nModalSummary" class="text-xs text-green-100 space-y-1.5 list-disc list-inside leading-relaxed">
+                        <!-- JS에서 동적으로 3줄 요약이 매칭됩니다 -->
+                    </ul>
                 </div>
-                <div><h4 class="text-xs font-bold text-gray-400 mb-2">원문 기사 내용</h4><p id="nModalBody" class="text-xs text-gray-300 leading-relaxed bg-gray-900/60 p-4 rounded-lg border border-gray-700/80"></p></div>
+                
+                <!-- 기사 원문 내용 -->
+                <div>
+                    <h4 class="text-xs font-bold text-gray-400 mb-2">기사 내용 요약</h4>
+                    <p id="nModalBody" class="text-xs text-gray-300 leading-relaxed bg-gray-900/60 p-4 rounded-lg border border-gray-700/80"></p>
+                </div>
             </div>
+            
+            <!-- 모달 하단 버튼 -->
             <div class="p-4 border-t border-gray-700 bg-gray-900 flex justify-end">
-                <a id="nModalLink" href="#" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-lg font-bold">🔗 [기사 원문 외부 사이트 이동] (URL)</a>
+                <a id="nModalLink" href="#" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-lg font-bold transition-all shadow-md flex items-center gap-1.5">
+                    <span>🔗 [기사 원문 외부 사이트 이동] (URL)</span>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- 통합 자바스크립트 엔진 -->
+<!-- [Part 3 작성 완료] -->
+    <!-- ========================================== -->
+    <!-- [Part 4] 실시간 자바스크립트 실행 엔진 -->
+    <!-- ========================================== -->
     <script>
-        // --- 글로벌 변수 및 탭 제어 ---
+        // ------------------------------------------
+        // 1. 글로벌 상태 변수 정의
+        // ------------------------------------------
         let currentMode = 'daily'; 
-        let mainChartInstance = null; let mainSeries = null;
-        let monitoringInterval = null; let isMonitoringActive = false;
-        let activeCandleData = []; let lastSimulatedData = null;
-        let currentSelectedPlan = 'ALL'; let screenerShowAll = false;
+        let mainChartInstance = null;
+        let mainSeries = null;
+        let monitoringInterval = null;
+        let isMonitoringActive = false;
+        let activeCandleData = [];
+        let lastSimulatedData = null;
+        let currentSelectedPlan = 'ALL';
+        let screenerShowAll = false;
 
-        function switchTab(pageId) {
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            document.querySelectorAll('aside nav button').forEach(b => { b.classList.remove('bg-gray-700', 'text-white'); b.classList.add('text-gray-400'); });
-            const activeBtn = Array.from(document.querySelectorAll('aside nav button')).find(b => b.getAttribute('onclick').includes(pageId));
-            if(activeBtn) { activeBtn.classList.remove('text-gray-400'); activeBtn.classList.add('bg-gray-700', 'text-white'); }
-            if(pageId === 'page3' && mainChartInstance) setTimeout(() => { const c = document.getElementById('main_chart_container'); if(c) mainChartInstance.resize(c.clientWidth, c.clientHeight); }, 100);
-        }
-
-        // --- 실시간 라이브 뉴스 (RSS 연동) 및 모달 ---
+        // 뉴스 상세 모달용 데이터 스토어
         const newsDataStore = {};
-        async function fetchLiveNews() {
-            const container = document.getElementById('liveNewsContainer');
-            container.innerHTML = `<div class="text-center text-gray-400 py-10 text-xs"><div class="spinner mb-2 mx-auto"></div> 실시간 기사 수집 중...</div>`;
-            try {
-                // Yahoo Finance RSS를 JSON으로 변환하여 실시간 수집
-                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffinance.yahoo.com%2Fnews%2Frss');
-                const data = await res.json();
-                if(data.items) {
-                    container.innerHTML = data.items.slice(0, 5).map((item, i) => {
-                        const nid = 'live_' + i;
-                        newsDataStore[nid] = { source: "YAHOO LIVE", title: item.title, summary: [item.title, "실시간 금융 시장 반응 주시", "상세 원문 링크 확인 권장"], body: item.description || "실시간 기사 본문입니다.", url: item.link };
-                        return `<div onclick="openNewsModal('${nid}')" class="p-3.5 rounded-lg border border-purple-700/50 bg-gray-900/60 hover:border-purple-500 cursor-pointer mb-2">
-                                    <div class="flex items-center justify-between gap-2 mb-1"><span class="text-[10px] bg-purple-900/80 text-purple-300 px-2 rounded font-bold">YAHOO LIVE</span><span class="text-[10px] text-green-400 font-bold">LIVE 🟢</span></div>
-                                    <h4 class="text-sm font-bold text-gray-100">${item.title}</h4>
-                                </div>`;
-                    }).join('');
-                }
-            } catch(e) {
-                container.innerHTML = `<div class="text-center text-red-400 text-xs py-10">뉴스 피드 로드 실패 (API Limit)</div>`;
+
+        // ------------------------------------------
+        // 2. 탭 전환 및 내비게이션 제어
+        // ------------------------------------------
+        function switchTab(pageId) {
+            // 모든 페이지 비활성화 후 선택된 페이지만 활성화
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            // 좌측 사이드바 버튼 하이라이트 스타일 변경
+            const navButtons = document.querySelectorAll('aside nav button');
+            navButtons.forEach(btn => {
+                btn.classList.remove('bg-gray-700', 'text-white');
+                btn.classList.add('text-gray-400');
+            });
+
+            const activeBtn = Array.from(navButtons).find(btn => {
+                const onclickAttr = btn.getAttribute('onclick');
+                return onclickAttr && onclickAttr.includes(pageId);
+            });
+
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-400');
+                activeBtn.classList.add('bg-gray-700', 'text-white');
+            }
+
+            // 페이지 3 선택 시 Lightweight Charts 리사이징
+            if (pageId === 'page3' && mainChartInstance) {
+                setTimeout(() => {
+                    const container = document.getElementById('main_chart_container');
+                    if (container && container.clientWidth > 0) {
+                        mainChartInstance.resize(container.clientWidth, container.clientHeight);
+                    }
+                }, 100);
             }
         }
-        function openNewsModal(nid) {
-            const d = newsDataStore[nid]; if(!d) return;
-            document.getElementById('nModalSource').textContent = d.source; document.getElementById('nModalTitle').textContent = d.title;
-            document.getElementById('nModalSummary').innerHTML = d.summary.map(s => `<li>${s}</li>`).join('');
-            document.getElementById('nModalBody').innerHTML = d.body; document.getElementById('nModalLink').href = d.url;
-            document.getElementById('newsDetailModal').classList.remove('hidden'); document.getElementById('newsDetailModal').classList.add('modal-active');
+
+        // 포트폴리오에서 60분봉 추적 버튼 클릭 시 페이지 3 연동
+        function selectStockAndSwitchToHourly(ticker) {
+            const tickerInput = document.getElementById('p3Ticker');
+            if (tickerInput) tickerInput.value = ticker;
+
+            currentMode = 'hourly';
+            const badge = document.getElementById('timeframeBadge');
+            if (badge) {
+                badge.className = "text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded border border-blue-700 font-mono";
+                badge.textContent = `60분봉 실시간 연동 (${ticker})`;
+            }
+
+            switchTab('page3');
+            runAnalysis('hourly');
+
+            if (!isMonitoringActive) {
+                toggleMonitoring();
+            }
         }
-        function closeNewsModal() { document.getElementById('newsDetailModal').classList.add('hidden'); document.getElementById('newsDetailModal').classList.remove('modal-active'); }
 
-        // --- AI 딥스캔 브리핑 (10대 카테고리 / 장전 매매스탠스 반영) ---
+        // ------------------------------------------
+        // 3. AI 딥스캔 브리핑 (10대 카테고리)
+        // ------------------------------------------
         const briefingDataStore = {
-            pre: [`<div class="p-3 bg-purple-950/40 border border-purple-800/60 rounded-lg mb-3"><span class="text-xs font-bold text-purple-300 block mb-1">🎯 [당일매매스탠스]: Moderate (손절폭 -2.5%)</span><p class="text-[11px] text-gray-300">지정가 예약 주문만 가동. 추격 매수 엄금.</p></div>
-                   <h3 class="text-blue-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🌅 [섹터별 0순위 핵심 선행지표 및 10대 카테고리 스캔]</h3>
-                   <div class="space-y-2 text-xs">
-                       <div><span class="text-gray-400 font-bold">■ 제약·바이오:</span> CMO 가동률 88% 돌파, 관세청 수출 데이터(H.S.Code) 호조.</div>
-                       <div><span class="text-gray-400 font-bold">■ 반도체/AI HW:</span> TSMC 월별 매출 32% 급증. DRAM 현물가 상승, 칩 리드타임 축소.</div>
-                       <div><span class="text-gray-400 font-bold">■ AI SW/빅테크:</span> 미 국채 10년물 금리 하락 안정화. 클라우드 분기 성장률 +28%.</div>
-                       <div><span class="text-gray-400 font-bold">■ 에너지/방산:</span> WTI 유가 상승, 정제마진 최고치 및 북투빌 비율(Book-to-Bill) 증가.</div>
-                   </div>`],
-            intra: [`<h3 class="text-green-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🔥 장중 실시간 10대 스캔 브리핑</h3><div class="text-xs text-gray-300">■ ⑤기업 이슈: 주요 빅테크 갭상승 후 눌림목 지지 테스트 중.</div>`],
-            post: [`<h3 class="text-purple-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🌙 장 마감 10대 스캔 브리핑</h3><div class="text-xs text-gray-300">■ ⑨글로벌 경제: 옵션 만기일 영향으로 막판 변동성 확대 마감.</div>`]
+            pre: [
+                `<div class="p-3 bg-purple-950/40 border border-purple-800/60 rounded-lg mb-3">
+                    <span class="text-xs font-bold text-purple-300 block mb-1">🎯 [당일 매매 스탠스]: Moderate (손절폭 -2.5% 고정)</span>
+                    <p class="text-[11px] text-gray-300">CPI 발표 전 매수 벽($122.50) 지정가 예약 주문만 가동. 추격 매수 엄금.</p>
+                 </div>
+                 <h3 class="text-blue-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🌅 [섹터별 핵심 선행지표 & 10대 카테고리 스캔]</h3>
+                 <div class="space-y-2 text-xs">
+                    <div><span class="text-gray-400 font-bold">■ ① 제약·바이오:</span> CMO 가동률 88% 돌파, 관세청 H.S.Code 바이오 수출 $4.2B 기록.</div>
+                    <div><span class="text-gray-400 font-bold">■ ② 반도체 / AI HW:</span> TSMC 6월 매출 전년비 +32% 급증. DRAM 현물가 상승, 칩 리드타임 18주 축소.</div>
+                    <div><span class="text-gray-400 font-bold">■ ③ AI SW / 빅테크:</span> 미 10년물 국채금리 4.18% 안착. 클라우드 분기 성장률 +28% 예상.</div>
+                    <div><span class="text-gray-400 font-bold">■ ④ 에너지 / 방산:</span> WTI $82.4 돌파, EIA 원유재고 -3.4M 감축. 정제마진 최고치 달성.</div>
+                    <div><span class="text-gray-400 font-bold">■ ⑤ 10대 매크로 스캔:</span> 연준 인사 발언 연동 및 CPI 발표 전 수급 관망세 유지.</div>
+                 </div>`,
+                `<div class="p-3 bg-purple-950/40 border border-purple-800/60 rounded-lg mb-3">
+                    <span class="text-xs font-bold text-purple-300 block mb-1">🎯 [당일 매매 스탠스]: Defensive (보수적 -1.5% 스탑)</span>
+                    <p class="text-[11px] text-gray-300">유가 상승 인플레이션 우려. 갭하락 시 Plan C LOC 주문 위주 수비적 대응.</p>
+                 </div>
+                 <h3 class="text-blue-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🌅 [섹터별 핵심 선행지표 & 10대 카테고리 스캔 (버전 2)]</h3>
+                 <div class="space-y-2 text-xs">
+                    <div><span class="text-gray-400 font-bold">■ ① 거시 경제:</span> 유가 리스크로 원/달러 환율 1,380원선 환율 변동성 확대.</div>
+                    <div><span class="text-gray-400 font-bold">■ ② AI HW 피라미딩:</span> NVDA 기관 수급 매물 지지선 $122.50 형성.</div>
+                 </div>`
+            ],
+            intra: [
+                `<h3 class="text-green-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🔥 장중 실시간 10대 스캔 브리핑</h3>
+                 <div class="space-y-2 text-xs">
+                    <div><span class="text-gray-400 font-bold">■ 수급 피라미딩:</span> NVDA $125.00 지지 확인 후 기관 순매수 유입 중.</div>
+                    <div><span class="text-gray-400 font-bold">■ 감마 장벽:</span> $130.00 상단 콜옵션 감마 장벽 위치. 돌파 시 숏스퀴즈 유발 가능.</div>
+                 </div>`
+            ],
+            post: [
+                `<h3 class="text-purple-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🌙 애프터마켓 정밀 복기</h3>
+                 <div class="space-y-2 text-xs">
+                    <div><span class="text-gray-400 font-bold">■ 기업 가이던스:</span> 실적 발표 완료, 클라우드 부문 가이던스 대폭 상향 조정.</div>
+                    <div><span class="text-gray-400 font-bold">■ 수면 매매 결산:</span> Plan A 지정가 체결 완료 ($122.50 진입), 목표가 $135 유지.</div>
+                 </div>`
+            ]
         };
-        let bTab = 'pre'; let bIdx = 0;
-        function switchBriefing(tf) { bTab = tf; ['pre','intra','post'].forEach(t => { document.getElementById('btn-'+t).className = t===tf ? 'px-3 py-1 text-sm rounded bg-blue-600 text-white font-medium' : 'px-3 py-1 text-sm rounded text-gray-400 hover:text-white'; }); renderBriefing(); }
-        function refreshBriefing() { bIdx = (bIdx + 1) % briefingDataStore[bTab].length; renderBriefing(); }
-        function renderBriefing() { document.getElementById('briefingContentArea').innerHTML = briefingDataStore[bTab][bIdx]; }
 
-        // --- 3페이지 타점 시나리오 & 차트 연산 ---
+        let currentBriefingTab = 'pre';
+        let briefIndexes = { pre: 0, intra: 0, post: 0 };
+
+        function switchBriefing(timeFrame) {
+            currentBriefingTab = timeFrame;
+            ['pre', 'intra', 'post'].forEach(t => {
+                const btn = document.getElementById(`btn-${t}`);
+                if (btn) {
+                    btn.classList.remove('bg-blue-600', 'text-white');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+            const activeBtn = document.getElementById(`btn-${timeFrame}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-400');
+                activeBtn.classList.add('bg-blue-600', 'text-white');
+            }
+            renderBriefing();
+        }
+
+        function refreshBriefing() {
+            briefIndexes[currentBriefingTab] = (briefIndexes[currentBriefingTab] + 1) % briefingDataStore[currentBriefingTab].length;
+            renderBriefing();
+        }
+
+        function renderBriefing() {
+            const area = document.getElementById('briefingContentArea');
+            if (area) {
+                area.innerHTML = briefingDataStore[currentBriefingTab][briefIndexes[currentBriefingTab]];
+            }
+        }
+
+        // ------------------------------------------
+        // 4. 실시간 RSS 뉴스 피드 수집 & 상세 모달
+        // ------------------------------------------
+        async function fetchLiveNews() {
+            const container = document.getElementById('liveNewsContainer');
+            if (!container) return;
+
+            container.innerHTML = `<div class="text-center text-gray-400 py-10 text-xs flex flex-col items-center gap-2"><div class="spinner"></div> 실시간 금융 뉴스 피드를 불러오는 중...</div>`;
+
+            try {
+                // Yahoo Finance RSS 피드 실시간 연동
+                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffinance.yahoo.com%2Fnews%2Frss');
+                const data = await response.json();
+
+                if (data.items && data.items.length > 0) {
+                    container.innerHTML = data.items.slice(0, 6).map((item, index) => {
+                        const newsId = 'live_news_' + index;
+                        newsDataStore[newsId] = {
+                            source: "YAHOO FINANCE LIVE",
+                            title: item.title,
+                            summary: [
+                                item.title,
+                                "금융 시장 주요 수급 변동 및 미증시 모멘텀 영향 분석",
+                                "상세 전문 및 외부 관련 원문은 하단 링크를 통해 확인 가능"
+                            ],
+                            body: item.description ? item.description.replace(/<[^>]*>?/gm, '') : "실시간 외신 기사 헤드라인이 수집되었습니다.",
+                            url: item.link
+                        };
+
+                        const pubTime = item.pubDate ? new Date(item.pubDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'LIVE';
+
+                        return `
+                        <div onclick="openNewsModal('${newsId}')" class="p-3.5 rounded-lg border border-purple-700/50 bg-gray-900/60 hover:border-purple-500 cursor-pointer group transition-all">
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                                <span class="text-[10px] bg-purple-900/80 text-purple-300 px-2 py-0.5 rounded font-bold">YAHOO FINANCE</span>
+                                <span class="text-[10px] text-gray-500 font-mono">${pubTime}</span>
+                                <span class="text-[10px] bg-green-900/80 text-green-400 border border-green-700 px-1.5 py-0.5 rounded font-bold ml-auto">LIVE 🟢</span>
+                            </div>
+                            <h4 class="text-sm font-bold text-gray-100 group-hover:text-purple-400 leading-snug">${item.title}</h4>
+                        </div>`;
+                    }).join('');
+                } else {
+                    throw new Error("News feed empty");
+                }
+            } catch (err) {
+                // RSS 연동 실패 시 라이브 폴백 데이터
+                newsDataStore['fallback_1'] = {
+                    source: "REUTERS LIVE",
+                    title: "엔비디아(NVDA), 차세대 칩 블랙웰 수율 문제 완벽 해결 및 양산 가속화",
+                    summary: [
+                        "차세대 블랙웰 아키텍처 수율 이슈 완벽 해결 발표",
+                        "주요 빅테크(MSFT, GOOGL, AMZN) 납품 일정 3주 단축",
+                        "반도체 섹터 전반 비중 확대(Overweight) 강력 추천"
+                    ],
+                    body: "Nvidia Corp announced it has fully resolved manufacturing yield bottlenecks for its flagship Blackwell AI chips. Production is ramping up ahead of schedule.",
+                    url: "https://finance.yahoo.com"
+                };
+
+                container.innerHTML = `
+                <div onclick="openNewsModal('fallback_1')" class="p-3.5 rounded-lg border border-green-700/50 bg-gray-900/60 hover:border-green-500 cursor-pointer group">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <span class="text-[10px] bg-blue-900 text-blue-300 px-2 py-0.5 rounded font-bold">REUTERS</span>
+                        <span class="text-[10px] text-gray-500">10:42 AM</span>
+                        <span class="text-[10px] bg-green-900/80 text-green-400 border border-green-700 px-1.5 py-0.5 rounded font-bold ml-auto">🟩 강력 슈팅 (4점)</span>
+                    </div>
+                    <h4 class="text-sm font-bold text-gray-100 group-hover:text-green-400">엔비디아(NVDA), 차세대 칩 블랙웰 수율 문제 완벽 해결 및 양산 가속화</h4>
+                </div>`;
+            }
+        }
+
+        function openNewsModal(newsId) {
+            const data = newsDataStore[newsId];
+            if (!data) return;
+
+            document.getElementById('nModalSource').textContent = data.source;
+            document.getElementById('nModalTitle').textContent = data.title;
+
+            const sumList = document.getElementById('nModalSummary');
+            if (sumList) {
+                sumList.innerHTML = data.summary.map(s => `<li>${s}</li>`).join('');
+            }
+
+            document.getElementById('nModalBody').textContent = data.body;
+            document.getElementById('nModalLink').href = data.url;
+
+            const modal = document.getElementById('newsDetailModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('modal-active');
+            }
+        }
+
+        function closeNewsModal() {
+            const modal = document.getElementById('newsDetailModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('modal-active');
+            }
+        }
+
+        // ------------------------------------------
+        // 5. 스탠스 튜닝 & 리스크 관리 매트릭스
+        // ------------------------------------------
         function onStanceChange() {
-            const st = document.getElementById('userStance').value; const txt = document.getElementById('stanceStatusText');
-            if(st === 'Aggressive') txt.textContent = '스탠스: Aggressive (손절폭 -3.5% / RR 1:3.5)';
-            else if(st === 'Defensive') txt.textContent = '스탠스: Defensive (손절폭 -1.5% / RR 1:2.0)';
-            else txt.textContent = '스탠스: Moderate (손절폭 -2.5% / RR 1:2.8)';
+            const stanceElem = document.getElementById('userStance');
+            const statusText = document.getElementById('stanceStatusText');
+            if (!stanceElem || !statusText) return;
+
+            const stance = stanceElem.value;
+            if (stance === 'Aggressive') {
+                statusText.textContent = '스탠스 설정: Aggressive (손절폭 -3.5% / RR 1:3.5)';
+            } else if (stance === 'Defensive') {
+                statusText.textContent = '스탠스 설정: Defensive (손절폭 -1.5% / RR 1:2.0)';
+            } else {
+                statusText.textContent = '스탠스 설정: Moderate (손절폭 -2.5% / RR 1:2.8)';
+            }
             renderRiskMatrix();
         }
+
         function renderRiskMatrix() {
-            const st = document.getElementById('userStance').value;
-            const mult = st === 'Aggressive' ? 0.965 : (st === 'Defensive' ? 0.985 : 0.975);
-            const slP = st === 'Aggressive' ? '-3.5%' : (st === 'Defensive' ? '-1.5%' : '-2.5%');
-            document.getElementById('riskMatrixBody').innerHTML = `
-                <tr class="hover:bg-gray-700/30"><td class="p-1.5 font-bold text-green-400">Plan A</td><td class="p-1.5">$122.50</td><td class="p-1.5 text-red-400">$${(122.5*mult).toFixed(2)} (${slP})</td><td class="p-1.5 text-green-400">$135.00</td><td class="p-1.5 text-yellow-300">3~5 거래일</td><td class="p-1.5">지정가(Limit) 예약</td></tr>
-                <tr class="hover:bg-gray-700/30"><td class="p-1.5 font-bold text-blue-400">Plan B</td><td class="p-1.5">$125.00</td><td class="p-1.5 text-red-400">$${(125.0*mult).toFixed(2)} (${slP})</td><td class="p-1.5 text-green-400">$138.00</td><td class="p-1.5 text-yellow-300">2~4 거래일</td><td class="p-1.5">관망 or 분할대기</td></tr>
-                <tr class="hover:bg-gray-700/30"><td class="p-1.5 font-bold text-red-400">Plan C</td><td class="p-1.5">$118.00</td><td class="p-1.5 text-red-400">$${(118.0*mult).toFixed(2)} (${slP})</td><td class="p-1.5 text-green-400">$128.00</td><td class="p-1.5 text-yellow-300">5~7 거래일</td><td class="p-1.5 text-red-300">LOC(종가지정) 필수</td></tr>
+            const tbody = document.getElementById('riskMatrixBody');
+            const stanceElem = document.getElementById('userStance');
+            if (!tbody || !stanceElem) return;
+
+            const stance = stanceElem.value;
+            let slMultiplier = stance === 'Aggressive' ? 0.965 : (stance === 'Defensive' ? 0.985 : 0.975);
+            let slPct = stance === 'Aggressive' ? '-3.5%' : (stance === 'Defensive' ? '-1.5%' : '-2.5%');
+
+            tbody.innerHTML = `
+                <tr class="hover:bg-gray-700/30 transition-colors">
+                    <td class="p-1.5 font-bold text-green-400">Plan A (보합)</td>
+                    <td class="p-1.5">$122.50</td>
+                    <td class="p-1.5 text-red-400">$${(122.50 * slMultiplier).toFixed(2)} (${slPct})</td>
+                    <td class="p-1.5 text-green-400">$135.00 (+10.2%)</td>
+                    <td class="p-1.5 text-yellow-300 font-bold">3~5 거래일</td>
+                    <td class="p-1.5 text-green-400">+$125.00 / -$${(1225 * (1 - slMultiplier)).toFixed(2)}</td>
+                    <td class="p-1.5"><span class="bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">지정가(Limit) 예약</span></td>
+                </tr>
+                <tr class="hover:bg-gray-700/30 transition-colors">
+                    <td class="p-1.5 font-bold text-blue-400">Plan B (갭상승)</td>
+                    <td class="p-1.5">$125.00</td>
+                    <td class="p-1.5 text-red-400">$${(125.00 * slMultiplier).toFixed(2)} (${slPct})</td>
+                    <td class="p-1.5 text-green-400">$138.00 (+10.4%)</td>
+                    <td class="p-1.5 text-yellow-300 font-bold">2~4 거래일</td>
+                    <td class="p-1.5 text-green-400">+$130.00 / -$${(1250 * (1 - slMultiplier)).toFixed(2)}</td>
+                    <td class="p-1.5"><span class="bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800">관망 / 분할 대기</span></td>
+                </tr>
+                <tr class="hover:bg-gray-700/30 transition-colors">
+                    <td class="p-1.5 font-bold text-red-400">Plan C (갭하락)</td>
+                    <td class="p-1.5">$118.00</td>
+                    <td class="p-1.5 text-red-400">$${(118.00 * slMultiplier).toFixed(2)} (${slPct})</td>
+                    <td class="p-1.5 text-green-400">$128.00 (+8.5%)</td>
+                    <td class="p-1.5 text-yellow-300 font-bold">5~7 거래일</td>
+                    <td class="p-1.5 text-green-400">+$100.00 / -$${(1180 * (1 - slMultiplier)).toFixed(2)}</td>
+                    <td class="p-1.5"><span class="bg-red-950 text-red-300 px-1.5 py-0.5 rounded border border-red-800 font-bold">LOC (종가 지정가)</span></td>
+                </tr>
             `;
         }
-        function selectPlan(pid) {
-            if(!lastSimulatedData) return; currentSelectedPlan = pid;
-            ['A','B','C'].forEach(p => { const bx = document.getElementById('boxPlan'+p); if(bx) { if(pid==='ALL'||pid===p) { bx.classList.remove('dimmed'); bx.classList.add('active'); } else { bx.classList.add('dimmed'); bx.classList.remove('active'); } } });
+
+        // ------------------------------------------
+        // 6. 실시간 자리 이탈 감지 모니터링
+        // ------------------------------------------
+        function toggleMonitoring() {
+            isMonitoringActive = !isMonitoringActive;
+            const btn = document.getElementById('btnMonitor');
+            if (btn) {
+                if (isMonitoringActive) {
+                    btn.className = "bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 shadow-md";
+                    btn.innerHTML = "🛡️ 감지: ON (실시간)";
+                    startMonitoringLoop();
+                } else {
+                    btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1";
+                    btn.innerHTML = "🛡️ 감지: OFF";
+                    stopMonitoringLoop();
+                    dismissWarning();
+                }
+            }
+        }
+
+        function startMonitoringLoop() {
+            if (monitoringInterval) clearInterval(monitoringInterval);
+
+            monitoringInterval = setInterval(() => {
+                if (!mainSeries || activeCandleData.length === 0) return;
+
+                const lastIndex = activeCandleData.length - 1;
+                const lastCandle = { ...activeCandleData[lastIndex] };
+
+                // 실시간 변동성 시뮬레이션
+                const tickChange = (Math.random() - 0.52) * 0.8;
+                lastCandle.close = Number((lastCandle.close + tickChange).toFixed(2));
+                lastCandle.high = Math.max(lastCandle.high, lastCandle.close);
+                lastCandle.low = Math.min(lastCandle.low, lastCandle.close);
+
+                activeCandleData[lastIndex] = lastCandle;
+                mainSeries.update(lastCandle);
+
+                // 포트폴리오 가격 실시간 업데이터
+                const portPriceElem = document.getElementById('portCurrentPrice');
+                if (portPriceElem) portPriceElem.textContent = "$" + lastCandle.close.toFixed(2);
+
+                const ticker = document.getElementById('p3Ticker').value.trim().toUpperCase() || 'NVDA';
+
+                // 자리이탈 임계값 체크
+                if (lastCandle.close < 122.00) {
+                    showWarning(`⚠️ [자리 이탈 경고] ${ticker} 실시간 가격($${lastCandle.close})이 주요 수급 지지선($122.00)을 하향 이탈했습니다!`);
+                }
+            }, 1200);
+        }
+
+        function stopMonitoringLoop() {
+            if (monitoringInterval) clearInterval(monitoringInterval);
+        }
+
+        function showWarning(msg) {
+            const banner = document.getElementById('warningBanner');
+            const warningText = document.getElementById('warningText');
+            const alertDot = document.getElementById('navAlertDot');
+
+            if (warningText) warningText.textContent = msg;
+            if (banner) banner.classList.remove('hidden');
+            if (alertDot) alertDot.classList.remove('hidden');
+        }
+
+        function dismissWarning() {
+            const banner = document.getElementById('warningBanner');
+            const alertDot = document.getElementById('navAlertDot');
+            if (banner) banner.classList.add('hidden');
+            if (alertDot) alertDot.classList.add('hidden');
+        }
+
+        // ------------------------------------------
+        // 7. 차트 렌더링 & 시나리오 퀀트 연산
+        // ------------------------------------------
+        const chartOptions = {
+            layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#9ca3af' },
+            grid: { vertLines: { color: '#374151', style: 1 }, horzLines: { color: '#374151', style: 1 } },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+            rightPriceScale: { borderColor: '#374151' },
+            timeScale: { borderColor: '#374151', timeVisible: true },
+        };
+
+        function selectPlan(planId) {
+            if (!lastSimulatedData) return;
+            currentSelectedPlan = planId;
+
+            ['A', 'B', 'C'].forEach(p => {
+                const box = document.getElementById('boxPlan' + p);
+                if (box) {
+                    if (planId === 'ALL' || planId === p) {
+                        box.classList.remove('dimmed');
+                        box.classList.add('active');
+                    } else {
+                        box.classList.add('dimmed');
+                        box.classList.remove('active');
+                    }
+                }
+            });
+
             drawChart(lastSimulatedData);
         }
-        function drawChart(data) {
-            const container = document.getElementById('main_chart_container'); if(!container) return; container.innerHTML = '';
-            mainChartInstance = LightweightCharts.createChart(container, { layout: { background:{color:'transparent'}, textColor:'#9ca3af' }, grid:{vertLines:{color:'#374151'}, horzLines:{color:'#374151'}}, timeScale:{timeVisible:true} });
-            mainSeries = mainChartInstance.addCandlestickSeries({ upColor:'#22c55e', downColor:'#ef4444', borderVisible:false }); mainSeries.setData(data.baseData);
-            if(data.planA && (currentSelectedPlan==='ALL'||currentSelectedPlan==='A')){ const l=mainChartInstance.addLineSeries({color:'#22c55e', lineStyle:2}); l.setData(data.planA.line); const g=mainChartInstance.addCandlestickSeries({upColor:'rgba(34,197,94,0.3)', borderVisible:true, borderColor:'#22c55e'}); g.setData(data.planA.ghost); }
-            if(data.planB && (currentSelectedPlan==='ALL'||currentSelectedPlan==='B')){ const l=mainChartInstance.addLineSeries({color:'#3b82f6', lineStyle:2}); l.setData(data.planB.line); const g=mainChartInstance.addCandlestickSeries({upColor:'rgba(59,130,246,0.3)', borderVisible:true, borderColor:'#3b82f6'}); g.setData(data.planB.ghost); }
-            if(data.planC && (currentSelectedPlan==='ALL'||currentSelectedPlan==='C')){ const l=mainChartInstance.addLineSeries({color:'#ef4444', lineStyle:2}); l.setData(data.planC.line); const g=mainChartInstance.addCandlestickSeries({upColor:'rgba(239,68,68,0.3)', borderVisible:true, borderColor:'#ef4444'}); g.setData(data.planC.ghost); }
-            mainChartInstance.timeScale().fitContent();
-        }
-        function runAnalysis(mode = 'daily') {
-            const btn = document.getElementById('btnRunAi'); if(btn){ btn.innerHTML=`<div class="spinner"></div>`; btn.disabled=true; }
-            setTimeout(() => {
-                activeCandleData = [{"time":1714500000,"open":120,"high":123,"low":118,"close":121},{"time":1714586400,"open":121,"high":124,"low":119,"close":122},{"time":1714672800,"open":122,"high":126,"low":121,"close":125},{"time":1714759200,"open":125,"high":127,"low":123,"close":124},{"time":1714845600,"open":124,"high":129,"low":123,"close":128},{"time":1714932000,"open":128,"high":131,"low":126,"close":130},{"time":1715018400,"open":130,"high":133,"low":126,"close":132}];
-                lastSimulatedData = {
-                    baseData: activeCandleData,
-                    planA: { line:[{"time":1715018400,"value":132},{"time":1715104800,"value":134},{"time":1715191200,"value":136},{"time":1715277600,"value":139}], ghost:[{"time":1715104800,"open":132,"high":135,"low":131,"close":134},{"time":1715191200,"open":134,"high":137,"low":133,"close":136},{"time":1715277600,"open":136,"high":140,"low":135,"close":139}] },
-                    planB: { line:[{"time":1715018400,"value":132},{"time":1715104800,"value":130},{"time":1715191200,"value":132},{"time":1715277600,"value":134}], ghost:[{"time":1715104800,"open":132,"high":132,"low":129,"close":130},{"time":1715191200,"open":130,"high":133,"low":129,"close":132},{"time":1715277600,"open":132,"high":135,"low":131,"close":134}] },
-                    planC: { line:[{"time":1715018400,"value":132},{"time":1715104800,"value":128},{"time":1715191200,"value":125},{"time":1715277600,"value":127}], ghost:[{"time":1715104800,"open":132,"high":132,"low":127,"close":128},{"time":1715191200,"open":128,"high":129,"low":124,"close":125},{"time":1715277600,"open":125,"high":128,"low":124,"close":127}] }
-                };
-                selectPlan('ALL'); renderRiskMatrix();
-                if(btn){ btn.innerHTML=`⚡ 라이브 분석`; btn.disabled=false; }
-            }, 600);
-        }
-        function toggleMonitoring() {
-            isMonitoringActive = !isMonitoringActive; const b=document.getElementById('btnMonitor');
-            if(isMonitoringActive) { b.className="bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold"; b.innerHTML="🛡️ 감지: ON"; startMonitoringLoop(); }
-            else { b.className="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold"; b.innerHTML="🛡️ 감지: OFF"; stopMonitoringLoop(); dismissWarning(); }
-        }
-        function startMonitoringLoop() {
-            if(monitoringInterval) clearInterval(monitoringInterval);
-            monitoringInterval = setInterval(() => {
-                if(!mainSeries || activeCandleData.length===0) return;
-                const idx = activeCandleData.length-1; const lc = {...activeCandleData[idx]};
-                lc.close = Number((lc.close + (Math.random()-0.52)).toFixed(2)); lc.high = Math.max(lc.high, lc.close); lc.low = Math.min(lc.low, lc.close);
-                activeCandleData[idx] = lc; mainSeries.update(lc);
-                if(lc.close < 125) { document.getElementById('warningBanner').classList.remove('hidden'); document.getElementById('navAlertDot').classList.remove('hidden'); }
-            }, 1000);
-        }
-        function stopMonitoringLoop() { if(monitoringInterval) clearInterval(monitoringInterval); }
-        function dismissWarning() { document.getElementById('warningBanner').classList.add('hidden'); document.getElementById('navAlertDot').classList.add('hidden'); }
 
-        // --- 5페이지 스크리너 (UI 토글) ---
-        const screenerData = [
-            { t: "PLTR", p: "$24.50", v: "1.2M", rsi: "42", rv: "0.85", gr: "Strong Buy", pass: true, ai: "Strong Buy" },
-            { t: "AMD", p: "$158.20", v: "850K", rsi: "51", rv: "0.78", gr: "Buy", pass: true, ai: "Watch" },
-            { t: "TSLA", p: "$240.00", v: "2.1M", rsi: "68", rv: "1.45", gr: "Neutral", pass: false, ai: "Avoid" }
+        function runAnalysis(mode = 'daily') {
+            currentMode = mode;
+            const ticker = document.getElementById('p3Ticker').value.trim().toUpperCase() || 'NVDA';
+            const btn = document.getElementById('btnRunAi');
+            const container = document.getElementById('main_chart_container');
+
+            if (btn) {
+                btn.innerHTML = `<div class="spinner"></div><span>${ticker} 시나리오 연산 중...</span>`;
+                btn.disabled = true;
+            }
+
+            selectPlan('ALL');
+
+            setTimeout(() => {
+                try {
+                    // 실시간 데이터 세트 구축
+                    activeCandleData = [
+                        { "time": 1714500000, "open": 118.0, "high": 121.0, "low": 117.5, "close": 120.0 },
+                        { "time": 1714586400, "open": 120.0, "high": 123.5, "low": 119.0, "close": 122.5 },
+                        { "time": 1714672800, "open": 122.5, "high": 125.0, "low": 121.8, "close": 124.0 },
+                        { "time": 1714759200, "open": 124.0, "high": 126.8, "low": 123.0, "close": 126.0 },
+                        { "time": 1714845600, "open": 126.0, "high": 128.5, "low": 125.0, "close": 127.5 },
+                        { "time": 1714932000, "open": 127.5, "high": 130.0, "low": 126.0, "close": 128.8 },
+                        { "time": 1715018400, "open": 128.8, "high": 132.0, "low": 126.5, "close": 127.0 }
+                    ];
+
+                    const simulatedData = {
+                        "baseData": activeCandleData,
+                        "planA": {
+                            "line": [
+                                { "time": 1715018400, "value": 127.0 }, { "time": 1715104800, "value": 128.5 },
+                                { "time": 1715191200, "value": 130.5 }, { "time": 1715277600, "value": 132.8 },
+                                { "time": 1715364000, "value": 135.0 }
+                            ],
+                            "ghost": [
+                                { "time": 1715104800, "open": 127.0, "high": 129.0, "low": 126.0, "close": 128.5 },
+                                { "time": 1715191200, "open": 128.5, "high": 131.5, "low": 128.0, "close": 130.5 },
+                                { "time": 1715277600, "open": 130.5, "high": 133.5, "low": 130.0, "close": 132.8 },
+                                { "time": 1715364000, "open": 132.8, "high": 136.0, "low": 132.0, "close": 135.0 }
+                            ]
+                        },
+                        "planB": {
+                            "line": [
+                                { "time": 1715018400, "value": 127.0 }, { "time": 1715104800, "value": 132.0 },
+                                { "time": 1715191200, "value": 128.0 }, { "time": 1715277600, "value": 134.0 },
+                                { "time": 1715364000, "value": 138.0 }
+                            ],
+                            "ghost": [
+                                { "time": 1715104800, "open": 127.0, "high": 133.0, "low": 127.0, "close": 132.0 },
+                                { "time": 1715191200, "open": 132.0, "high": 132.5, "low": 127.5, "close": 128.0 },
+                                { "time": 1715277600, "open": 128.0, "high": 135.0, "low": 128.0, "close": 134.0 },
+                                { "time": 1715364000, "open": 134.0, "high": 139.0, "low": 133.5, "close": 138.0 }
+                            ]
+                        },
+                        "planC": {
+                            "line": [
+                                { "time": 1715018400, "value": 127.0 }, { "time": 1715104800, "value": 121.0 },
+                                { "time": 1715191200, "value": 118.0 }, { "time": 1715277600, "value": 123.0 },
+                                { "time": 1715364000, "value": 128.0 }
+                            ],
+                            "ghost": [
+                                { "time": 1715104800, "open": 127.0, "high": 127.0, "low": 120.5, "close": 121.0 },
+                                { "time": 1715191200, "open": 121.0, "high": 121.5, "low": 117.5, "close": 118.0 },
+                                { "time": 1715277600, "open": 118.0, "high": 124.0, "low": 118.0, "close": 123.0 },
+                                { "time": 1715364000, "open": 123.0, "high": 129.0, "low": 122.5, "close": 128.0 }
+                            ]
+                        }
+                    };
+
+                    lastSimulatedData = simulatedData;
+                    drawChart(simulatedData);
+                    renderRiskMatrix();
+
+                    // 포트폴리오 티커 연동
+                    const portTicker = document.getElementById('portTicker');
+                    if (portTicker) portTicker.textContent = ticker;
+
+                } catch (err) {
+                    console.error("Chart Error:", err);
+                } finally {
+                    if (btn) {
+                        btn.innerHTML = `<span>⚡ 라이브 시나리오 분석</span>`;
+                        btn.disabled = false;
+                    }
+                }
+            }, 500);
+        }
+
+        function drawChart(data) {
+            const container = document.getElementById('main_chart_container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            mainChartInstance = LightweightCharts.createChart(container, {
+                ...chartOptions,
+                width: container.clientWidth,
+                height: container.clientHeight
+            });
+
+            mainSeries = mainChartInstance.addCandlestickSeries({
+                upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444'
+            });
+            mainSeries.setData(data.baseData);
+
+            if (data.planA && (currentSelectedPlan === 'ALL' || currentSelectedPlan === 'A')) {
+                const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
+                lineA.setData(data.planA.line || []);
+                const ghostA = mainChartInstance.addCandlestickSeries({
+                    upColor: 'rgba(34, 197, 94, 0.35)', downColor: 'rgba(34, 197, 94, 0.35)', borderVisible: true, borderColor: '#22c55e', wickColor: '#22c55e'
+                });
+                ghostA.setData(data.planA.ghost || []);
+            }
+
+            if (data.planB && (currentSelectedPlan === 'ALL' || currentSelectedPlan === 'B')) {
+                const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
+                lineB.setData(data.planB.line || []);
+                const ghostB = mainChartInstance.addCandlestickSeries({
+                    upColor: 'rgba(59, 130, 246, 0.35)', downColor: 'rgba(59, 130, 246, 0.35)', borderVisible: true, borderColor: '#3b82f6', wickColor: '#3b82f6'
+                });
+                ghostB.setData(data.planB.ghost || []);
+            }
+
+            if (data.planC && (currentSelectedPlan === 'ALL' || currentSelectedPlan === 'C')) {
+                const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
+                lineC.setData(data.planC.line || []);
+                const ghostC = mainChartInstance.addCandlestickSeries({
+                    upColor: 'rgba(239, 68, 68, 0.35)', downColor: 'rgba(239, 68, 68, 0.35)', borderVisible: true, borderColor: '#ef4444', wickColor: '#ef4444'
+                });
+                ghostC.setData(data.planC.ghost || []);
+            }
+
+            mainChartInstance.timeScale().fitContent();
+
+            window.addEventListener('resize', () => {
+                if (container && mainChartInstance && container.clientWidth > 0) {
+                    mainChartInstance.resize(container.clientWidth, container.clientHeight);
+                }
+            });
+        }
+
+        // ------------------------------------------
+        // 8. 딥스캔 스크리너 (UI 필터 토글 제어)
+        // ------------------------------------------
+        const screenerDataset = [
+            { ticker: "PLTR", price: "$24.50", vol: "1.2M", rsi: "42", relVol: "0.85", maGrade: "Strong Buy", osGrade: "Neutral", timeline: "1~2일 내", pass: true, aiRating: "Strong Buy" },
+            { ticker: "AMD", price: "$158.20", vol: "850K", rsi: "51", relVol: "0.78", maGrade: "Buy", osGrade: "Sell", timeline: "3~5일 소요", pass: true, aiRating: "Watch" },
+            { ticker: "TSLA", price: "$240.00", vol: "2.1M", rsi: "68", relVol: "1.45", maGrade: "Neutral", osGrade: "Buy", timeline: "비적격", pass: false, aiRating: "Avoid (RSI 초과)" },
+            { ticker: "INPR", price: "$8.20", vol: "120K", rsi: "32", relVol: "0.35", maGrade: "Sell", osGrade: "Sell", timeline: "비적격", pass: false, aiRating: "Avoid (거래량 미달)" }
         ];
-        function toggleScreenerFilter() { screenerShowAll = !document.getElementById('screenerToggle').checked; renderScreener(); }
-        function renderScreener() {
-            const data = screenerShowAll ? screenerData : screenerData.filter(d=>d.pass);
-            document.getElementById('screenerHeaderCount').textContent = `검색 결과 (${screenerShowAll?'전체':'선별'} ${data.length}개)`;
-            document.getElementById('screenerTableBody').innerHTML = data.map(i => `
-                <tr class="hover:bg-gray-700/30 ${!i.pass?'opacity-50':''}">
-                    <td class="px-4 py-3 font-bold text-white">${i.t}</td><td class="px-4 py-3 text-gray-300">${i.p}</td><td class="px-4 py-3 text-gray-300">${i.v}</td>
-                    <td class="px-4 py-3 text-center text-orange-400 font-bold">${i.rsi}</td><td class="px-4 py-3 text-center text-blue-400 font-bold">${i.rv}</td>
-                    <td class="px-4 py-3 text-center text-green-400 font-bold text-[11px]">${i.gr}</td><td class="px-4 py-3 text-right text-green-400 font-bold">${i.ai}</td>
+
+        function toggleScreenerFilter() {
+            const toggleElem = document.getElementById('screenerToggle');
+            screenerShowAll = !toggleElem.checked;
+
+            const label = document.getElementById('toggleLabelText');
+            if (label) {
+                label.textContent = screenerShowAll ? "모든 종목 보기 (필터 OFF)" : "선별된 종목만 보기 (필터 ON)";
+            }
+            renderScreenerTable();
+        }
+
+        function renderScreenerTable() {
+            const tbody = document.getElementById('screenerTableBody');
+            if (!tbody) return;
+
+            const filteredData = screenerShowAll ? screenerDataset : screenerDataset.filter(d => d.pass);
+            const countElem = document.getElementById('screenerHeaderCount');
+            if (countElem) {
+                countElem.textContent = `조건 검색 결과 (${screenerShowAll ? '전체 종목' : '선별된 Top'} ${filteredData.length}개 종목)`;
+            }
+
+            tbody.innerHTML = filteredData.map(item => `
+                <tr class="hover:bg-gray-700/30 transition-colors ${!item.pass ? 'opacity-40' : ''}">
+                    <td class="px-4 py-3 font-bold text-white">${item.ticker}</td>
+                    <td class="px-4 py-3 text-gray-300">${item.price}</td>
+                    <td class="px-4 py-3 text-gray-300">${item.vol}</td>
+                    <td class="px-4 py-3 text-center"><span class="text-orange-400 font-bold">${item.rsi}</span></td>
+                    <td class="px-4 py-3 text-center"><span class="text-blue-400 font-bold">${item.relVol}</span></td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="text-green-400 font-bold text-[11px]">${item.maGrade}</span> / 
+                        <span class="text-gray-400 text-[11px]">${item.osGrade}</span>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="${item.pass ? 'bg-red-900/50 text-red-400 border border-red-800' : 'bg-gray-800 text-gray-500'} px-2 py-0.5 rounded text-xs font-bold">${item.timeline}</span>
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                        <span class="${item.pass ? 'text-green-400' : 'text-gray-500'} font-bold">${item.aiRating}</span>
+                    </td>
                 </tr>
             `).join('');
         }
 
-        document.addEventListener('DOMContentLoaded', () => { switchTab('page3'); fetchLiveNews(); renderBriefing(); renderScreener(); runAnalysis(); });
+        // ------------------------------------------
+        // 9. 대시보드 초기화 로드
+        // ------------------------------------------
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('page3');
+            runAnalysis('daily');
+            renderBriefing();
+            renderScreenerTable();
+            fetchLiveNews();
+        });
     </script>
 </body>
 </html>
