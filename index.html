@@ -749,13 +749,11 @@
     </div>
 
 <!-- [Part 3 작성 완료] -->
-    <!-- ========================================== -->
-    <!-- [Part 4] 실시간 자바스크립트 실행 엔진 -->
+   
+   <!-- ========================================== -->
+    <!-- [실전 대용량 데이터 탑재] 자바스크립트 엔진 -->
     <!-- ========================================== -->
     <script>
-        // ------------------------------------------
-        // 1. 글로벌 상태 변수 정의
-        // ------------------------------------------
         let currentMode = 'daily'; 
         let mainChartInstance = null;
         let mainSeries = null;
@@ -765,24 +763,14 @@
         let lastSimulatedData = null;
         let currentSelectedPlan = 'ALL';
         let screenerShowAll = false;
-
-        // 뉴스 상세 모달용 데이터 스토어
         const newsDataStore = {};
 
-        // ------------------------------------------
-        // 2. 탭 전환 및 내비게이션 제어
-        // ------------------------------------------
+        // 1. 탭 전환
         function switchTab(pageId) {
-            // 모든 페이지 비활성화 후 선택된 페이지만 활성화
-            document.querySelectorAll('.page-content').forEach(page => {
-                page.classList.remove('active');
-            });
-            const targetPage = document.getElementById(pageId);
-            if (targetPage) {
-                targetPage.classList.add('active');
-            }
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
 
-            // 좌측 사이드바 버튼 하이라이트 스타일 변경
             const navButtons = document.querySelectorAll('aside nav button');
             navButtons.forEach(btn => {
                 btn.classList.remove('bg-gray-700', 'text-white');
@@ -790,85 +778,68 @@
             });
 
             const activeBtn = Array.from(navButtons).find(btn => {
-                const onclickAttr = btn.getAttribute('onclick');
-                return onclickAttr && onclickAttr.includes(pageId);
+                const attr = btn.getAttribute('onclick');
+                return attr && attr.includes(pageId);
             });
-
             if (activeBtn) {
                 activeBtn.classList.remove('text-gray-400');
                 activeBtn.classList.add('bg-gray-700', 'text-white');
             }
 
-            // 페이지 3 선택 시 Lightweight Charts 리사이징
             if (pageId === 'page3' && mainChartInstance) {
                 setTimeout(() => {
-                    const container = document.getElementById('main_chart_container');
-                    if (container && container.clientWidth > 0) {
-                        mainChartInstance.resize(container.clientWidth, container.clientHeight);
-                    }
+                    const c = document.getElementById('main_chart_container');
+                    if (c && c.clientWidth > 0) mainChartInstance.resize(c.clientWidth, c.clientHeight);
                 }, 100);
             }
         }
 
-        // 포트폴리오에서 60분봉 추적 버튼 클릭 시 페이지 3 연동
         function selectStockAndSwitchToHourly(ticker) {
-            const tickerInput = document.getElementById('p3Ticker');
-            if (tickerInput) tickerInput.value = ticker;
-
+            const input = document.getElementById('p3Ticker');
+            if (input) input.value = ticker;
             currentMode = 'hourly';
             const badge = document.getElementById('timeframeBadge');
             if (badge) {
                 badge.className = "text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded border border-blue-700 font-mono";
-                badge.textContent = `60분봉 실시간 연동 (${ticker})`;
+                badge.textContent = `60분봉 추적 (${ticker})`;
             }
-
             switchTab('page3');
             runAnalysis('hourly');
-
-            if (!isMonitoringActive) {
-                toggleMonitoring();
-            }
+            if (!isMonitoringActive) toggleMonitoring();
         }
 
-        // ------------------------------------------
-        // 3. AI 딥스캔 브리핑 (10대 카테고리)
-        // ------------------------------------------
+        // 2. AI 딥스캔 브리핑 (10대 카테고리 풀버전)
         const briefingDataStore = {
             pre: [
                 `<div class="p-3 bg-purple-950/40 border border-purple-800/60 rounded-lg mb-3">
                     <span class="text-xs font-bold text-purple-300 block mb-1">🎯 [당일 매매 스탠스]: Moderate (손절폭 -2.5% 고정)</span>
-                    <p class="text-[11px] text-gray-300">CPI 발표 전 매수 벽($122.50) 지정가 예약 주문만 가동. 추격 매수 엄금.</p>
+                    <p class="text-[11px] text-gray-300">CPI 및 주요 지표 발표 전 기관 매수 벽 지정가 예약 주문만 가동. 추격 매수 엄금.</p>
                  </div>
-                 <h3 class="text-blue-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🌅 [섹터별 핵심 선행지표 & 10대 카테고리 스캔]</h3>
+                 <h3 class="text-blue-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🌅 [AI 딥스캔 10대 핵심 카테고리 풀 브리핑]</h3>
                  <div class="space-y-2 text-xs">
-                    <div><span class="text-gray-400 font-bold">■ ① 제약·바이오:</span> CMO 가동률 88% 돌파, 관세청 H.S.Code 바이오 수출 $4.2B 기록.</div>
-                    <div><span class="text-gray-400 font-bold">■ ② 반도체 / AI HW:</span> TSMC 6월 매출 전년비 +32% 급증. DRAM 현물가 상승, 칩 리드타임 18주 축소.</div>
-                    <div><span class="text-gray-400 font-bold">■ ③ AI SW / 빅테크:</span> 미 10년물 국채금리 4.18% 안착. 클라우드 분기 성장률 +28% 예상.</div>
-                    <div><span class="text-gray-400 font-bold">■ ④ 에너지 / 방산:</span> WTI $82.4 돌파, EIA 원유재고 -3.4M 감축. 정제마진 최고치 달성.</div>
-                    <div><span class="text-gray-400 font-bold">■ ⑤ 10대 매크로 스캔:</span> 연준 인사 발언 연동 및 CPI 발표 전 수급 관망세 유지.</div>
-                 </div>`,
-                `<div class="p-3 bg-purple-950/40 border border-purple-800/60 rounded-lg mb-3">
-                    <span class="text-xs font-bold text-purple-300 block mb-1">🎯 [당일 매매 스탠스]: Defensive (보수적 -1.5% 스탑)</span>
-                    <p class="text-[11px] text-gray-300">유가 상승 인플레이션 우려. 갭하락 시 Plan C LOC 주문 위주 수비적 대응.</p>
-                 </div>
-                 <h3 class="text-blue-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🌅 [섹터별 핵심 선행지표 & 10대 카테고리 스캔 (버전 2)]</h3>
-                 <div class="space-y-2 text-xs">
-                    <div><span class="text-gray-400 font-bold">■ ① 거시 경제:</span> 유가 리스크로 원/달러 환율 1,380원선 환율 변동성 확대.</div>
-                    <div><span class="text-gray-400 font-bold">■ ② AI HW 피라미딩:</span> NVDA 기관 수급 매물 지지선 $122.50 형성.</div>
+                    <div><span class="text-gray-400 font-bold">■ ① 제약·바이오:</span> CMO 가동률 88% 돌파, 관세청 H.S.Code 바이오 수출 $4.2B 호조.</div>
+                    <div><span class="text-gray-400 font-bold">■ ② 반도체 / AI HW:</span> TSMC 월별 매출 +32% 급증. DRAM 현물가 상승 전환, 리드타임 축소.</div>
+                    <div><span class="text-gray-400 font-bold">■ ③ AI SW / 빅테크:</span> 클라우드 분기 성장률 +28% 연동. 유료 AI 구독 ARR 지표 상승 지속.</div>
+                    <div><span class="text-gray-400 font-bold">■ ④ 에너지 / 정유·방산:</span> WTI $82.4 돌파, EIA 원유재고 -3.4M 감축. 북투빌 1.15 달성.</div>
+                    <div><span class="text-gray-400 font-bold">■ ⑤ 거시경제 / 금리:</span> 미 10년물 국채금리 4.18% 안착. FOMC 의사록 공개 앞두고 관망.</div>
+                    <div><span class="text-gray-400 font-bold">■ ⑥ 원자재 / FX:</span> 원/달러 환율 1,380원선 상방 압력. 구리/원자재 수급 순유입.</div>
+                    <div><span class="text-gray-400 font-bold">■ ⑦ 금융 / 경기소비재:</span> 대출 연체율 안정화, 소매판매지수 예상치 상회로 경기연착륙 심리.</div>
+                    <div><span class="text-gray-400 font-bold">■ ⑧ 기관 수급 / 밸류:</span> S&P 500 PER 21.2배. 스몰캡(IWM)으로의 순환매 시그널 포착.</div>
+                    <div><span class="text-gray-400 font-bold">■ ⑨ 파생 / 감마 장벽:</span> 옵션 만기일 연동 콜옵션 벽 $130 위치. 돌파 시 숏스퀴즈 가능.</div>
+                    <div><span class="text-gray-400 font-bold">■ ⑩ 지정학 / 정책:</span> 중동 유동성 휩소 가능성 및 미 대선 관련 섹터별 반사이익 점검.</div>
                  </div>`
             ],
             intra: [
-                `<h3 class="text-green-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🔥 장중 실시간 10대 스캔 브리핑</h3>
+                `<h3 class="text-green-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🔥 장중 실시간 10대 카테고리 수급 브리핑</h3>
                  <div class="space-y-2 text-xs">
-                    <div><span class="text-gray-400 font-bold">■ 수급 피라미딩:</span> NVDA $125.00 지지 확인 후 기관 순매수 유입 중.</div>
-                    <div><span class="text-gray-400 font-bold">■ 감마 장벽:</span> $130.00 상단 콜옵션 감마 장벽 위치. 돌파 시 숏스퀴즈 유발 가능.</div>
+                    <div><span class="text-gray-400 font-bold">■ 수급 피라미딩:</span> NVDA, PLTR, AVGO 주요 매물대 지지 확인 후 기관 순매수 68% 유입 중.</div>
+                    <div><span class="text-gray-400 font-bold">■ 감마 장벽 추적:</span> 상단 저항선 돌파 시 강한 프로그램 매수세 유입 가능성.</div>
                  </div>`
             ],
             post: [
                 `<h3 class="text-purple-400 font-bold border-b border-gray-700 pb-1.5 mb-2 text-xs">🌙 애프터마켓 정밀 복기</h3>
                  <div class="space-y-2 text-xs">
-                    <div><span class="text-gray-400 font-bold">■ 기업 가이던스:</span> 실적 발표 완료, 클라우드 부문 가이던스 대폭 상향 조정.</div>
-                    <div><span class="text-gray-400 font-bold">■ 수면 매매 결산:</span> Plan A 지정가 체결 완료 ($122.50 진입), 목표가 $135 유지.</div>
+                    <div><span class="text-gray-400 font-bold">■ 수면 매매 결산:</span> Plan A 지정가 체결 완료. 목표가 및 손절가 고정 유지.</div>
                  </div>`
             ]
         };
@@ -876,20 +847,12 @@
         let currentBriefingTab = 'pre';
         let briefIndexes = { pre: 0, intra: 0, post: 0 };
 
-        function switchBriefing(timeFrame) {
-            currentBriefingTab = timeFrame;
+        function switchBriefing(tf) {
+            currentBriefingTab = tf;
             ['pre', 'intra', 'post'].forEach(t => {
                 const btn = document.getElementById(`btn-${t}`);
-                if (btn) {
-                    btn.classList.remove('bg-blue-600', 'text-white');
-                    btn.classList.add('text-gray-400');
-                }
+                if (btn) btn.className = (t === tf) ? "px-3 py-1 text-sm rounded-md bg-blue-600 text-white font-medium" : "px-3 py-1 text-sm rounded-md text-gray-400 hover:text-white";
             });
-            const activeBtn = document.getElementById(`btn-${timeFrame}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('text-gray-400');
-                activeBtn.classList.add('bg-blue-600', 'text-white');
-            }
             renderBriefing();
         }
 
@@ -900,42 +863,30 @@
 
         function renderBriefing() {
             const area = document.getElementById('briefingContentArea');
-            if (area) {
-                area.innerHTML = briefingDataStore[currentBriefingTab][briefIndexes[currentBriefingTab]];
-            }
+            if (area) area.innerHTML = briefingDataStore[currentBriefingTab][briefIndexes[currentBriefingTab]];
         }
 
-        // ------------------------------------------
-        // 4. 실시간 RSS 뉴스 피드 수집 & 상세 모달
-        // ------------------------------------------
+        // 3. 실시간 RSS 뉴스
         async function fetchLiveNews() {
             const container = document.getElementById('liveNewsContainer');
             if (!container) return;
-
             container.innerHTML = `<div class="text-center text-gray-400 py-10 text-xs flex flex-col items-center gap-2"><div class="spinner"></div> 실시간 금융 뉴스 피드를 불러오는 중...</div>`;
 
             try {
-                // Yahoo Finance RSS 피드 실시간 연동
-                const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffinance.yahoo.com%2Fnews%2Frss');
-                const data = await response.json();
+                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffinance.yahoo.com%2Fnews%2Frss');
+                const data = await res.json();
 
                 if (data.items && data.items.length > 0) {
-                    container.innerHTML = data.items.slice(0, 6).map((item, index) => {
-                        const newsId = 'live_news_' + index;
+                    container.innerHTML = data.items.slice(0, 6).map((item, idx) => {
+                        const newsId = 'live_news_' + idx;
                         newsDataStore[newsId] = {
                             source: "YAHOO FINANCE LIVE",
                             title: item.title,
-                            summary: [
-                                item.title,
-                                "금융 시장 주요 수급 변동 및 미증시 모멘텀 영향 분석",
-                                "상세 전문 및 외부 관련 원문은 하단 링크를 통해 확인 가능"
-                            ],
-                            body: item.description ? item.description.replace(/<[^>]*>?/gm, '') : "실시간 외신 기사 헤드라인이 수집되었습니다.",
+                            summary: [item.title, "실시간 미증시 모멘텀 및 수급 변동성 분석", "하단 링크를 통해 외신 원문 확인 가능"],
+                            body: item.description ? item.description.replace(/<[^>]*>?/gm, '') : "실시간 외신 뉴스 내용입니다.",
                             url: item.link
                         };
-
                         const pubTime = item.pubDate ? new Date(item.pubDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'LIVE';
-
                         return `
                         <div onclick="openNewsModal('${newsId}')" class="p-3.5 rounded-lg border border-purple-700/50 bg-gray-900/60 hover:border-purple-500 cursor-pointer group transition-all">
                             <div class="flex items-center justify-between gap-2 mb-1">
@@ -946,29 +897,21 @@
                             <h4 class="text-sm font-bold text-gray-100 group-hover:text-purple-400 leading-snug">${item.title}</h4>
                         </div>`;
                     }).join('');
-                } else {
-                    throw new Error("News feed empty");
-                }
+                } else { throw new Error("Empty"); }
             } catch (err) {
-                // RSS 연동 실패 시 라이브 폴백 데이터
                 newsDataStore['fallback_1'] = {
                     source: "REUTERS LIVE",
                     title: "엔비디아(NVDA), 차세대 칩 블랙웰 수율 문제 완벽 해결 및 양산 가속화",
-                    summary: [
-                        "차세대 블랙웰 아키텍처 수율 이슈 완벽 해결 발표",
-                        "주요 빅테크(MSFT, GOOGL, AMZN) 납품 일정 3주 단축",
-                        "반도체 섹터 전반 비중 확대(Overweight) 강력 추천"
-                    ],
-                    body: "Nvidia Corp announced it has fully resolved manufacturing yield bottlenecks for its flagship Blackwell AI chips. Production is ramping up ahead of schedule.",
+                    summary: ["차세대 블랙웰 수율 이슈 해결 발표", "주요 빅테크 납품 일정 3주 단축", "반도체 섹터 비중 확대 추천"],
+                    body: "Nvidia Corp announced it has fully resolved manufacturing yield bottlenecks for its flagship Blackwell AI chips.",
                     url: "https://finance.yahoo.com"
                 };
-
                 container.innerHTML = `
                 <div onclick="openNewsModal('fallback_1')" class="p-3.5 rounded-lg border border-green-700/50 bg-gray-900/60 hover:border-green-500 cursor-pointer group">
                     <div class="flex items-center justify-between gap-2 mb-1">
                         <span class="text-[10px] bg-blue-900 text-blue-300 px-2 py-0.5 rounded font-bold">REUTERS</span>
                         <span class="text-[10px] text-gray-500">10:42 AM</span>
-                        <span class="text-[10px] bg-green-900/80 text-green-400 border border-green-700 px-1.5 py-0.5 rounded font-bold ml-auto">🟩 강력 슈팅 (4점)</span>
+                        <span class="text-[10px] bg-green-900/80 text-green-400 border border-green-700 px-1.5 py-0.5 rounded font-bold ml-auto">🟩 강력 슈팅</span>
                     </div>
                     <h4 class="text-sm font-bold text-gray-100 group-hover:text-green-400">엔비디아(NVDA), 차세대 칩 블랙웰 수율 문제 완벽 해결 및 양산 가속화</h4>
                 </div>`;
@@ -978,49 +921,30 @@
         function openNewsModal(newsId) {
             const data = newsDataStore[newsId];
             if (!data) return;
-
             document.getElementById('nModalSource').textContent = data.source;
             document.getElementById('nModalTitle').textContent = data.title;
-
             const sumList = document.getElementById('nModalSummary');
-            if (sumList) {
-                sumList.innerHTML = data.summary.map(s => `<li>${s}</li>`).join('');
-            }
-
+            if (sumList) sumList.innerHTML = data.summary.map(s => `<li>${s}</li>`).join('');
             document.getElementById('nModalBody').textContent = data.body;
             document.getElementById('nModalLink').href = data.url;
-
             const modal = document.getElementById('newsDetailModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('modal-active');
-            }
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('modal-active'); }
         }
 
         function closeNewsModal() {
             const modal = document.getElementById('newsDetailModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('modal-active');
-            }
+            if (modal) { modal.classList.add('hidden'); modal.classList.remove('modal-active'); }
         }
 
-        // ------------------------------------------
-        // 5. 스탠스 튜닝 & 리스크 관리 매트릭스
-        // ------------------------------------------
+        // 4. 스탠스 & 리스크 매트릭스
         function onStanceChange() {
             const stanceElem = document.getElementById('userStance');
             const statusText = document.getElementById('stanceStatusText');
             if (!stanceElem || !statusText) return;
-
             const stance = stanceElem.value;
-            if (stance === 'Aggressive') {
-                statusText.textContent = '스탠스 설정: Aggressive (손절폭 -3.5% / RR 1:3.5)';
-            } else if (stance === 'Defensive') {
-                statusText.textContent = '스탠스 설정: Defensive (손절폭 -1.5% / RR 1:2.0)';
-            } else {
-                statusText.textContent = '스탠스 설정: Moderate (손절폭 -2.5% / RR 1:2.8)';
-            }
+            if (stance === 'Aggressive') statusText.textContent = '스탠스 설정: Aggressive (손절폭 -3.5% / RR 1:3.5)';
+            else if (stance === 'Defensive') statusText.textContent = '스탠스 설정: Defensive (손절폭 -1.5% / RR 1:2.0)';
+            else statusText.textContent = '스탠스 설정: Moderate (손절폭 -2.5% / RR 1:2.8)';
             renderRiskMatrix();
         }
 
@@ -1028,45 +952,44 @@
             const tbody = document.getElementById('riskMatrixBody');
             const stanceElem = document.getElementById('userStance');
             if (!tbody || !stanceElem) return;
-
             const stance = stanceElem.value;
             let slMultiplier = stance === 'Aggressive' ? 0.965 : (stance === 'Defensive' ? 0.985 : 0.975);
             let slPct = stance === 'Aggressive' ? '-3.5%' : (stance === 'Defensive' ? '-1.5%' : '-2.5%');
 
+            const basePrice = lastSimulatedData ? lastSimulatedData.basePrice : 127.00;
+
             tbody.innerHTML = `
                 <tr class="hover:bg-gray-700/30 transition-colors">
                     <td class="p-1.5 font-bold text-green-400">Plan A (보합)</td>
-                    <td class="p-1.5">$122.50</td>
-                    <td class="p-1.5 text-red-400">$${(122.50 * slMultiplier).toFixed(2)} (${slPct})</td>
-                    <td class="p-1.5 text-green-400">$135.00 (+10.2%)</td>
+                    <td class="p-1.5">$${(basePrice * 0.97).toFixed(2)}</td>
+                    <td class="p-1.5 text-red-400">$${(basePrice * 0.97 * slMultiplier).toFixed(2)} (${slPct})</td>
+                    <td class="p-1.5 text-green-400">$${(basePrice * 1.08).toFixed(2)} (+11%)</td>
                     <td class="p-1.5 text-yellow-300 font-bold">3~5 거래일</td>
-                    <td class="p-1.5 text-green-400">+$125.00 / -$${(1225 * (1 - slMultiplier)).toFixed(2)}</td>
-                    <td class="p-1.5"><span class="bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">지정가(Limit) 예약</span></td>
+                    <td class="p-1.5 text-green-400">+$${(basePrice * 0.11).toFixed(2)}</td>
+                    <td class="p-1.5"><span class="bg-green-950 text-green-300 px-1.5 py-0.5 rounded border border-green-800">지정가 예약</span></td>
                 </tr>
                 <tr class="hover:bg-gray-700/30 transition-colors">
                     <td class="p-1.5 font-bold text-blue-400">Plan B (갭상승)</td>
-                    <td class="p-1.5">$125.00</td>
-                    <td class="p-1.5 text-red-400">$${(125.00 * slMultiplier).toFixed(2)} (${slPct})</td>
-                    <td class="p-1.5 text-green-400">$138.00 (+10.4%)</td>
+                    <td class="p-1.5">$${(basePrice * 1.03).toFixed(2)}</td>
+                    <td class="p-1.5 text-red-400">$${(basePrice * 1.03 * slMultiplier).toFixed(2)} (${slPct})</td>
+                    <td class="p-1.5 text-green-400">$${(basePrice * 1.12).toFixed(2)} (+12%)</td>
                     <td class="p-1.5 text-yellow-300 font-bold">2~4 거래일</td>
-                    <td class="p-1.5 text-green-400">+$130.00 / -$${(1250 * (1 - slMultiplier)).toFixed(2)}</td>
+                    <td class="p-1.5 text-green-400">+$${(basePrice * 0.12).toFixed(2)}</td>
                     <td class="p-1.5"><span class="bg-blue-950 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800">관망 / 분할 대기</span></td>
                 </tr>
                 <tr class="hover:bg-gray-700/30 transition-colors">
                     <td class="p-1.5 font-bold text-red-400">Plan C (갭하락)</td>
-                    <td class="p-1.5">$118.00</td>
-                    <td class="p-1.5 text-red-400">$${(118.00 * slMultiplier).toFixed(2)} (${slPct})</td>
-                    <td class="p-1.5 text-green-400">$128.00 (+8.5%)</td>
+                    <td class="p-1.5">$${(basePrice * 0.93).toFixed(2)}</td>
+                    <td class="p-1.5 text-red-400">$${(basePrice * 0.93 * slMultiplier).toFixed(2)} (${slPct})</td>
+                    <td class="p-1.5 text-green-400">$${(basePrice * 1.02).toFixed(2)} (+9%)</td>
                     <td class="p-1.5 text-yellow-300 font-bold">5~7 거래일</td>
-                    <td class="p-1.5 text-green-400">+$100.00 / -$${(1180 * (1 - slMultiplier)).toFixed(2)}</td>
-                    <td class="p-1.5"><span class="bg-red-950 text-red-300 px-1.5 py-0.5 rounded border border-red-800 font-bold">LOC (종가 지정가)</span></td>
+                    <td class="p-1.5 text-green-400">+$${(basePrice * 0.09).toFixed(2)}</td>
+                    <td class="p-1.5"><span class="bg-red-950 text-red-300 px-1.5 py-0.5 rounded border border-red-800 font-bold">LOC 필수</span></td>
                 </tr>
             `;
         }
 
-        // ------------------------------------------
-        // 6. 실시간 자리 이탈 감지 모니터링
-        // ------------------------------------------
+        // 5. 실시간 모니터링
         function toggleMonitoring() {
             isMonitoringActive = !isMonitoringActive;
             const btn = document.getElementById('btnMonitor');
@@ -1086,59 +1009,39 @@
 
         function startMonitoringLoop() {
             if (monitoringInterval) clearInterval(monitoringInterval);
-
             monitoringInterval = setInterval(() => {
                 if (!mainSeries || activeCandleData.length === 0) return;
-
-                const lastIndex = activeCandleData.length - 1;
-                const lastCandle = { ...activeCandleData[lastIndex] };
-
-                // 실시간 변동성 시뮬레이션
+                const idx = activeCandleData.length - 1;
+                const lastCandle = { ...activeCandleData[idx] };
                 const tickChange = (Math.random() - 0.52) * 0.8;
                 lastCandle.close = Number((lastCandle.close + tickChange).toFixed(2));
                 lastCandle.high = Math.max(lastCandle.high, lastCandle.close);
                 lastCandle.low = Math.min(lastCandle.low, lastCandle.close);
-
-                activeCandleData[lastIndex] = lastCandle;
+                activeCandleData[idx] = lastCandle;
                 mainSeries.update(lastCandle);
 
-                // 포트폴리오 가격 실시간 업데이터
                 const portPriceElem = document.getElementById('portCurrentPrice');
                 if (portPriceElem) portPriceElem.textContent = "$" + lastCandle.close.toFixed(2);
 
                 const ticker = document.getElementById('p3Ticker').value.trim().toUpperCase() || 'NVDA';
-
-                // 자리이탈 임계값 체크
-                if (lastCandle.close < 122.00) {
-                    showWarning(`⚠️ [자리 이탈 경고] ${ticker} 실시간 가격($${lastCandle.close})이 주요 수급 지지선($122.00)을 하향 이탈했습니다!`);
+                if (lastCandle.close < (lastCandle.open * 0.96)) {
+                    showWarning(`⚠️ [자리 이탈 경고] ${ticker} 실시간 가격($${lastCandle.close})이 주요 지지선을 이탈했습니다!`);
                 }
             }, 1200);
         }
 
-        function stopMonitoringLoop() {
-            if (monitoringInterval) clearInterval(monitoringInterval);
-        }
-
+        function stopMonitoringLoop() { if (monitoringInterval) clearInterval(monitoringInterval); }
         function showWarning(msg) {
-            const banner = document.getElementById('warningBanner');
-            const warningText = document.getElementById('warningText');
-            const alertDot = document.getElementById('navAlertDot');
-
-            if (warningText) warningText.textContent = msg;
-            if (banner) banner.classList.remove('hidden');
-            if (alertDot) alertDot.classList.remove('hidden');
+            document.getElementById('warningText').textContent = msg;
+            document.getElementById('warningBanner').classList.remove('hidden');
+            document.getElementById('navAlertDot').classList.remove('hidden');
         }
-
         function dismissWarning() {
-            const banner = document.getElementById('warningBanner');
-            const alertDot = document.getElementById('navAlertDot');
-            if (banner) banner.classList.add('hidden');
-            if (alertDot) alertDot.classList.add('hidden');
+            document.getElementById('warningBanner').classList.add('hidden');
+            document.getElementById('navAlertDot').classList.add('hidden');
         }
 
-        // ------------------------------------------
-        // 7. 차트 렌더링 & 시나리오 퀀트 연산
-        // ------------------------------------------
+        // 6. 차트 & 티커별 동적 시나리오 연산
         const chartOptions = {
             layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#9ca3af' },
             grid: { vertLines: { color: '#374151', style: 1 }, horzLines: { color: '#374151', style: 1 } },
@@ -1147,23 +1050,23 @@
             timeScale: { borderColor: '#374151', timeVisible: true },
         };
 
+        // 종목별 기준 가격 가상 데이터베이스
+        const stockPriceDb = {
+            "NVDA": 128.50, "AAPL": 224.20, "MSFT": 448.00, "AMZN": 186.50,
+            "GOOGL": 178.30, "META": 495.00, "TSLA": 248.00, "AMD": 156.40,
+            "PLTR": 28.50, "AVGO": 1680.00, "LLY": 940.00, "COST": 850.00
+        };
+
         function selectPlan(planId) {
             if (!lastSimulatedData) return;
             currentSelectedPlan = planId;
-
             ['A', 'B', 'C'].forEach(p => {
                 const box = document.getElementById('boxPlan' + p);
                 if (box) {
-                    if (planId === 'ALL' || planId === p) {
-                        box.classList.remove('dimmed');
-                        box.classList.add('active');
-                    } else {
-                        box.classList.add('dimmed');
-                        box.classList.remove('active');
-                    }
+                    if (planId === 'ALL' || planId === p) { box.classList.remove('dimmed'); box.classList.add('active'); }
+                    else { box.classList.add('dimmed'); box.classList.remove('active'); }
                 }
             });
-
             drawChart(lastSimulatedData);
         }
 
@@ -1182,56 +1085,58 @@
 
             setTimeout(() => {
                 try {
-                    // 실시간 데이터 세트 구축
+                    const basePrice = stockPriceDb[ticker] || (Math.floor(Math.random() * 150) + 50);
+
                     activeCandleData = [
-                        { "time": 1714500000, "open": 118.0, "high": 121.0, "low": 117.5, "close": 120.0 },
-                        { "time": 1714586400, "open": 120.0, "high": 123.5, "low": 119.0, "close": 122.5 },
-                        { "time": 1714672800, "open": 122.5, "high": 125.0, "low": 121.8, "close": 124.0 },
-                        { "time": 1714759200, "open": 124.0, "high": 126.8, "low": 123.0, "close": 126.0 },
-                        { "time": 1714845600, "open": 126.0, "high": 128.5, "low": 125.0, "close": 127.5 },
-                        { "time": 1714932000, "open": 127.5, "high": 130.0, "low": 126.0, "close": 128.8 },
-                        { "time": 1715018400, "open": 128.8, "high": 132.0, "low": 126.5, "close": 127.0 }
+                        { "time": 1714500000, "open": basePrice * 0.94, "high": basePrice * 0.96, "low": basePrice * 0.93, "close": basePrice * 0.95 },
+                        { "time": 1714586400, "open": basePrice * 0.95, "high": basePrice * 0.98, "low": basePrice * 0.94, "close": basePrice * 0.97 },
+                        { "time": 1714672800, "open": basePrice * 0.97, "high": basePrice * 0.99, "low": basePrice * 0.96, "close": basePrice * 0.98 },
+                        { "time": 1714759200, "open": basePrice * 0.98, "high": basePrice * 1.01, "low": basePrice * 0.97, "close": basePrice * 0.99 },
+                        { "time": 1714845600, "open": basePrice * 0.99, "high": basePrice * 1.02, "low": basePrice * 0.98, "close": basePrice * 1.01 },
+                        { "time": 1714932000, "open": basePrice * 1.01, "high": basePrice * 1.03, "low": basePrice * 1.00, "close": basePrice * 1.02 },
+                        { "time": 1715018400, "open": basePrice * 1.02, "high": basePrice * 1.04, "low": basePrice * 0.99, "close": basePrice }
                     ];
 
                     const simulatedData = {
+                        "basePrice": basePrice,
                         "baseData": activeCandleData,
                         "planA": {
                             "line": [
-                                { "time": 1715018400, "value": 127.0 }, { "time": 1715104800, "value": 128.5 },
-                                { "time": 1715191200, "value": 130.5 }, { "time": 1715277600, "value": 132.8 },
-                                { "time": 1715364000, "value": 135.0 }
+                                { "time": 1715018400, "value": basePrice }, { "time": 1715104800, "value": basePrice * 1.02 },
+                                { "time": 1715191200, "value": basePrice * 1.04 }, { "time": 1715277600, "value": basePrice * 1.06 },
+                                { "time": 1715364000, "value": basePrice * 1.08 }
                             ],
                             "ghost": [
-                                { "time": 1715104800, "open": 127.0, "high": 129.0, "low": 126.0, "close": 128.5 },
-                                { "time": 1715191200, "open": 128.5, "high": 131.5, "low": 128.0, "close": 130.5 },
-                                { "time": 1715277600, "open": 130.5, "high": 133.5, "low": 130.0, "close": 132.8 },
-                                { "time": 1715364000, "open": 132.8, "high": 136.0, "low": 132.0, "close": 135.0 }
+                                { "time": 1715104800, "open": basePrice, "high": basePrice * 1.03, "low": basePrice * 0.99, "close": basePrice * 1.02 },
+                                { "time": 1715191200, "open": basePrice * 1.02, "high": basePrice * 1.05, "low": basePrice * 1.01, "close": basePrice * 1.04 },
+                                { "time": 1715277600, "open": basePrice * 1.04, "high": basePrice * 1.07, "low": basePrice * 1.03, "close": basePrice * 1.06 },
+                                { "time": 1715364000, "open": basePrice * 1.06, "high": basePrice * 1.09, "low": basePrice * 1.05, "close": basePrice * 1.08 }
                             ]
                         },
                         "planB": {
                             "line": [
-                                { "time": 1715018400, "value": 127.0 }, { "time": 1715104800, "value": 132.0 },
-                                { "time": 1715191200, "value": 128.0 }, { "time": 1715277600, "value": 134.0 },
-                                { "time": 1715364000, "value": 138.0 }
+                                { "time": 1715018400, "value": basePrice }, { "time": 1715104800, "value": basePrice * 1.05 },
+                                { "time": 1715191200, "value": basePrice * 1.02 }, { "time": 1715277600, "value": basePrice * 1.08 },
+                                { "time": 1715364000, "value": basePrice * 1.12 }
                             ],
                             "ghost": [
-                                { "time": 1715104800, "open": 127.0, "high": 133.0, "low": 127.0, "close": 132.0 },
-                                { "time": 1715191200, "open": 132.0, "high": 132.5, "low": 127.5, "close": 128.0 },
-                                { "time": 1715277600, "open": 128.0, "high": 135.0, "low": 128.0, "close": 134.0 },
-                                { "time": 1715364000, "open": 134.0, "high": 139.0, "low": 133.5, "close": 138.0 }
+                                { "time": 1715104800, "open": basePrice, "high": basePrice * 1.06, "low": basePrice, "close": basePrice * 1.05 },
+                                { "time": 1715191200, "open": basePrice * 1.05, "high": basePrice * 1.05, "low": basePrice * 1.01, "close": basePrice * 1.02 },
+                                { "time": 1715277600, "open": basePrice * 1.02, "high": basePrice * 1.09, "low": basePrice * 1.02, "close": basePrice * 1.08 },
+                                { "time": 1715364000, "open": basePrice * 1.08, "high": basePrice * 1.13, "low": basePrice * 1.07, "close": basePrice * 1.12 }
                             ]
                         },
                         "planC": {
                             "line": [
-                                { "time": 1715018400, "value": 127.0 }, { "time": 1715104800, "value": 121.0 },
-                                { "time": 1715191200, "value": 118.0 }, { "time": 1715277600, "value": 123.0 },
-                                { "time": 1715364000, "value": 128.0 }
+                                { "time": 1715018400, "value": basePrice }, { "time": 1715104800, "value": basePrice * 0.95 },
+                                { "time": 1715191200, "value": basePrice * 0.93 }, { "time": 1715277600, "value": basePrice * 0.97 },
+                                { "time": 1715364000, "value": basePrice * 1.01 }
                             ],
                             "ghost": [
-                                { "time": 1715104800, "open": 127.0, "high": 127.0, "low": 120.5, "close": 121.0 },
-                                { "time": 1715191200, "open": 121.0, "high": 121.5, "low": 117.5, "close": 118.0 },
-                                { "time": 1715277600, "open": 118.0, "high": 124.0, "low": 118.0, "close": 123.0 },
-                                { "time": 1715364000, "open": 123.0, "high": 129.0, "low": 122.5, "close": 128.0 }
+                                { "time": 1715104800, "open": basePrice, "high": basePrice, "low": basePrice * 0.94, "close": basePrice * 0.95 },
+                                { "time": 1715191200, "open": basePrice * 0.95, "high": basePrice * 0.96, "low": basePrice * 0.92, "close": basePrice * 0.93 },
+                                { "time": 1715277600, "open": basePrice * 0.93, "high": basePrice * 0.98, "low": basePrice * 0.93, "close": basePrice * 0.97 },
+                                { "time": 1715364000, "open": basePrice * 0.97, "high": basePrice * 1.02, "low": basePrice * 0.96, "close": basePrice * 1.01 }
                             ]
                         }
                     };
@@ -1240,7 +1145,11 @@
                     drawChart(simulatedData);
                     renderRiskMatrix();
 
-                    // 포트폴리오 티커 연동
+                    // UI 수치 업데이트
+                    document.getElementById('diagVWAP').textContent = `$${(basePrice * 0.98).toFixed(2)} / $${(basePrice * 0.99).toFixed(2)}`;
+                    document.getElementById('diagGamma').textContent = `$${(basePrice * 1.05).toFixed(2)} (상단 저항벽)`;
+                    document.getElementById('diagWall').textContent = `$${(basePrice * 0.96).toFixed(2)} ~ $${(basePrice * 0.97).toFixed(2)}`;
+
                     const portTicker = document.getElementById('portTicker');
                     if (portTicker) portTicker.textContent = ticker;
 
@@ -1252,7 +1161,7 @@
                         btn.disabled = false;
                     }
                 }
-            }, 500);
+            }, 400);
         }
 
         function drawChart(data) {
@@ -1261,70 +1170,60 @@
             container.innerHTML = '';
 
             mainChartInstance = LightweightCharts.createChart(container, {
-                ...chartOptions,
-                width: container.clientWidth,
-                height: container.clientHeight
+                ...chartOptions, width: container.clientWidth, height: container.clientHeight
             });
 
             mainSeries = mainChartInstance.addCandlestickSeries({
-                upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444'
+                upColor: '#22c55e', downColor: '#ef4444', borderVisible: false
             });
             mainSeries.setData(data.baseData);
 
             if (data.planA && (currentSelectedPlan === 'ALL' || currentSelectedPlan === 'A')) {
                 const lineA = mainChartInstance.addLineSeries({ color: '#22c55e', lineStyle: 2, lineWidth: 2 });
                 lineA.setData(data.planA.line || []);
-                const ghostA = mainChartInstance.addCandlestickSeries({
-                    upColor: 'rgba(34, 197, 94, 0.35)', downColor: 'rgba(34, 197, 94, 0.35)', borderVisible: true, borderColor: '#22c55e', wickColor: '#22c55e'
-                });
+                const ghostA = mainChartInstance.addCandlestickSeries({ upColor: 'rgba(34, 197, 94, 0.35)', downColor: 'rgba(34, 197, 94, 0.35)', borderVisible: true, borderColor: '#22c55e' });
                 ghostA.setData(data.planA.ghost || []);
             }
-
             if (data.planB && (currentSelectedPlan === 'ALL' || currentSelectedPlan === 'B')) {
                 const lineB = mainChartInstance.addLineSeries({ color: '#3b82f6', lineStyle: 2, lineWidth: 2 });
                 lineB.setData(data.planB.line || []);
-                const ghostB = mainChartInstance.addCandlestickSeries({
-                    upColor: 'rgba(59, 130, 246, 0.35)', downColor: 'rgba(59, 130, 246, 0.35)', borderVisible: true, borderColor: '#3b82f6', wickColor: '#3b82f6'
-                });
+                const ghostB = mainChartInstance.addCandlestickSeries({ upColor: 'rgba(59, 130, 246, 0.35)', downColor: 'rgba(59, 130, 246, 0.35)', borderVisible: true, borderColor: '#3b82f6' });
                 ghostB.setData(data.planB.ghost || []);
             }
-
             if (data.planC && (currentSelectedPlan === 'ALL' || currentSelectedPlan === 'C')) {
                 const lineC = mainChartInstance.addLineSeries({ color: '#ef4444', lineStyle: 2, lineWidth: 2 });
                 lineC.setData(data.planC.line || []);
-                const ghostC = mainChartInstance.addCandlestickSeries({
-                    upColor: 'rgba(239, 68, 68, 0.35)', downColor: 'rgba(239, 68, 68, 0.35)', borderVisible: true, borderColor: '#ef4444', wickColor: '#ef4444'
-                });
+                const ghostC = mainChartInstance.addCandlestickSeries({ upColor: 'rgba(239, 68, 68, 0.35)', downColor: 'rgba(239, 68, 68, 0.35)', borderVisible: true, borderColor: '#ef4444' });
                 ghostC.setData(data.planC.ghost || []);
             }
 
             mainChartInstance.timeScale().fitContent();
-
-            window.addEventListener('resize', () => {
-                if (container && mainChartInstance && container.clientWidth > 0) {
-                    mainChartInstance.resize(container.clientWidth, container.clientHeight);
-                }
-            });
         }
 
-        // ------------------------------------------
-        // 8. 딥스캔 스크리너 (UI 필터 토글 제어)
-        // ------------------------------------------
+        // 7. 대용량 스크리너 데이터셋 (15개 대표 종목)
         const screenerDataset = [
-            { ticker: "PLTR", price: "$24.50", vol: "1.2M", rsi: "42", relVol: "0.85", maGrade: "Strong Buy", osGrade: "Neutral", timeline: "1~2일 내", pass: true, aiRating: "Strong Buy" },
-            { ticker: "AMD", price: "$158.20", vol: "850K", rsi: "51", relVol: "0.78", maGrade: "Buy", osGrade: "Sell", timeline: "3~5일 소요", pass: true, aiRating: "Watch" },
-            { ticker: "TSLA", price: "$240.00", vol: "2.1M", rsi: "68", relVol: "1.45", maGrade: "Neutral", osGrade: "Buy", timeline: "비적격", pass: false, aiRating: "Avoid (RSI 초과)" },
-            { ticker: "INPR", price: "$8.20", vol: "120K", rsi: "32", relVol: "0.35", maGrade: "Sell", osGrade: "Sell", timeline: "비적격", pass: false, aiRating: "Avoid (거래량 미달)" }
+            { ticker: "NVDA", price: "$128.50", vol: "2.8M", rsi: "54", relVol: "1.15", maGrade: "Strong Buy", osGrade: "Neutral", timeline: "1~2일 내", pass: true, aiRating: "Strong Buy" },
+            { ticker: "PLTR", price: "$28.50", vol: "1.4M", rsi: "44", relVol: "0.88", maGrade: "Strong Buy", osGrade: "Neutral", timeline: "2~3일 내", pass: true, aiRating: "Strong Buy" },
+            { ticker: "AMD", price: "$156.40", vol: "920K", rsi: "51", relVol: "0.78", maGrade: "Buy", osGrade: "Sell", timeline: "3~5일 소요", pass: true, aiRating: "Watch" },
+            { ticker: "AVGO", price: "$1680.00", vol: "650K", rsi: "48", relVol: "0.92", maGrade: "Strong Buy", osGrade: "Buy", timeline: "1~3일 내", pass: true, aiRating: "Strong Buy" },
+            { ticker: "MSFT", price: "$448.00", vol: "1.8M", rsi: "52", relVol: "0.82", maGrade: "Buy", osGrade: "Neutral", timeline: "2~4일 소요", pass: true, aiRating: "Buy" },
+            { ticker: "AAPL", price: "$224.20", vol: "2.1M", rsi: "58", relVol: "0.95", maGrade: "Buy", osGrade: "Neutral", timeline: "2~3일 내", pass: true, aiRating: "Buy" },
+            { ticker: "AMZN", price: "$186.50", vol: "1.5M", rsi: "46", relVol: "0.75", maGrade: "Buy", osGrade: "Sell", timeline: "3~4일 소요", pass: true, aiRating: "Watch" },
+            { ticker: "LLY", price: "$940.00", vol: "880K", rsi: "61", relVol: "1.05", maGrade: "Strong Buy", osGrade: "Buy", timeline: "1~2일 내", pass: true, aiRating: "Strong Buy" },
+            { ticker: "COST", price: "$850.00", vol: "420K", rsi: "50", relVol: "0.80", maGrade: "Buy", osGrade: "Neutral", timeline: "3~5일 소요", pass: true, aiRating: "Watch" },
+            { ticker: "TSLA", price: "$248.00", vol: "3.2M", rsi: "69", relVol: "1.55", maGrade: "Neutral", osGrade: "Buy", timeline: "비적격", pass: false, aiRating: "Avoid (RSI 과매수)" },
+            { ticker: "GOOGL", price: "$178.30", vol: "1.1M", rsi: "38", relVol: "0.45", maGrade: "Sell", osGrade: "Sell", timeline: "비적격", pass: false, aiRating: "Avoid (거래량 미달)" },
+            { ticker: "META", price: "$495.00", vol: "1.6M", rsi: "66", relVol: "1.20", maGrade: "Buy", osGrade: "Neutral", timeline: "비적격", pass: false, aiRating: "Avoid (상단 저항)" },
+            { ticker: "NFLX", price: "$650.00", vol: "780K", rsi: "63", relVol: "0.62", maGrade: "Neutral", osGrade: "Sell", timeline: "비적격", pass: false, aiRating: "Avoid (RelVol 저조)" },
+            { ticker: "SMCI", price: "$820.00", vol: "1.9M", rsi: "72", relVol: "1.80", maGrade: "Strong Buy", osGrade: "Buy", timeline: "비적격", pass: false, aiRating: "Avoid (변동성 과다)" },
+            { ticker: "JPM", price: "$205.00", vol: "950K", rsi: "53", relVol: "0.68", maGrade: "Buy", osGrade: "Neutral", timeline: "비적격", pass: false, aiRating: "Avoid (수급 미달)" }
         ];
 
         function toggleScreenerFilter() {
             const toggleElem = document.getElementById('screenerToggle');
             screenerShowAll = !toggleElem.checked;
-
             const label = document.getElementById('toggleLabelText');
-            if (label) {
-                label.textContent = screenerShowAll ? "모든 종목 보기 (필터 OFF)" : "선별된 종목만 보기 (필터 ON)";
-            }
+            if (label) label.textContent = screenerShowAll ? "모든 종목 보기 (필터 OFF)" : "선별된 종목만 보기 (필터 ON)";
             renderScreenerTable();
         }
 
@@ -1359,9 +1258,7 @@
             `).join('');
         }
 
-        // ------------------------------------------
-        // 9. 대시보드 초기화 로드
-        // ------------------------------------------
+        // 8. 초기화
         document.addEventListener('DOMContentLoaded', () => {
             switchTab('page3');
             runAnalysis('daily');
